@@ -18,9 +18,10 @@
         <details class="relative ms-auto hidden md:block">
             <summary
                 class="cursor-pointer list-none py-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden"
-                aria-label="{{ __('app.nav.user_menu') }}"
             >
-                {{ $user->name }} <span aria-hidden="true">&#9662;</span>
+                {{ $user->name }}
+                <span class="sr-only">{{ __('app.nav.user_menu') }}</span>
+                <span aria-hidden="true">&#9662;</span>
             </summary>
 
             <div class="absolute inset-e-0 top-full z-10 min-w-48 border border-border-strong bg-surface-dark py-1">

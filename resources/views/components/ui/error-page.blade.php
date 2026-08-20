@@ -2,9 +2,10 @@
 
 <x-layouts.guest :title="$title" width="max-w-md">
     <div class="text-center">
-        <h1 class="text-5xl font-bold tabular-nums">{{ $code }}</h1>
-
-        <p class="mt-3 text-base font-semibold">{{ $title }}</p>
+        <h1>
+            <span class="block text-5xl font-bold tabular-nums">{{ $code }}</span>
+            <span class="mt-3 block text-base font-semibold">{{ $title }}</span>
+        </h1>
 
         <p class="mt-2 text-sm text-text-soft">{{ $message }}</p>
     </div>
