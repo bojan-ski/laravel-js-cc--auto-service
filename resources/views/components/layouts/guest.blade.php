@@ -1,4 +1,4 @@
-@props(['title'])
+@props(['title', 'width' => 'max-w-sm'])
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -17,7 +17,7 @@
     <div class="flex flex-1 flex-col items-center justify-center px-3 py-8">
         <span class="mb-4 text-sm font-bold uppercase tracking-wider">{{ __('app.name') }}</span>
 
-        <div class="w-full max-w-sm rounded-sm border border-border bg-surface p-6">
+        <div class="w-full {{ $width }} rounded-sm border border-border bg-surface p-6">
             {{ $slot }}
         </div>
     </div>

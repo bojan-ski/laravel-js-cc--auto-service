@@ -30,4 +30,24 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function isMechanic(): bool
+    {
+        return $this->role === UserRole::Mechanic;
+    }
+
+    public function isReceptionist(): bool
+    {
+        return $this->role === UserRole::Receptionist;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === UserRole::Admin;
+    }
+
+    public function isFrontOffice(): bool
+    {
+        return (bool) $this->role?->isFrontOffice();
+    }
 }
