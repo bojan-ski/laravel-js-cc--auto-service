@@ -47,7 +47,7 @@ class PasswordResetLinkTest extends TestCase
     {
         $this->get('/forgot-password')
             ->assertOk()
-            ->assertViewIs('auth.forgot-password')
+            ->assertViewIs('pages.auth.forgot-password')
             ->assertSee(__('app.auth.forgot.submit'));
     }
 

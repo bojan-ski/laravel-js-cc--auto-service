@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
-    Route::view('/', 'dashboard')->name('dashboard');
+    Route::view('/', 'pages.dashboard')->name('dashboard');
+
+    require __DIR__.'/customers.php';
 });
 
 require __DIR__.'/auth.php';

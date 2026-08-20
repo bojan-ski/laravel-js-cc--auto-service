@@ -7,9 +7,22 @@ return [
     'nav' => [
         'primary' => 'Primary navigation',
         'dashboard' => 'Dashboard',
+        'customers' => 'Customers',
         'toggle' => 'Menu',
         'user_menu' => 'Account menu',
         'sign_out' => 'Sign out',
+    ],
+
+    'value_none' => '—',
+    'value_none_spoken' => 'Not provided',
+
+    'actions' => [
+        'view' => 'View',
+        'edit' => 'Edit',
+        'delete' => 'Delete',
+        'cancel' => 'Cancel',
+        'search' => 'Search',
+        'clear_search' => 'Clear search',
     ],
 
     'roles' => [

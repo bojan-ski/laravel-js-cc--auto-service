@@ -19,6 +19,7 @@
         type="{{ $type }}"
         @if ($type !== 'password') value="{{ old($name, $value) }}" @endif
         @readonly($readonly)
+        @if ($hasError) aria-invalid="true" aria-describedby="{{ $name }}-error" @endif
         {{ $attributes->class([
             'mt-1 block w-full rounded-sm border px-3 py-2 focus:outline-2 focus:outline-offset-2 focus:outline-accent',
             'bg-surface text-text' => ! $readonly,
@@ -29,6 +30,6 @@
     >
 
     @error($name)
-        <p class="mt-1 text-sm text-status-cancelled">{{ $message }}</p>
+        <p id="{{ $name }}-error" class="mt-1 text-sm text-status-cancelled">{{ $message }}</p>
     @enderror
 </div>

@@ -23,7 +23,7 @@ class NewPasswordTest extends TestCase
 
         $this->get("/reset-password/{$token}?email={$user->email}")
             ->assertOk()
-            ->assertViewIs('auth.reset-password')
+            ->assertViewIs('pages.auth.reset-password')
             ->assertViewHas('token', $token)
             ->assertViewHas('email', $user->email);
     }

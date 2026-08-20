@@ -12,7 +12,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="flex min-h-screen flex-col bg-background text-text antialiased">
-    <x-partials.flash />
+    <x-global.flash />
 
     <main class="flex flex-1 flex-col items-center justify-center px-3 py-8">
         <span class="mb-4 text-sm font-bold uppercase tracking-wider">{{ __('app.name') }}</span>
