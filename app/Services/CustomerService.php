@@ -4,9 +4,21 @@ namespace App\Services;
 
 use App\Models\Customer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class CustomerService
 {
+    /**
+     * @return Collection<int, Customer>
+     */
+    public function selectable(?Customer $except = null): Collection
+    {
+        return Customer::query()
+            ->when($except, fn ($query, Customer $customer) => $query->whereKeyNot($customer->getKey()))
+            ->orderBy('name')
+            ->get();
+    }
+
     /**
      * @param  array{search: string}  $filters
      * @return LengthAwarePaginator<int, Customer>

@@ -21,15 +21,15 @@ class CustomerViewTest extends TestCase
             ->assertSee(__('app.value_none'));
     }
 
-    public function test_the_detail_page_renders_both_placeholder_sections(): void
+    public function test_the_detail_page_renders_the_vehicles_section_and_the_jobs_placeholder(): void
     {
         $customer = Customer::factory()->create();
 
         $this->actingAs(User::factory()->mechanic()->create())
             ->get(route('customers.show', $customer))
             ->assertOk()
-            ->assertSee(__('customers.show.vehicles'))
-            ->assertSee(__('customers.show.vehicles_empty'))
+            ->assertSee(__('vehicles.section.title'))
+            ->assertSee(__('vehicles.section.empty'))
             ->assertSee(__('customers.show.jobs'))
             ->assertSee(__('customers.show.jobs_empty'));
     }

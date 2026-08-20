@@ -3,10 +3,13 @@
 
     <x-customers.contact-details :customer="$customer" />
 
-    <x-customers.placeholder-section
-        :heading="__('customers.show.vehicles')"
-        :message="__('customers.show.vehicles_empty')"
-    />
+    <x-vehicles.list-section :customer="$customer" />
+
+    @can('viewDeleted', App\Models\Vehicle::class)
+        @if ($customer->deletedVehicles->isNotEmpty())
+            <x-vehicles.deleted-section :customer="$customer" />
+        @endif
+    @endcan
 
     <x-customers.placeholder-section
         :heading="__('customers.show.jobs')"

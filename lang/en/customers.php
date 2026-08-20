@@ -36,8 +36,6 @@ return [
         'email' => 'Email',
         'address' => 'Address',
         'notes' => 'Notes',
-        'vehicles' => 'Vehicles',
-        'vehicles_empty' => 'No vehicles recorded yet.',
         'jobs' => 'Job history',
         'jobs_empty' => 'No jobs recorded yet.',
     ],
