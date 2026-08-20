@@ -4,6 +4,51 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Backgrounds */
+    --color-background: #F5F5F4;
+    --color-surface: #FFFFFF;
+    --color-surface-muted: #EFEDEC;
+    --color-surface-dark: #1C1917;
+
+    /* Text */
+    --color-text: #1C1917;
+    --color-text-soft: #44403C;
+    --color-text-muted: #78716C;
+    --color-text-inverse: #FAFAF9;
+
+    /* Brand */
+    --color-brand: #EA580C;
+    --color-brand-dark: #C2410C;
+    --color-brand-soft: #FFEDD5;
+
+    /* Accents */
+    --color-accent: #0EA5E9;
+    --color-accent-soft: #E0F2FE;
+
+    /* Borders */
+    --color-border: #D6D3D1;
+    --color-border-strong: #A8A29E;
+
+    /* Status — job lifecycle */
+    --color-status-received: #78716C;
+    --color-status-in-progress: #0369A1;
+    --color-status-awaiting-parts: #CA8A04;
+    --color-status-completed: #15803D;
+    --color-status-cancelled: #B91C1C;
+
+    /* Status — appointment lifecycle */
+    --color-status-booked: #0369A1;
+    --color-status-arrived: #15803D;
+    --color-status-no-show: #B91C1C;
+
+    /* Status — invoice lifecycle */
+    --color-status-unpaid: #CA8A04;
+    --color-status-paid: #15803D;
+    --color-status-void: #78716C;
+
+    /* Inventory warning */
+    --color-status-low-stock: #B91C1C;
 }
