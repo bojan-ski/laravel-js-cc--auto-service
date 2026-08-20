@@ -104,6 +104,23 @@ class ErrorPagesTest extends TestCase
             ->assertDontSee('Deliberate failure.');
     }
 
+    public function test_the_heading_names_the_problem_and_not_only_the_status_code(): void
+    {
+        $content = $this->get($this->routeAborting(403))->assertForbidden()->getContent();
+
+        $heading = preg_match('/<h1\b[^>]*>(.*?)<\/h1>/s', $content, $matches) ? $matches[1] : '';
+
+        $this->assertStringContainsString('403', $heading);
+        $this->assertStringContainsString(__('errors.forbidden.title'), $heading);
+    }
+
+    public function test_the_error_layout_exposes_a_main_landmark(): void
+    {
+        $this->get($this->routeAborting(403))
+            ->assertForbidden()
+            ->assertSee('<main', false);
+    }
+
     public function test_the_maintenance_page_renders_while_the_application_is_down(): void
     {
         $this->artisan('down');

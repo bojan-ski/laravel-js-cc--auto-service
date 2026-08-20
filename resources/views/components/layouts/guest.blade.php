@@ -14,12 +14,12 @@
 <body class="flex min-h-screen flex-col bg-background text-text antialiased">
     <x-partials.flash />
 
-    <div class="flex flex-1 flex-col items-center justify-center px-3 py-8">
+    <main class="flex flex-1 flex-col items-center justify-center px-3 py-8">
         <span class="mb-4 text-sm font-bold uppercase tracking-wider">{{ __('app.name') }}</span>
 
         <div class="w-full {{ $width }} rounded-sm border border-border bg-surface p-6">
             {{ $slot }}
         </div>
-    </div>
+    </main>
 </body>
 </html>

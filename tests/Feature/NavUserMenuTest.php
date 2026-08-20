@@ -43,6 +43,16 @@ class NavUserMenuTest extends TestCase
         $response->assertSee('<summary', false);
     }
 
+    public function test_the_disclosure_does_not_override_the_visible_name_with_an_aria_label(): void
+    {
+        $user = User::factory()->create(['name' => 'Dragan Jovanovic']);
+
+        $response = $this->actingAs($user)->get('/');
+
+        $response->assertDontSee('aria-label="'.__('app.nav.user_menu').'"', false);
+        $response->assertSee('<span class="sr-only">'.__('app.nav.user_menu').'</span>', false);
+    }
+
     public function test_the_menu_carries_a_csrf_token(): void
     {
         $this->actingAs(User::factory()->create())
