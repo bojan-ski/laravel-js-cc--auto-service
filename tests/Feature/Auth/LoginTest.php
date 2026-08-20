@@ -24,7 +24,7 @@ class LoginTest extends TestCase
     {
         $this->get('/login')
             ->assertOk()
-            ->assertViewIs('auth.login')
+            ->assertViewIs('pages.auth.login')
             ->assertSee(__('app.auth.login.submit'));
     }
 
