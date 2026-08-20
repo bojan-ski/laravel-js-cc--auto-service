@@ -58,7 +58,7 @@ class SoftDeletedUserTest extends TestCase
 
         Auth::forgetGuards();
 
-        $this->get('/')->assertOk();
+        $this->get('/')->assertRedirect(route('login'));
 
         $this->assertGuest();
     }

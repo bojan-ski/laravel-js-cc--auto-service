@@ -8,7 +8,14 @@ return [
         'primary' => 'Primary navigation',
         'dashboard' => 'Dashboard',
         'toggle' => 'Menu',
-        'account' => 'Account',
+        'user_menu' => 'Account menu',
+        'sign_out' => 'Sign out',
+    ],
+
+    'roles' => [
+        'mechanic' => 'Mechanic',
+        'receptionist' => 'Receptionist',
+        'admin' => 'Administrator',
     ],
 
     'flash' => [
