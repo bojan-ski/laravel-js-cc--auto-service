@@ -6,6 +6,7 @@ use App\Http\Requests\CustomerIndexRequest;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
+use App\Models\Vehicle;
 use App\Services\CustomerService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -49,6 +50,12 @@ class CustomerController extends Controller
     public function show(Customer $customer): View
     {
         Gate::authorize('view', $customer);
+
+        $customer->load('vehicles');
+
+        if (Gate::allows('viewDeleted', Vehicle::class)) {
+            $customer->load('deletedVehicles');
+        }
 
         return view('pages.customers.show', ['customer' => $customer]);
     }
