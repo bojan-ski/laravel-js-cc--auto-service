@@ -7,6 +7,7 @@ return [
     'nav' => [
         'primary' => 'Primary navigation',
         'dashboard' => 'Dashboard',
+        'appointments' => 'Appointments',
         'customers' => 'Customers',
         'toggle' => 'Menu',
         'user_menu' => 'Account menu',

@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
-enum AppointmentStatus: string
+use App\Contracts\ProvidesStatusPresentation;
+
+enum AppointmentStatus: string implements ProvidesStatusPresentation
 {
     case Booked = 'booked';
     case Arrived = 'arrived';
