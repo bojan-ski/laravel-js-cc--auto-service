@@ -33,6 +33,14 @@ class Customer extends Model
         return $this->hasMany(Vehicle::class)->onlyTrashed()->orderBy('registration_plate');
     }
 
+    /**
+     * @return HasMany<Appointment, $this>
+     */
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class)->orderBy('scheduled_at');
+    }
+
     #[Scope]
     protected function matching(Builder $query, string $term): void
     {
