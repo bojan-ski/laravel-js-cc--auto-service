@@ -14,15 +14,6 @@ class AppointmentTransitionController extends Controller
         private AppointmentService $appointments,
     ) {}
 
-    public function arrive(Appointment $appointment): RedirectResponse
-    {
-        Gate::authorize('markArrived', $appointment);
-
-        $this->appointments->markArrived($appointment);
-
-        return $this->redirectToDay($appointment, 'arrived');
-    }
-
     public function noShow(Appointment $appointment): RedirectResponse
     {
         Gate::authorize('markNoShow', $appointment);

@@ -46,6 +46,28 @@ class AppointmentIndexTest extends TestCase
             ->assertDontSee($tomorrow->vehicle->registration_plate);
     }
 
+    public function test_a_booked_row_links_arrival_to_the_job_intake_form(): void
+    {
+        $booked = $this->bookedAt('2026-09-02 10:00:00');
+        $arrived = Appointment::factory()->arrived()->create(['scheduled_at' => CarbonImmutable::parse('2026-09-02 11:00:00')]);
+
+        $response = $this->get(route('appointments.index'))->assertOk();
+
+        $response->assertSee(route('jobs.create', ['appointment' => $booked->getKey()]), false);
+        $response->assertDontSee(route('jobs.create', ['appointment' => $arrived->getKey()]), false);
+        $response->assertDontSee('/arrive"', false);
+    }
+
+    public function test_the_arrival_link_is_visible_to_a_mechanic(): void
+    {
+        $booked = $this->bookedAt('2026-09-02 10:00:00');
+
+        $this->actingAs(User::factory()->mechanic()->create())
+            ->get(route('appointments.index'))
+            ->assertOk()
+            ->assertSee(route('jobs.create', ['appointment' => $booked->getKey()]), false);
+    }
+
     public function test_day_mode_shows_only_the_anchor_day(): void
     {
         $wanted = $this->bookedAt('2026-09-05 09:00:00');

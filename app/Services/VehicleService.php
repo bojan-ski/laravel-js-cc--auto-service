@@ -8,6 +8,25 @@ use App\Models\Vehicle;
 class VehicleService
 {
     /**
+     * @return array<int, string>
+     */
+    public function pickerOptions(): array
+    {
+        return Vehicle::query()
+            ->with('customer')
+            ->orderBy('registration_plate')
+            ->get()
+            ->mapWithKeys(fn (Vehicle $vehicle): array => [
+                $vehicle->getKey() => __('vehicles.picker.option', [
+                    'plate' => $vehicle->registration_plate,
+                    'vehicle' => $vehicle->make.' '.$vehicle->model,
+                    'owner' => $vehicle->customer->name,
+                ]),
+            ])
+            ->all();
+    }
+
+    /**
      * @param  array<string, mixed>  $attributes
      */
     public function create(Customer $customer, array $attributes): Vehicle

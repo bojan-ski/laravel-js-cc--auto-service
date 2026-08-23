@@ -25,7 +25,7 @@
             <p class="block text-sm font-medium">{{ __('appointments.form.vehicle_fixed') }}</p>
 
             <p class="mt-1 tabular-nums">
-                {{ __('appointments.form.vehicle_option', [
+                {{ __('vehicles.picker.option', [
                     'plate' => $appointment->vehicle->registration_plate,
                     'vehicle' => $appointment->vehicle->make.' '.$appointment->vehicle->model,
                     'owner' => $appointment->customer->name,

@@ -18,7 +18,7 @@ class JobReferenceTest extends TestCase
 
     private function create(): Job
     {
-        return app(JobService::class)->create(
+        return app(JobService::class)->createWalkIn(
             Vehicle::factory()->create(),
             User::factory()->receptionist()->create(),
             ['complaint' => 'Rattle over bumps'],

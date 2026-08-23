@@ -51,6 +51,10 @@ return [
         'submit' => 'Save changes',
     ],
 
+    'picker' => [
+        'option' => ':plate · :vehicle · :owner',
+    ],
+
     'form' => [
         'owner' => 'Owner',
         'registration_plate' => 'Registration plate',

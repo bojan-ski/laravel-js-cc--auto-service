@@ -9,6 +9,7 @@ use App\Http\Requests\Appointments\UpdateAppointmentRequest;
 use App\Models\Appointment;
 use App\Models\Vehicle;
 use App\Services\AppointmentService;
+use App\Services\VehicleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -17,6 +18,7 @@ class AppointmentController extends Controller
 {
     public function __construct(
         private AppointmentService $appointments,
+        private VehicleService $vehicles,
     ) {}
 
     public function index(AppointmentIndexRequest $request): View
@@ -40,7 +42,7 @@ class AppointmentController extends Controller
         Gate::authorize('create', Appointment::class);
 
         return view('pages.appointments.create', [
-            'vehicleOptions' => $this->appointments->vehicleOptions(),
+            'vehicleOptions' => $this->vehicles->pickerOptions(),
         ]);
     }
 
