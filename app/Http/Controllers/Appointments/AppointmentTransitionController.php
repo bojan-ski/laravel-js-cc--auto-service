@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Appointments;
 
+use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Services\AppointmentService;
 use Illuminate\Http\RedirectResponse;

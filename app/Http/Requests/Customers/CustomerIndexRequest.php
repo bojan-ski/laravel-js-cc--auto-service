@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Customers;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateCustomerRequest extends FormRequest
+class CustomerIndexRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -20,11 +20,17 @@ class UpdateCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:40'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'address' => ['nullable', 'string', 'max:255'],
-            'notes' => ['nullable', 'string', 'max:2000'],
+            'search' => ['nullable', 'string', 'max:255'],
+        ];
+    }
+
+    /**
+     * @return array{search: string}
+     */
+    public function filters(): array
+    {
+        return [
+            'search' => $this->string('search')->trim()->toString(),
         ];
     }
 }

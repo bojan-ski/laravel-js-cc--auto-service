@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Appointments;
 
-use App\Http\Requests\AppointmentIndexRequest;
-use App\Http\Requests\StoreAppointmentRequest;
-use App\Http\Requests\UpdateAppointmentRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Appointments\AppointmentIndexRequest;
+use App\Http\Requests\Appointments\StoreAppointmentRequest;
+use App\Http\Requests\Appointments\UpdateAppointmentRequest;
 use App\Models\Appointment;
 use App\Models\Vehicle;
 use App\Services\AppointmentService;
