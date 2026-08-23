@@ -41,6 +41,14 @@ class Customer extends Model
         return $this->hasMany(Appointment::class)->orderBy('scheduled_at');
     }
 
+    /**
+     * @return HasMany<Job, $this>
+     */
+    public function jobs(): HasMany
+    {
+        return $this->hasMany(Job::class)->latest();
+    }
+
     #[Scope]
     protected function matching(Builder $query, string $term): void
     {

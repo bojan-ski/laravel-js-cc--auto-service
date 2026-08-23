@@ -16,6 +16,10 @@ class StatusBadge extends Component
         'status-arrived' => 'bg-status-arrived/10 text-status-arrived',
         'status-no-show' => 'bg-status-no-show/10 text-status-no-show',
         'status-cancelled' => 'bg-status-cancelled/10 text-status-cancelled',
+        'status-received' => 'bg-status-received/10 text-status-received',
+        'status-in-progress' => 'bg-status-in-progress/10 text-status-in-progress',
+        'status-awaiting-parts' => 'bg-status-awaiting-parts/10 text-status-awaiting-parts',
+        'status-completed' => 'bg-status-completed/10 text-status-completed',
     ];
 
     public function __construct(
