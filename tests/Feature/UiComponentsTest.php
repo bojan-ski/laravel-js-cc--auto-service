@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Blade;
@@ -173,5 +174,38 @@ class UiComponentsTest extends TestCase
         $this->assertStringContainsString('No customers yet.', $html);
         $this->assertStringContainsString('Add the first one.', $html);
         $this->assertStringContainsString('CTA', $html);
+    }
+
+    public function test_the_empty_state_title_is_a_level_two_heading_by_default(): void
+    {
+        $html = Blade::render('<x-ui.empty-state title="No customers yet." />');
+
+        $this->assertStringContainsString('<h2 class="text-sm font-semibold">No customers yet.</h2>', $html);
+    }
+
+    public function test_the_empty_state_title_level_can_be_changed_or_demoted_to_a_paragraph(): void
+    {
+        $this->assertStringContainsString(
+            '<h3 class="text-sm font-semibold">Nothing here.</h3>',
+            Blade::render('<x-ui.empty-state title="Nothing here." :level="3" />'),
+        );
+
+        $html = Blade::render('<x-ui.empty-state title="Nothing here." :level="0" />');
+
+        $this->assertStringContainsString('<p class="text-sm font-semibold">Nothing here.</p>', $html);
+        $this->assertStringNotContainsString('<h', $html);
+    }
+
+    public function test_in_section_empty_states_do_not_add_a_heading_under_their_section_heading(): void
+    {
+        $customer = Customer::factory()->create();
+
+        $html = $this->actingAs(User::factory()->create())
+            ->get(route('customers.show', $customer))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('<p class="text-sm font-semibold">'.__('vehicles.section.empty').'</p>', $html);
+        $this->assertStringNotContainsString('<h3', $html);
     }
 }

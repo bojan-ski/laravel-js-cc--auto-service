@@ -19,7 +19,7 @@
     </div>
 
     @if ($customer->vehicles->isEmpty())
-        <x-ui.empty-state class="mt-2" :title="__('vehicles.section.empty')" />
+        <x-ui.empty-state class="mt-2" :title="__('vehicles.section.empty')" :level="0" />
     @else
         <div class="mt-2 overflow-x-auto border border-border bg-surface">
             <table role="table" class="w-full text-left">

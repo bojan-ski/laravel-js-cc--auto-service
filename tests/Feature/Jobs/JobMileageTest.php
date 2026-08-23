@@ -65,6 +65,8 @@ class JobMileageTest extends TestCase
 
     public function test_an_equal_reading_changes_nothing_and_is_not_a_warning(): void
     {
+        $this->freezeTime();
+
         $vehicle = Vehicle::factory()->create(['mileage' => 100_000, 'updated_at' => now()->subDay()]);
 
         $job = $this->walkIn($vehicle, 100_000);
