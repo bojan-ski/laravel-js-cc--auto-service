@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Customers;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateAppointmentRequest extends FormRequest
+class UpdateCustomerRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -20,8 +20,10 @@ class UpdateAppointmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'scheduled_at' => ['required', 'date'],
-            'duration_minutes' => ['required', 'integer', 'min:15', 'max:480'],
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:40'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'address' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
     }

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Vehicles;
 
-use App\Http\Requests\ReassignVehicleRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Vehicles\ReassignVehicleRequest;
 use App\Models\Customer;
 use App\Models\Vehicle;
 use App\Services\CustomerService;

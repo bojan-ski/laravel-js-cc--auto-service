@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\CustomerVehicleController;
-use App\Http\Controllers\VehicleController;
-use App\Http\Controllers\VehicleOwnerController;
+use App\Http\Controllers\Vehicles\CustomerVehicleController;
+use App\Http\Controllers\Vehicles\VehicleController;
+use App\Http\Controllers\Vehicles\VehicleOwnerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/customers/{customer}/vehicles/create', [CustomerVehicleController::class, 'create'])->name('customers.vehicles.create');

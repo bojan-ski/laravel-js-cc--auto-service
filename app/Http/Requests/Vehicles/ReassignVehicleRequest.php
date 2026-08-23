@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Vehicles;
 
 use App\Models\Vehicle;
 use Illuminate\Contracts\Validation\ValidationRule;

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Appointments;
 
-use App\Http\Requests\AppointmentOverlapRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Appointments\AppointmentOverlapRequest;
 use App\Http\Resources\AppointmentResource;
 use App\Models\Appointment;
 use App\Services\AppointmentService;

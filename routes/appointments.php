@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\AppointmentOverlapController;
-use App\Http\Controllers\AppointmentTransitionController;
+use App\Http\Controllers\Appointments\AppointmentController;
+use App\Http\Controllers\Appointments\AppointmentOverlapController;
+use App\Http\Controllers\Appointments\AppointmentTransitionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');

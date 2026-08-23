@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Vehicles;
 
-use App\Http\Requests\StoreVehicleRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Vehicles\StoreVehicleRequest;
 use App\Models\Customer;
 use App\Models\Vehicle;
 use App\Services\VehicleService;

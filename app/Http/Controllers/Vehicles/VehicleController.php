@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Vehicles;
 
-use App\Http\Requests\UpdateVehicleRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Vehicles\UpdateVehicleRequest;
 use App\Models\Vehicle;
 use App\Services\VehicleService;
 use Illuminate\Http\RedirectResponse;
