@@ -32,9 +32,9 @@ class DashboardPageTest extends TestCase
         $this->get('/')->assertSee(__('app.name'));
     }
 
-    public function test_page_renders_the_dashboard_navigation_label(): void
+    public function test_the_wordmark_links_back_to_the_dashboard(): void
     {
-        $this->get('/')->assertSee(__('app.nav.dashboard'));
+        $this->get('/')->assertSee('href="'.route('dashboard').'"', false);
     }
 
     public function test_page_renders_the_empty_state(): void

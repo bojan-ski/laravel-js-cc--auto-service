@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Jobs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Jobs\JobIndexRequest;
 use App\Http\Requests\Jobs\StoreJobRequest;
 use App\Models\Appointment;
 use App\Models\Job;
@@ -20,6 +21,20 @@ class JobController extends Controller
         private JobService $jobs,
         private VehicleService $vehicles,
     ) {}
+
+    public function index(JobIndexRequest $request): View
+    {
+        Gate::authorize('viewAny', Job::class);
+
+        $filters = $request->filters();
+
+        return view('pages.jobs.index', [
+            'jobs' => $this->jobs->paginateFiltered($filters),
+            'counts' => $this->jobs->countByStatus($filters),
+            'filters' => $filters,
+            'hasAny' => $this->jobs->hasAny(),
+        ]);
+    }
 
     public function create(Request $request): View
     {

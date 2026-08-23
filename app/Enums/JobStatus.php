@@ -30,6 +30,13 @@ enum JobStatus: string implements ProvidesStatusPresentation
         return ! $this->isWorking();
     }
 
+    public static function sortExpression(): string
+    {
+        $values = array_map(fn (self $status): string => "'{$status->value}'", self::cases());
+
+        return 'FIELD(jobs.status, '.implode(', ', $values).')';
+    }
+
     public function colorToken(): string
     {
         return match ($this) {
