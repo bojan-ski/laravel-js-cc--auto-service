@@ -25,7 +25,6 @@ class AppointmentRouteAuthorizationTest extends TestCase
             'overlaps' => ['get', '/appointments/overlaps'],
             'edit' => ['get', '/appointments/1/edit'],
             'update' => ['put', '/appointments/1'],
-            'arrive' => ['patch', '/appointments/1/arrive'],
             'no-show' => ['patch', '/appointments/1/no-show'],
             'cancel' => ['patch', '/appointments/1/cancel'],
         ];
@@ -68,13 +67,9 @@ class AppointmentRouteAuthorizationTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_a_mechanic_may_record_arrival_and_no_show(): void
+    public function test_a_mechanic_may_record_a_no_show(): void
     {
         $mechanic = User::factory()->mechanic()->create();
-
-        $this->actingAs($mechanic)
-            ->patch(route('appointments.arrive', Appointment::factory()->create()))
-            ->assertRedirect();
 
         $this->actingAs($mechanic)
             ->patch(route('appointments.no-show', Appointment::factory()->create()))
@@ -115,7 +110,6 @@ class AppointmentRouteAuthorizationTest extends TestCase
         $this->actingAs($user)->post(route('appointments.store'), $this->validBooking())->assertRedirect();
         $this->actingAs($user)->put(route('appointments.update', Appointment::factory()->create()), $this->validReschedule())->assertRedirect();
         $this->actingAs($user)->patch(route('appointments.cancel', Appointment::factory()->create()))->assertRedirect();
-        $this->actingAs($user)->patch(route('appointments.arrive', Appointment::factory()->create()))->assertRedirect();
         $this->actingAs($user)->patch(route('appointments.no-show', Appointment::factory()->create()))->assertRedirect();
     }
 

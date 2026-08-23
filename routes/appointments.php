@@ -13,6 +13,5 @@ Route::get('/appointments/overlaps', AppointmentOverlapController::class)->name(
 Route::get('/appointments/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
 Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
 
-Route::patch('/appointments/{appointment}/arrive', [AppointmentTransitionController::class, 'arrive'])->name('appointments.arrive');
 Route::patch('/appointments/{appointment}/no-show', [AppointmentTransitionController::class, 'noShow'])->name('appointments.no-show');
 Route::patch('/appointments/{appointment}/cancel', [AppointmentTransitionController::class, 'cancel'])->name('appointments.cancel');

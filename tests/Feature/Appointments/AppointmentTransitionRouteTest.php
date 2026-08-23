@@ -6,6 +6,7 @@ use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -19,7 +20,6 @@ class AppointmentTransitionRouteTest extends TestCase
     public static function transitionProvider(): array
     {
         return [
-            'arrive' => ['appointments.arrive', AppointmentStatus::Arrived, 'arrived_at'],
             'no-show' => ['appointments.no-show', AppointmentStatus::NoShow, 'no_show_at'],
             'cancel' => ['appointments.cancel', AppointmentStatus::Cancelled, 'cancelled_at'],
         ];
@@ -67,7 +67,7 @@ class AppointmentTransitionRouteTest extends TestCase
         $cases = [];
 
         foreach (['arrived', 'noShow', 'cancelled'] as $state) {
-            foreach (['appointments.arrive', 'appointments.no-show', 'appointments.cancel'] as $route) {
+            foreach (['appointments.no-show', 'appointments.cancel'] as $route) {
                 $cases["{$route} on a {$state} appointment"] = [$state, $route];
             }
         }
@@ -83,6 +83,15 @@ class AppointmentTransitionRouteTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())
             ->patch(route($route, $appointment))
             ->assertForbidden();
+    }
+
+    public function test_arrival_is_no_longer_a_one_click_transition(): void
+    {
+        $this->assertFalse(Route::has('appointments.arrive'));
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->patch('/appointments/'.Appointment::factory()->create()->getKey().'/arrive')
+            ->assertNotFound();
     }
 
     public function test_a_terminal_appointment_cannot_be_edited(): void

@@ -9,14 +9,13 @@
 
 <div class="flex flex-wrap justify-end gap-1">
     @can('markArrived', $appointment)
-        <form method="POST" action="{{ route('appointments.arrive', $appointment) }}">
-            @csrf
-            @method('PATCH')
-
-            <x-ui.button variant="secondary" :aria-label="__('appointments.actions.mark_arrived_for', $context)">
-                {{ __('appointments.actions.arrived') }}
-            </x-ui.button>
-        </form>
+        <x-ui.button
+            variant="secondary"
+            :href="route('jobs.create', ['appointment' => $appointment->getKey()])"
+            :aria-label="__('appointments.actions.mark_arrived_for', $context)"
+        >
+            {{ __('appointments.actions.arrived') }}
+        </x-ui.button>
     @endcan
 
     @can('markNoShow', $appointment)

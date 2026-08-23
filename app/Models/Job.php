@@ -120,6 +120,13 @@ class Job extends Model
         return $this->status === JobStatus::Completed && ! $this->isLocked();
     }
 
+    public function mileageInIsBelowVehicleMileage(): bool
+    {
+        return $this->mileage_in !== null
+            && $this->vehicle->mileage !== null
+            && $this->mileage_in < $this->vehicle->mileage;
+    }
+
     /**
      * @return array<string, string>
      */

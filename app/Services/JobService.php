@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\JobStatus;
+use App\Exceptions\InvalidAppointmentTransition;
 use App\Exceptions\InvalidJobTransition;
 use App\Models\Appointment;
 use App\Models\Job;
@@ -11,7 +12,6 @@ use App\Models\Vehicle;
 use Closure;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 class JobService
 {
@@ -19,42 +19,96 @@ class JobService
 
     public function __construct(
         private readonly JobReferenceGenerator $references,
+        private readonly AppointmentService $appointments,
     ) {}
 
     /**
      * @param  array<string, mixed>  $attributes
      */
-    public function create(Vehicle $vehicle, User $openedBy, array $attributes, ?Appointment $appointment = null): Job
+    public function createWalkIn(Vehicle $vehicle, User $openedBy, array $attributes): Job
     {
-        if ($appointment !== null && $appointment->vehicle_id !== $vehicle->getKey()) {
-            throw new InvalidArgumentException(
-                "Appointment {$appointment->getKey()} is for vehicle {$appointment->vehicle_id}, not vehicle {$vehicle->getKey()}."
-            );
+        return $this->persist(function () use ($vehicle, $openedBy, $attributes): Job {
+            return $this->insert($vehicle->customer_id, $vehicle, null, $openedBy, $attributes);
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    public function createFromAppointment(Appointment $appointment, User $openedBy, array $attributes): Job
+    {
+        if (! $appointment->canBeMarkedArrived()) {
+            throw new InvalidAppointmentTransition($appointment, 'mark arrived');
         }
 
+        $vehicle = $appointment->vehicle()->firstOrFail();
+
+        return $this->persist(function () use ($appointment, $vehicle, $openedBy, $attributes): Job {
+            $locked = Appointment::query()->whereKey($appointment->getKey())->lockForUpdate()->firstOrFail();
+
+            $this->appointments->markArrived($locked);
+
+            $job = $this->insert($locked->customer_id, $vehicle, $locked, $openedBy, $attributes);
+
+            $appointment->setRawAttributes($locked->getAttributes(), true);
+
+            return $job;
+        });
+    }
+
+    /**
+     * @param  Closure(): Job  $creation
+     */
+    private function persist(Closure $creation): Job
+    {
         for ($attempt = 1; ; $attempt++) {
             try {
-                return DB::transaction(function () use ($vehicle, $openedBy, $attributes, $appointment): Job {
-                    $job = new Job;
-                    $job->fill($attributes);
-
-                    $job->reference = $this->references->generate(now());
-                    $job->appointment_id = $appointment?->getKey();
-                    $job->customer_id = $vehicle->customer_id;
-                    $job->vehicle_id = $vehicle->getKey();
-                    $job->status = JobStatus::Received;
-                    $job->created_by = $openedBy->getKey();
-
-                    $job->save();
-
-                    return $job;
-                });
+                return DB::transaction($creation);
             } catch (UniqueConstraintViolationException $exception) {
                 if ($attempt >= self::REFERENCE_ATTEMPTS) {
                     throw $exception;
                 }
             }
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function insert(int $customerId, Vehicle $vehicle, ?Appointment $appointment, User $openedBy, array $attributes): Job
+    {
+        $job = new Job;
+        $job->fill($attributes);
+
+        $job->reference = $this->references->generate(now());
+        $job->appointment_id = $appointment?->getKey();
+        $job->customer_id = $customerId;
+        $job->vehicle_id = $vehicle->getKey();
+        $job->status = JobStatus::Received;
+        $job->created_by = $openedBy->getKey();
+
+        $job->save();
+
+        $this->recordMileage($vehicle, $job);
+        $job->setRelation('vehicle', $vehicle);
+
+        return $job;
+    }
+
+    private function recordMileage(Vehicle $vehicle, Job $job): void
+    {
+        if ($job->mileage_in === null) {
+            return;
+        }
+
+        $current = Vehicle::withTrashed()->whereKey($vehicle->getKey())->lockForUpdate()->firstOrFail();
+
+        if ($current->mileage === null || $job->mileage_in > $current->mileage) {
+            $current->mileage = $job->mileage_in;
+            $current->save();
+        }
+
+        $vehicle->setRawAttributes($current->getAttributes(), true);
     }
 
     public function start(Job $job): Job

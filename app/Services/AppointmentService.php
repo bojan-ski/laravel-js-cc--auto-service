@@ -89,25 +89,6 @@ class AppointmentService
     }
 
     /**
-     * @return array<int, string>
-     */
-    public function vehicleOptions(): array
-    {
-        return Vehicle::query()
-            ->with('customer')
-            ->orderBy('registration_plate')
-            ->get()
-            ->mapWithKeys(fn (Vehicle $vehicle): array => [
-                $vehicle->getKey() => __('appointments.form.vehicle_option', [
-                    'plate' => $vehicle->registration_plate,
-                    'vehicle' => $vehicle->make.' '.$vehicle->model,
-                    'owner' => $vehicle->customer->name,
-                ]),
-            ])
-            ->all();
-    }
-
-    /**
      * @param  array<string, mixed>  $attributes
      */
     public function create(Vehicle $vehicle, User $bookedBy, array $attributes): Appointment
