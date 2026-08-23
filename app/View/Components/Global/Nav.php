@@ -27,7 +27,7 @@ class Nav extends Component
     private function buildItems(): array
     {
         $destinations = [
-            ['label' => __('app.nav.dashboard'), 'route' => 'dashboard', 'pattern' => 'dashboard'],
+            ['label' => __('app.nav.jobs'), 'route' => 'jobs.index', 'pattern' => 'jobs.*'],
             ['label' => __('app.nav.appointments'), 'route' => 'appointments.index', 'pattern' => 'appointments.*'],
             ['label' => __('app.nav.customers'), 'route' => 'customers.index', 'pattern' => 'customers.*'],
         ];

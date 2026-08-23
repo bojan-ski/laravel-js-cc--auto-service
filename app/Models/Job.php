@@ -6,6 +6,8 @@ use App\Enums\JobStatus;
 use App\Exceptions\JobLockedException;
 use Database\Factories\JobFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -73,6 +75,26 @@ class Job extends Model
     public function appointment(): BelongsTo
     {
         return $this->belongsTo(Appointment::class);
+    }
+
+    #[Scope]
+    protected function joinedForBoard(Builder $query): void
+    {
+        $query
+            ->join('vehicles', 'vehicles.id', '=', 'jobs.vehicle_id')
+            ->join('customers', 'customers.id', '=', 'jobs.customer_id')
+            ->select('jobs.*');
+    }
+
+    #[Scope]
+    protected function matching(Builder $query, string $term): void
+    {
+        $escaped = addcslashes($term, '%_\\');
+
+        $query->where(function (Builder $query) use ($escaped): void {
+            $query->where('vehicles.registration_plate', 'like', "%{$escaped}%")
+                ->orWhere('customers.name', 'like', "%{$escaped}%");
+        });
     }
 
     public function isLocked(): bool

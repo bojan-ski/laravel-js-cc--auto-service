@@ -10,6 +10,8 @@ use App\Models\Job;
 use App\Models\User;
 use App\Models\Vehicle;
 use Closure;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
@@ -17,10 +19,69 @@ class JobService
 {
     public const int REFERENCE_ATTEMPTS = 3;
 
+    public const int BOARD_PER_PAGE = 25;
+
     public function __construct(
         private readonly JobReferenceGenerator $references,
         private readonly AppointmentService $appointments,
     ) {}
+
+    /**
+     * @param  array{status: string, search: string, sort: string, direction: string}  $filters
+     * @return LengthAwarePaginator<int, Job>
+     */
+    public function paginateFiltered(array $filters): LengthAwarePaginator
+    {
+        $direction = $filters['direction'];
+
+        return $this->boardQuery($filters['search'])
+            ->with(['vehicle', 'customer'])
+            ->when($filters['status'], fn (Builder $query, string $status) => $query->where('jobs.status', $status))
+            ->tap(fn (Builder $query) => match ($filters['sort']) {
+                'plate' => $query->orderBy('vehicles.registration_plate', $direction),
+                'customer' => $query->orderBy('customers.name', $direction),
+                'status' => $query->orderByRaw(JobStatus::sortExpression().' '.$direction),
+                default => $query->orderBy('jobs.created_at', $direction),
+            })
+            ->orderBy('jobs.id', $direction)
+            ->paginate(self::BOARD_PER_PAGE)
+            ->withQueryString();
+    }
+
+    /**
+     * @param  array{status: string, search: string, sort: string, direction: string}  $filters
+     * @return array<string, int>
+     */
+    public function countByStatus(array $filters): array
+    {
+        $counts = $this->boardQuery($filters['search'])
+            ->select('jobs.status', DB::raw('COUNT(*) AS aggregate'))
+            ->groupBy('jobs.status')
+            ->pluck('aggregate', 'jobs.status');
+
+        $result = [];
+
+        foreach (JobStatus::cases() as $status) {
+            $result[$status->value] = (int) ($counts[$status->value] ?? 0);
+        }
+
+        return $result;
+    }
+
+    public function hasAny(): bool
+    {
+        return Job::query()->exists();
+    }
+
+    /**
+     * @return Builder<Job>
+     */
+    private function boardQuery(string $search): Builder
+    {
+        return Job::query()
+            ->joinedForBoard()
+            ->when($search, fn (Builder $query, string $term) => $query->matching($term));
+    }
 
     /**
      * @param  array<string, mixed>  $attributes

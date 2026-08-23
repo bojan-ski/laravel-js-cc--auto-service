@@ -1,6 +1,11 @@
 <header class="relative border-b border-border-strong bg-surface-dark text-text-inverse">
     <div class="mx-auto flex w-full max-w-7xl items-center gap-6 px-3 md:px-4 lg:px-6">
-        <span class="py-3 text-sm font-bold uppercase tracking-wider">{{ __('app.name') }}</span>
+        <a
+            href="{{ route('dashboard') }}"
+            class="rounded-sm py-3 text-sm font-bold uppercase tracking-wider focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+            {{ __('app.name') }}
+        </a>
 
         <nav class="hidden md:flex md:items-center md:gap-1" aria-label="{{ __('app.nav.primary') }}">
             @foreach ($items as $item)

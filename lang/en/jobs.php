@@ -9,6 +9,46 @@ return [
         'cancelled' => 'Cancelled',
     ],
 
+    'board' => [
+        'title' => 'Jobs',
+        'new' => 'New job',
+        'count' => ':count job|:count jobs',
+        'tabs_label' => 'Filter by status',
+        'tab_all' => 'All',
+        'search_label' => 'Search jobs',
+        'search_placeholder' => 'Plate or customer',
+        'sort_by' => 'Sort by :column, :direction',
+        'ascending' => 'ascending',
+        'descending' => 'descending',
+
+        'headers' => [
+            'plate' => 'Plate',
+            'vehicle' => 'Vehicle',
+            'customer' => 'Customer',
+            'status' => 'Status',
+            'received' => 'Received',
+            'assigned' => 'Assigned',
+        ],
+
+        'empty' => [
+            'none' => [
+                'title' => 'No jobs yet.',
+                'body' => 'Open the first job from an arrived appointment or as a walk-in.',
+            ],
+
+            'none_in_status' => [
+                'title' => 'No jobs in this status.',
+                'body' => 'Show all statuses to see everything on the board.',
+                'clear' => 'Show all statuses',
+            ],
+
+            'no_matches' => [
+                'title' => 'No job matches that search.',
+                'body' => 'Check the plate or try part of the customer\'s name.',
+            ],
+        ],
+    ],
+
     'form' => [
         'create_title' => 'New job',
         'appointment' => 'Appointment',
