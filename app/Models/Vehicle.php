@@ -33,6 +33,14 @@ class Vehicle extends Model
     }
 
     /**
+     * @return HasMany<Job, $this>
+     */
+    public function jobs(): HasMany
+    {
+        return $this->hasMany(Job::class)->latest();
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

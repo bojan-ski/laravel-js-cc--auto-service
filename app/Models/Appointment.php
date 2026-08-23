@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['scheduled_at', 'duration_minutes', 'notes'])]
 class Appointment extends Model
@@ -47,6 +48,14 @@ class Appointment extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by')->withTrashed();
+    }
+
+    /**
+     * @return HasOne<Job, $this>
+     */
+    public function job(): HasOne
+    {
+        return $this->hasOne(Job::class);
     }
 
     public function isBooked(): bool
