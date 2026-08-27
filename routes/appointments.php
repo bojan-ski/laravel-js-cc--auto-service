@@ -10,6 +10,7 @@ Route::get('/appointments/create', [AppointmentController::class, 'create'])->na
 Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
 Route::get('/appointments/overlaps', AppointmentOverlapController::class)->name('appointments.overlaps');
 
+Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('appointments.show');
 Route::get('/appointments/{appointment}/edit', [AppointmentController::class, 'edit'])->name('appointments.edit');
 Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
 

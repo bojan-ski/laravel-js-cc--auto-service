@@ -85,7 +85,7 @@ class JobIntakeRouteTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('jobs.store'), ['appointment_id' => $appointment->getKey(), 'complaint' => 'Booked car'])
-            ->assertRedirect(route('appointments.index', ['date' => now()->addDay()->format('Y-m-d')]))
+            ->assertRedirect(route('jobs.show', Job::query()->sole()))
             ->assertSessionHas('success')
             ->assertSessionMissing('warning');
 
@@ -106,7 +106,7 @@ class JobIntakeRouteTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('jobs.store'), ['vehicle_id' => $vehicle->getKey(), 'complaint' => 'Walk-in', 'mileage_in' => 500_000])
-            ->assertRedirect(route('vehicles.show', $vehicle))
+            ->assertRedirect(route('jobs.show', Job::query()->sole()))
             ->assertSessionHas('success')
             ->assertSessionMissing('warning');
 
@@ -136,7 +136,7 @@ class JobIntakeRouteTest extends TestCase
         $response = $this->actingAs(User::factory()->receptionist()->create())
             ->post(route('jobs.store'), ['vehicle_id' => $vehicle->getKey(), 'complaint' => 'Walk-in']);
 
-        $response->assertRedirect(route('vehicles.show', $vehicle));
+        $response->assertRedirect(route('jobs.show', Job::query()->sole()));
 
         $this->followRedirects($response)->assertOk();
     }
@@ -147,7 +147,7 @@ class JobIntakeRouteTest extends TestCase
 
         $this->actingAs(User::factory()->receptionist()->create())
             ->post(route('jobs.store'), ['vehicle_id' => $vehicle->getKey(), 'complaint' => 'Walk-in', 'mileage_in' => 119_000])
-            ->assertRedirect(route('vehicles.show', $vehicle))
+            ->assertRedirect(route('jobs.show', Job::query()->sole()))
             ->assertSessionHas('success')
             ->assertSessionHas('warning', __('jobs.flash.mileage_lower', ['entered' => '119,000', 'stored' => '120,000']));
 

@@ -174,10 +174,13 @@ class JobBoardViewTest extends TestCase
         $this->board()->assertDontSee(__('jobs.board.new'));
     }
 
-    public function test_rows_are_not_links_yet(): void
+    public function test_each_row_links_to_the_job(): void
     {
         $job = Job::factory()->create();
 
-        $this->board()->assertOk()->assertDontSee('href="'.url('/jobs/'.$job->getKey()).'"', false);
+        $this->board()
+            ->assertOk()
+            ->assertSee('href="'.route('jobs.show', $job).'"', false)
+            ->assertSee($job->reference);
     }
 }

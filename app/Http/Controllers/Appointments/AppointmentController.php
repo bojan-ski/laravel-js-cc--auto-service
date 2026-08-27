@@ -58,6 +58,15 @@ class AppointmentController extends Controller
             ->with($this->overlapWarning($appointment));
     }
 
+    public function show(Appointment $appointment): View
+    {
+        Gate::authorize('view', $appointment);
+
+        $appointment->load(['vehicle', 'customer', 'createdBy', 'job']);
+
+        return view('pages.appointments.show', ['appointment' => $appointment]);
+    }
+
     public function edit(Appointment $appointment): View
     {
         Gate::authorize('update', $appointment);

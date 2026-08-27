@@ -62,6 +62,15 @@ class JobController extends Controller
             : $this->storeFromAppointment($request, $appointment);
     }
 
+    public function show(Job $job): View
+    {
+        Gate::authorize('view', $job);
+
+        $job->load(['customer', 'vehicle', 'createdBy', 'appointment']);
+
+        return view('pages.jobs.show', ['job' => $job]);
+    }
+
     private function storeWalkIn(StoreJobRequest $request): RedirectResponse
     {
         Gate::authorize('create', Job::class);
@@ -70,7 +79,7 @@ class JobController extends Controller
         $job = $this->jobs->createWalkIn($vehicle, $request->user(), $request->validated());
 
         return redirect()
-            ->route('vehicles.show', $vehicle)
+            ->route('jobs.show', $job)
             ->with($this->flashes($job));
     }
 
@@ -81,7 +90,7 @@ class JobController extends Controller
         $job = $this->jobs->createFromAppointment($appointment, $request->user(), $request->validated());
 
         return redirect()
-            ->route('appointments.index', ['date' => $appointment->scheduled_at->format('Y-m-d')])
+            ->route('jobs.show', $job)
             ->with($this->flashes($job));
     }
 
