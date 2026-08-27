@@ -2,8 +2,13 @@
 
 <tr role="row" class="grid grid-cols-[1fr_auto] items-center gap-x-3 border-b border-border p-3 last:border-b-0 md:table-row md:p-0">
     <td role="cell" class="col-start-1 row-start-1 md:table-cell md:px-3 md:py-2">
-        <span class="block font-medium tabular-nums">{{ $job->vehicle->registration_plate }}</span>
-        <span class="block text-sm tabular-nums text-text-muted">{{ $job->reference }}</span>
+        <a href="{{ route('jobs.show', $job) }}" class="block hover:text-brand-dark">
+            <span class="block font-medium tabular-nums underline underline-offset-2">
+                {{ $job->vehicle->registration_plate }}
+            </span>
+
+            <span class="block text-sm tabular-nums text-text-muted">{{ $job->reference }}</span>
+        </a>
     </td>
 
     <td role="cell" class="hidden xl:table-cell xl:px-3 xl:py-2">

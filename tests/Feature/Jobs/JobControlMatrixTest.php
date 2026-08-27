@@ -1,0 +1,146 @@
+<?php
+
+namespace Tests\Feature\Jobs;
+
+use App\Models\Job;
+use App\Models\User;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\TestCase;
+
+class JobControlMatrixTest extends TestCase
+{
+    use LazilyRefreshDatabase;
+
+    private const VERBS = ['start', 'pause', 'resume', 'complete', 'cancel', 'reopen'];
+
+    /**
+     * @return array<string, array{0: string, 1: string, 2: list<string>}>
+     */
+    public static function matrixProvider(): array
+    {
+        $expected = [
+            'received' => [
+                'mechanic' => ['start'],
+                'receptionist' => ['start', 'cancel'],
+                'admin' => ['start', 'cancel'],
+            ],
+            'inProgress' => [
+                'mechanic' => ['pause', 'complete'],
+                'receptionist' => ['pause', 'complete', 'cancel'],
+                'admin' => ['pause', 'complete', 'cancel'],
+            ],
+            'awaitingParts' => [
+                'mechanic' => ['resume'],
+                'receptionist' => ['resume', 'cancel'],
+                'admin' => ['resume', 'cancel'],
+            ],
+            'completed' => [
+                'mechanic' => [],
+                'receptionist' => ['reopen'],
+                'admin' => ['reopen'],
+            ],
+            'cancelled' => [
+                'mechanic' => [],
+                'receptionist' => [],
+                'admin' => [],
+            ],
+        ];
+
+        $cases = [];
+
+        foreach ($expected as $state => $roles) {
+            foreach ($roles as $role => $verbs) {
+                $cases["{$state} as {$role}"] = [$state, $role, $verbs];
+            }
+        }
+
+        return $cases;
+    }
+
+    /**
+     * @param  list<string>  $expected
+     */
+    #[DataProvider('matrixProvider')]
+    public function test_the_control_row_shows_exactly_the_legal_transitions(string $state, string $role, array $expected): void
+    {
+        $job = Job::factory()->{$state}()->create();
+
+        $response = $this->actingAs(User::factory()->{$role}()->create())
+            ->get(route('jobs.show', $job))
+            ->assertOk();
+
+        foreach (self::VERBS as $verb) {
+            $action = route("jobs.{$verb}", $job);
+
+            in_array($verb, $expected, true)
+                ? $response->assertSee('action="'.$action.'"', false)
+                : $response->assertDontSee('action="'.$action.'"', false);
+        }
+    }
+
+    /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function withoutControlsProvider(): array
+    {
+        $cases = [];
+
+        foreach (self::matrixProvider() as $name => [$state, $role, $verbs]) {
+            if ($verbs === []) {
+                $cases[$name] = [$state, $role];
+            }
+        }
+
+        return $cases;
+    }
+
+    #[DataProvider('withoutControlsProvider')]
+    public function test_a_job_with_no_legal_transition_renders_no_control_row_at_all(string $state, string $role): void
+    {
+        $job = Job::factory()->{$state}()->create();
+
+        $this->actingAs(User::factory()->{$role}()->create())
+            ->get(route('jobs.show', $job))
+            ->assertOk()
+            ->assertDontSee('mt-4 flex flex-wrap gap-2', false);
+    }
+
+    /**
+     * @param  list<string>  $expected
+     */
+    #[DataProvider('matrixProvider')]
+    public function test_every_transition_absent_from_the_control_row_is_refused_by_its_route(string $state, string $role, array $expected): void
+    {
+        $job = Job::factory()->{$state}()->create();
+        $user = User::factory()->{$role}()->create();
+        $status = $job->status;
+
+        foreach (self::VERBS as $verb) {
+            if (in_array($verb, $expected, true)) {
+                continue;
+            }
+
+            $this->actingAs($user)
+                ->patch(route("jobs.{$verb}", $job))
+                ->assertForbidden();
+        }
+
+        $this->assertSame($status, $job->refresh()->status);
+    }
+
+    public function test_a_mechanic_never_sees_cancel_or_reopen(): void
+    {
+        $mechanic = User::factory()->mechanic()->create();
+
+        foreach (['received', 'inProgress', 'awaitingParts', 'completed', 'cancelled'] as $state) {
+            $job = Job::factory()->{$state}()->create();
+
+            $this->actingAs($mechanic)
+                ->get(route('jobs.show', $job))
+                ->assertOk()
+                ->assertDontSee('action="'.route('jobs.cancel', $job).'"', false)
+                ->assertDontSee('action="'.route('jobs.reopen', $job).'"', false);
+        }
+    }
+}

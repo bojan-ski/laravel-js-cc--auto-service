@@ -92,7 +92,7 @@ class JobIntakeValidationTest extends TestCase
 
         $this->submit(['vehicle_id' => $vehicle->getKey(), 'complaint' => str_repeat('a', 2000)])
             ->assertSessionDoesntHaveErrors()
-            ->assertRedirect(route('vehicles.show', $vehicle));
+            ->assertRedirect(route('jobs.show', Job::query()->sole()));
     }
 
     public function test_mileage_must_be_a_non_negative_integer_when_present(): void

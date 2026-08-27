@@ -43,6 +43,20 @@ return [
         'clear_filter' => 'Clear status filter',
     ],
 
+    'show' => [
+        'title' => ':plate booked :time',
+        'details' => 'Booking details',
+        'customer' => 'Customer',
+        'duration' => 'Duration',
+        'duration_value' => ':minutes minutes',
+        'notes' => 'Notes',
+        'booked_by' => 'Booked by',
+        'arrived' => 'Arrived',
+        'no_show' => 'Marked no-show',
+        'cancelled' => 'Cancelled',
+        'job' => 'Job',
+    ],
+
     'actions' => [
         'arrived' => 'Arrived',
         'no_show' => 'No-show',

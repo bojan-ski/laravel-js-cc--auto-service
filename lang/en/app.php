@@ -16,6 +16,7 @@ return [
 
     'value_none' => '—',
     'value_none_spoken' => 'Not provided',
+    'deleted' => 'deleted',
 
     'actions' => [
         'view' => 'View',
