@@ -93,6 +93,19 @@ return [
         ],
     ],
 
+    'history' => [
+        'view_all' => 'View all :count jobs',
+
+        'headers' => [
+            'reference' => 'Job',
+            'plate' => 'Plate',
+            'customer' => 'Customer',
+            'status' => 'Status',
+            'received' => 'Received',
+            'mileage' => 'Mileage',
+        ],
+    ],
+
     'actions' => [
         'start' => 'Start',
         'pause' => 'Awaiting parts',

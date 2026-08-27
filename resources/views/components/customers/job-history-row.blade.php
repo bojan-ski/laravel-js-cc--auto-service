@@ -1,0 +1,28 @@
+@props(['job'])
+
+<tr role="row" class="grid grid-cols-[1fr_auto] items-center gap-x-3 border-b border-border p-3 last:border-b-0 md:table-row md:p-0">
+    <td role="cell" class="col-start-1 row-start-1 md:table-cell md:px-3 md:py-1.5">
+        <a
+            href="{{ route('jobs.show', $job) }}"
+            class="font-medium tabular-nums underline underline-offset-2 hover:text-brand-dark"
+        >
+            {{ $job->reference }}
+        </a>
+    </td>
+
+    <td role="cell" class="col-start-1 row-start-2 text-sm tabular-nums text-text-muted md:table-cell md:px-3 md:py-1.5 md:text-base md:text-text">
+        {{ $job->vehicle->registration_plate }}
+
+        @if ($job->vehicle->trashed())
+            <span class="text-sm text-text-muted">({{ __('app.deleted') }})</span>
+        @endif
+    </td>
+
+    <td role="cell" class="col-start-2 row-start-1 row-span-2 self-center text-end md:table-cell md:px-3 md:py-1.5 md:text-start">
+        <x-ui.status-badge :status="$job->status" />
+    </td>
+
+    <td role="cell" class="hidden tabular-nums md:table-cell md:px-3 md:py-1.5">
+        {{ $job->created_at->isoFormat('D MMM YYYY') }}
+    </td>
+</tr>

@@ -11,8 +11,5 @@
         @endif
     @endcan
 
-    <x-customers.placeholder-section
-        :heading="__('customers.show.jobs')"
-        :message="__('customers.show.jobs_empty')"
-    />
+    <x-customers.job-history :customer="$customer" :jobs="$jobHistory" :total="$jobTotal" />
 </x-layouts.app>

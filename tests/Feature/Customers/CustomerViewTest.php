@@ -21,7 +21,7 @@ class CustomerViewTest extends TestCase
             ->assertSee(__('app.value_none'));
     }
 
-    public function test_the_detail_page_renders_the_vehicles_section_and_the_jobs_placeholder(): void
+    public function test_the_detail_page_renders_the_vehicles_section_and_the_empty_job_history(): void
     {
         $customer = Customer::factory()->create();
 
