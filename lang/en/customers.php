@@ -38,6 +38,7 @@ return [
         'notes' => 'Notes',
         'jobs' => 'Job history',
         'jobs_empty' => 'No jobs recorded yet.',
+        'jobs_view_all_for' => 'View all :count jobs for :name',
     ],
 
     'create' => [

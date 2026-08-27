@@ -6,12 +6,14 @@ use App\Enums\JobStatus;
 use App\Exceptions\InvalidAppointmentTransition;
 use App\Exceptions\InvalidJobTransition;
 use App\Models\Appointment;
+use App\Models\Customer;
 use App\Models\Job;
 use App\Models\User;
 use App\Models\Vehicle;
 use Closure;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +22,8 @@ class JobService
     public const int REFERENCE_ATTEMPTS = 3;
 
     public const int BOARD_PER_PAGE = 25;
+
+    public const int HISTORY_LIMIT = 10;
 
     public function __construct(
         private readonly JobReferenceGenerator $references,
@@ -71,6 +75,40 @@ class JobService
     public function hasAny(): bool
     {
         return Job::query()->exists();
+    }
+
+    /**
+     * @return Collection<int, Job>
+     */
+    public function historyForCustomer(Customer $customer): Collection
+    {
+        return $customer->jobs()
+            ->with('vehicle')
+            ->orderByDesc('id')
+            ->limit(self::HISTORY_LIMIT)
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, Job>
+     */
+    public function historyForVehicle(Vehicle $vehicle): Collection
+    {
+        return $vehicle->jobs()
+            ->with('customer')
+            ->orderByDesc('id')
+            ->limit(self::HISTORY_LIMIT)
+            ->get();
+    }
+
+    public function countForCustomer(Customer $customer): int
+    {
+        return $customer->jobs()->count();
+    }
+
+    public function countForVehicle(Vehicle $vehicle): int
+    {
+        return $vehicle->jobs()->count();
     }
 
     /**

@@ -38,6 +38,7 @@ return [
         'mileage_value' => ':mileage km',
         'history' => 'Service history',
         'history_empty' => 'No jobs recorded for this vehicle yet.',
+        'history_view_all_for' => 'View all :count jobs for :plate',
     ],
 
     'create' => [

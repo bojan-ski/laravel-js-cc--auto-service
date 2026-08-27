@@ -9,6 +9,7 @@ use App\Http\Requests\Customers\UpdateCustomerRequest;
 use App\Models\Customer;
 use App\Models\Vehicle;
 use App\Services\CustomerService;
+use App\Services\JobService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -17,6 +18,7 @@ class CustomerController extends Controller
 {
     public function __construct(
         private CustomerService $customers,
+        private JobService $jobs,
     ) {}
 
     public function index(CustomerIndexRequest $request): View
@@ -58,7 +60,11 @@ class CustomerController extends Controller
             $customer->load('deletedVehicles');
         }
 
-        return view('pages.customers.show', ['customer' => $customer]);
+        return view('pages.customers.show', [
+            'customer' => $customer,
+            'jobHistory' => $this->jobs->historyForCustomer($customer),
+            'jobTotal' => $this->jobs->countForCustomer($customer),
+        ]);
     }
 
     public function edit(Customer $customer): View

@@ -3,5 +3,5 @@
 
     <x-vehicles.identity :vehicle="$vehicle" />
 
-    <x-vehicles.service-history />
+    <x-vehicles.service-history :vehicle="$vehicle" :jobs="$jobHistory" :total="$jobTotal" />
 </x-layouts.app>

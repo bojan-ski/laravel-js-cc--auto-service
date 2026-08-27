@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Vehicles;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Vehicles\UpdateVehicleRequest;
 use App\Models\Vehicle;
+use App\Services\JobService;
 use App\Services\VehicleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -14,6 +15,7 @@ class VehicleController extends Controller
 {
     public function __construct(
         private VehicleService $vehicles,
+        private JobService $jobs,
     ) {}
 
     public function show(Vehicle $vehicle): View
@@ -22,7 +24,11 @@ class VehicleController extends Controller
 
         $vehicle->load(['customer' => fn ($query) => $query->withTrashed()]);
 
-        return view('pages.vehicles.show', ['vehicle' => $vehicle]);
+        return view('pages.vehicles.show', [
+            'vehicle' => $vehicle,
+            'jobHistory' => $this->jobs->historyForVehicle($vehicle),
+            'jobTotal' => $this->jobs->countForVehicle($vehicle),
+        ]);
     }
 
     public function edit(Vehicle $vehicle): View
