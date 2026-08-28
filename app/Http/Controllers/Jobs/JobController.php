@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Jobs;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Jobs\JobIndexRequest;
+use App\Http\Requests\Jobs\JobShowRequest;
 use App\Http\Requests\Jobs\StoreJobRequest;
 use App\Models\Appointment;
 use App\Models\Job;
+use App\Models\JobItem;
 use App\Models\Vehicle;
 use App\Services\JobService;
+use App\Services\UserService;
 use App\Services\VehicleService;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -20,6 +24,7 @@ class JobController extends Controller
     public function __construct(
         private JobService $jobs,
         private VehicleService $vehicles,
+        private UserService $users,
     ) {}
 
     public function index(JobIndexRequest $request): View
@@ -62,13 +67,44 @@ class JobController extends Controller
             : $this->storeFromAppointment($request, $appointment);
     }
 
-    public function show(Job $job): View
+    public function show(JobShowRequest $request, Job $job): View
     {
         Gate::authorize('view', $job);
 
-        $job->load(['customer', 'vehicle', 'createdBy', 'appointment']);
+        $user = $request->user();
+        $showPricing = Gate::allows('viewPricing', Job::class);
 
-        return view('pages.jobs.show', ['job' => $job]);
+        $job->load([
+            'customer',
+            'vehicle',
+            'createdBy',
+            'appointment',
+            'items' => fn (HasMany $query) => $query->visibleTo($user)->with('user')->orderBy('id'),
+        ]);
+
+        $job->items->each(fn (JobItem $item) => $item->setRelation('job', $job));
+
+        $editing = $this->editableItem($job, $request->editingItemId());
+
+        return view('pages.jobs.show', [
+            'job' => $job,
+            'showPricing' => $showPricing,
+            'subtotal' => $showPricing ? $job->subtotal() : null,
+            'editing' => $editing,
+            'userOptions' => $user->isFrontOffice() ? $this->users->pickerOptions() : [],
+            'defaultRate' => $showPricing ? (string) config('shop.labor_rate') : null,
+        ]);
+    }
+
+    private function editableItem(Job $job, ?int $itemId): ?JobItem
+    {
+        if ($itemId === null) {
+            return null;
+        }
+
+        $item = $job->items->firstWhere('id', $itemId);
+
+        return $item !== null && Gate::allows('update', $item) ? $item : null;
     }
 
     private function storeWalkIn(StoreJobRequest $request): RedirectResponse

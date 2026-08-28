@@ -3,6 +3,7 @@
 namespace Tests\Feature\Jobs;
 
 use App\Models\Job;
+use App\Models\JobItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -64,7 +65,7 @@ class JobControlMatrixTest extends TestCase
     #[DataProvider('matrixProvider')]
     public function test_the_control_row_shows_exactly_the_legal_transitions(string $state, string $role, array $expected): void
     {
-        $job = Job::factory()->{$state}()->create();
+        $job = $this->jobWithLineItem($state);
 
         $response = $this->actingAs(User::factory()->{$role}()->create())
             ->get(route('jobs.show', $job))
@@ -98,7 +99,7 @@ class JobControlMatrixTest extends TestCase
     #[DataProvider('withoutControlsProvider')]
     public function test_a_job_with_no_legal_transition_renders_no_control_row_at_all(string $state, string $role): void
     {
-        $job = Job::factory()->{$state}()->create();
+        $job = $this->jobWithLineItem($state);
 
         $this->actingAs(User::factory()->{$role}()->create())
             ->get(route('jobs.show', $job))
@@ -112,7 +113,7 @@ class JobControlMatrixTest extends TestCase
     #[DataProvider('matrixProvider')]
     public function test_every_transition_absent_from_the_control_row_is_refused_by_its_route(string $state, string $role, array $expected): void
     {
-        $job = Job::factory()->{$state}()->create();
+        $job = $this->jobWithLineItem($state);
         $user = User::factory()->{$role}()->create();
         $status = $job->status;
 
@@ -134,7 +135,7 @@ class JobControlMatrixTest extends TestCase
         $mechanic = User::factory()->mechanic()->create();
 
         foreach (['received', 'inProgress', 'awaitingParts', 'completed', 'cancelled'] as $state) {
-            $job = Job::factory()->{$state}()->create();
+            $job = $this->jobWithLineItem($state);
 
             $this->actingAs($mechanic)
                 ->get(route('jobs.show', $job))
@@ -142,5 +143,19 @@ class JobControlMatrixTest extends TestCase
                 ->assertDontSee('action="'.route('jobs.cancel', $job).'"', false)
                 ->assertDontSee('action="'.route('jobs.reopen', $job).'"', false);
         }
+    }
+
+    /**
+     * Every job here carries a line item so that its status alone decides which
+     * controls appear; the lineless case is covered by
+     * JobCompletionRequiresLineItemsTest.
+     */
+    private function jobWithLineItem(string $state): Job
+    {
+        $job = Job::factory()->{$state}()->create();
+
+        JobItem::factory()->forJob($job)->create();
+
+        return $job;
     }
 }

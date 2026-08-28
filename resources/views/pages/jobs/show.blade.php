@@ -7,7 +7,14 @@
         <x-jobs.details :job="$job" />
 
         <div class="space-y-4">
-            <x-jobs.line-items />
+            <x-jobs.line-items
+                :job="$job"
+                :show-pricing="$showPricing"
+                :subtotal="$subtotal"
+                :editing="$editing"
+                :user-options="$userOptions"
+                :default-rate="$defaultRate"
+            />
 
             <x-jobs.attachments />
         </div>

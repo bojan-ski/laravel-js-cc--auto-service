@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Jobs\JobController;
+use App\Http\Controllers\Jobs\JobItemController;
 use App\Http\Controllers\Jobs\JobTransitionController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,3 +16,7 @@ Route::patch('/jobs/{job}/resume', [JobTransitionController::class, 'resume'])->
 Route::patch('/jobs/{job}/complete', [JobTransitionController::class, 'complete'])->name('jobs.complete');
 Route::patch('/jobs/{job}/cancel', [JobTransitionController::class, 'cancel'])->name('jobs.cancel');
 Route::patch('/jobs/{job}/reopen', [JobTransitionController::class, 'reopen'])->name('jobs.reopen');
+
+Route::post('/jobs/{job}/items', [JobItemController::class, 'store'])->name('jobs.items.store');
+Route::put('/job-items/{jobItem}', [JobItemController::class, 'update'])->name('job-items.update');
+Route::delete('/job-items/{jobItem}', [JobItemController::class, 'destroy'])->name('job-items.destroy');
