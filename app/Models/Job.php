@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\JobItemType;
 use App\Enums\JobStatus;
 use App\Exceptions\JobLockedException;
 use Database\Factories\JobFactory;
@@ -11,7 +12,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 
 #[Fillable(['complaint', 'mileage_in'])]
 class Job extends Model
@@ -77,6 +80,22 @@ class Job extends Model
         return $this->belongsTo(Appointment::class);
     }
 
+    /**
+     * @return HasMany<JobItem, $this>
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(JobItem::class);
+    }
+
+    /**
+     * @return HasMany<JobItem, $this>
+     */
+    public function laborItems(): HasMany
+    {
+        return $this->hasMany(JobItem::class)->where('type', JobItemType::Labor);
+    }
+
     #[Scope]
     protected function joinedForBoard(Builder $query): void
     {
@@ -129,7 +148,7 @@ class Job extends Model
 
     public function canComplete(): bool
     {
-        return $this->status === JobStatus::InProgress && ! $this->isLocked();
+        return $this->status === JobStatus::InProgress && ! $this->isLocked() && $this->hasLineItems();
     }
 
     public function canCancel(): bool
@@ -140,6 +159,40 @@ class Job extends Model
     public function canReopen(): bool
     {
         return $this->status === JobStatus::Completed && ! $this->isLocked();
+    }
+
+    public function needsLineItemsToComplete(): bool
+    {
+        return $this->status === JobStatus::InProgress
+            && ! $this->isLocked()
+            && ! $this->hasLineItems();
+    }
+
+    public function hasLineItems(): bool
+    {
+        return $this->relationLoaded('items')
+            ? $this->items->isNotEmpty()
+            : $this->items()->exists();
+    }
+
+    public function subtotal(): string
+    {
+        return $this->items->reduce(
+            fn (string $carry, JobItem $item): string => bcadd($carry, $item->lineTotal(), 2),
+            '0.00',
+        );
+    }
+
+    /**
+     * @return Collection<int, string>
+     */
+    public function assignedNames(): Collection
+    {
+        return $this->laborItems
+            ->map(fn (JobItem $item): ?string => $item->user?->shortName())
+            ->filter()
+            ->unique()
+            ->values();
     }
 
     public function mileageInIsBelowVehicleMileage(): bool

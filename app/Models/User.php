@@ -50,4 +50,15 @@ class User extends Authenticatable
     {
         return (bool) $this->role?->isFrontOffice();
     }
+
+    public function shortName(): string
+    {
+        $parts = preg_split('/\s+/', trim((string) $this->name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        if (count($parts) < 2) {
+            return $this->name;
+        }
+
+        return mb_substr(array_shift($parts), 0, 1).'. '.array_pop($parts);
+    }
 }

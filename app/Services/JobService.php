@@ -39,7 +39,7 @@ class JobService
         $direction = $filters['direction'];
 
         return $this->boardQuery($filters['search'])
-            ->with(['vehicle', 'customer'])
+            ->with(['vehicle', 'customer', 'laborItems:id,job_id,user_id,type', 'laborItems.user'])
             ->when($filters['status'], fn (Builder $query, string $status) => $query->where('jobs.status', $status))
             ->tap(fn (Builder $query) => match ($filters['sort']) {
                 'plate' => $query->orderBy('vehicles.registration_plate', $direction),

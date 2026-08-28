@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Blade;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class UiComponentsTest extends TestCase
@@ -207,5 +208,52 @@ class UiComponentsTest extends TestCase
 
         $this->assertStringContainsString('<p class="text-sm font-semibold">'.__('vehicles.section.empty').'</p>', $html);
         $this->assertStringNotContainsString('<h3', $html);
+    }
+
+    /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function moneyProvider(): array
+    {
+        return [
+            'a thousands separator' => ['3000.00', '3,000.00'],
+            'a computed subtotal' => ['6000.00', '6,000.00'],
+            'a whole number gains its decimals' => ['3000', '3,000.00'],
+            'millions keep every group' => ['1234567.89', '1,234,567.89'],
+            'zero' => ['0.00', '0.00'],
+            'a fraction rounds to two places' => ['0.125', '0.13'],
+        ];
+    }
+
+    #[DataProvider('moneyProvider')]
+    public function test_money_renders_with_two_decimals_and_no_currency_symbol(string $value, string $expected): void
+    {
+        $html = Blade::render('<x-ui.money :value="$value" />', ['value' => $value]);
+
+        $this->assertStringContainsString('>'.$expected.'<', $html);
+        $this->assertStringContainsString('tabular-nums', $html);
+        $this->assertDoesNotMatchRegularExpression('/[€$£]|RSD|din/i', $html);
+    }
+
+    /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function quantityProvider(): array
+    {
+        return [
+            'a half hour keeps one decimal' => ['1.50', '1.5'],
+            'a whole hour drops both' => ['1.00', '1'],
+            'a quarter keeps both' => ['2.25', '2.25'],
+            'zero' => ['0.00', '0'],
+        ];
+    }
+
+    #[DataProvider('quantityProvider')]
+    public function test_quantity_shows_decimals_only_when_they_are_meaningful(string $value, string $expected): void
+    {
+        $html = Blade::render('<x-ui.quantity :value="$value" />', ['value' => $value]);
+
+        $this->assertStringContainsString('>'.$expected.'<', $html);
+        $this->assertStringContainsString('tabular-nums', $html);
     }
 }

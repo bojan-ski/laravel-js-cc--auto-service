@@ -181,6 +181,7 @@ class JobShowViewTest extends TestCase
             $job->reference,
             __('jobs.show.details'),
             __('jobs.show.line_items'),
+            __('jobs.items.add.title'),
             __('jobs.show.attachments'),
         ], $headings);
     }

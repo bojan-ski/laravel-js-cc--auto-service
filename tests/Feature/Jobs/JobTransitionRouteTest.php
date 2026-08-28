@@ -4,6 +4,7 @@ namespace Tests\Feature\Jobs;
 
 use App\Enums\JobStatus;
 use App\Models\Job;
+use App\Models\JobItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -99,6 +100,7 @@ class JobTransitionRouteTest extends TestCase
         $this->freezeTime();
 
         $job = Job::factory()->inProgress()->create();
+        JobItem::factory()->forJob($job)->create();
 
         $this->actingAs(User::factory()->mechanic()->create())
             ->patch(route('jobs.complete', $job))

@@ -30,6 +30,8 @@ return [
             'assigned' => 'Assigned',
         ],
 
+        'assigned_more' => ':count more person|:count more people',
+
         'empty' => [
             'none' => [
                 'title' => 'No jobs yet.',
@@ -90,6 +92,59 @@ return [
         'lock' => [
             'title' => 'Locked — invoiced :date',
             'body' => 'Line items are read-only. An admin must void the invoice to reopen this job.',
+        ],
+    ],
+
+    'items' => [
+        'types' => [
+            'labor' => 'Labor',
+            'part' => 'Part',
+        ],
+
+        'headers' => [
+            'type' => 'Type',
+            'description' => 'Description',
+            'quantity' => 'Qty',
+            'price' => 'Price',
+            'who' => 'Who',
+            'actions' => 'Actions',
+        ],
+
+        'subtotal' => 'Subtotal',
+        'complete_hint' => 'Add at least one line item before this job can be completed.',
+
+        'add' => [
+            'title' => 'Add labor',
+            'description' => 'Description',
+            'description_placeholder' => 'What was done?',
+            'quantity' => 'Hours',
+            'who' => 'Performed by',
+            'who_placeholder' => 'Select who performed the work',
+            'rate' => 'Hourly rate',
+            'submit' => 'Add line',
+        ],
+
+        'edit' => [
+            'title' => 'Edit line item',
+            'title_for' => 'Edit line item: :description',
+            'row_marker' => 'This line is being edited below.',
+            'open' => 'Edit',
+            'open_line' => 'Edit :description',
+            'save' => 'Save',
+            'save_line' => 'Save changes to :description',
+            'cancel' => 'Cancel',
+        ],
+
+        'delete' => [
+            'label' => 'Delete',
+            'label_line' => 'Delete :description',
+            'confirm' => 'Delete ":description"? Line items are deleted permanently.',
+        ],
+
+        'flash' => [
+            'added' => 'Line item added.',
+            'updated' => 'Line item updated.',
+            'deleted' => 'Line item deleted.',
         ],
     ],
 

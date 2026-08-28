@@ -6,6 +6,7 @@ use App\Enums\JobStatus;
 use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Job;
+use App\Models\JobItem;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -104,6 +105,7 @@ class JobModelTest extends TestCase
     public function test_each_guard_answers_correctly_for_an_unlocked_job(string $state, JobStatus $status, array $expected): void
     {
         $job = Job::factory()->{$state}()->create();
+        JobItem::factory()->forJob($job)->create();
 
         $this->assertSame($status, $job->status);
         $this->assertFalse($job->isLocked());

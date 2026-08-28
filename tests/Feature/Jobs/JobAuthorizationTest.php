@@ -3,6 +3,7 @@
 namespace Tests\Feature\Jobs;
 
 use App\Models\Job;
+use App\Models\JobItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -72,7 +73,7 @@ class JobAuthorizationTest extends TestCase
         $subject = match ($ability) {
             'viewAny', 'create' => Job::class,
             'view' => Job::factory()->create(),
-            default => Job::factory()->{self::ENABLING_STATE[$ability]}()->create(),
+            default => $this->jobFor($ability, self::ENABLING_STATE[$ability]),
         };
 
         $this->assertSame($allowed, $user->can($ability, $subject));
@@ -106,7 +107,7 @@ class JobAuthorizationTest extends TestCase
     public function test_every_transition_ability_is_denied_when_its_guard_is_false(string $role, string $ability, string $state): void
     {
         $user = User::factory()->{$role}()->create();
-        $job = Job::factory()->{$state}()->create();
+        $job = $this->jobFor($ability, $state);
 
         $this->assertFalse($user->can($ability, $job));
     }
@@ -131,7 +132,7 @@ class JobAuthorizationTest extends TestCase
     public function test_every_transition_ability_is_denied_on_a_locked_job_even_for_an_admin(string $role, string $ability): void
     {
         $user = User::factory()->{$role}()->create();
-        $job = Job::factory()->{self::ENABLING_STATE[$ability]}()->create(['locked_at' => now()]);
+        $job = $this->jobFor($ability, self::ENABLING_STATE[$ability], locked: true);
 
         $this->assertFalse($user->can($ability, $job));
     }
@@ -152,5 +153,25 @@ class JobAuthorizationTest extends TestCase
 
         $this->assertFalse($admin->can('update', $job));
         $this->assertFalse($admin->can('delete', $job));
+    }
+
+    /**
+     * A job in the given state, carrying a line item whenever the ability under
+     * test is `complete`, so that only its status decides the outcome.
+     */
+    private function jobFor(string $ability, string $state, bool $locked = false): Job
+    {
+        $job = Job::factory()->{$state}()->create();
+
+        if ($ability === 'complete') {
+            JobItem::factory()->forJob($job)->create();
+        }
+
+        if ($locked) {
+            $job->locked_at = now();
+            $job->save();
+        }
+
+        return $job;
     }
 }

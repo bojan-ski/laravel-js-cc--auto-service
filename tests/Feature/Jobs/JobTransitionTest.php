@@ -5,6 +5,7 @@ namespace Tests\Feature\Jobs;
 use App\Enums\JobStatus;
 use App\Exceptions\InvalidJobTransition;
 use App\Models\Job;
+use App\Models\JobItem;
 use App\Services\JobService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -82,6 +83,7 @@ class JobTransitionTest extends TestCase
     public function test_complete_finishes_a_job_in_progress(): void
     {
         $job = Job::factory()->inProgress()->create();
+        JobItem::factory()->forJob($job)->create();
 
         $this->service()->complete($job);
 
@@ -253,6 +255,7 @@ class JobTransitionTest extends TestCase
     public function test_a_full_lifecycle_runs_end_to_end(): void
     {
         $job = Job::factory()->received()->create();
+        JobItem::factory()->forJob($job)->create();
         $service = $this->service();
 
         $service->start($job);

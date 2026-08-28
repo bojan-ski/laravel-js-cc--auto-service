@@ -64,6 +64,22 @@ class JobPolicy
     }
 
     /**
+     * Determine whether the user can add a line item to the job.
+     */
+    public function createItem(User $user, Job $job): bool
+    {
+        return $job->isWorking() && ! $job->isLocked();
+    }
+
+    /**
+     * Determine whether the user can see prices, line totals, and job totals.
+     */
+    public function viewPricing(User $user): bool
+    {
+        return $user->isFrontOffice();
+    }
+
+    /**
      * Determine whether the user can cancel the job.
      */
     public function cancel(User $user, Job $job): bool
