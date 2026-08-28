@@ -133,10 +133,12 @@ class AppointmentShowTest extends TestCase
         $this->actingAs(User::factory()->receptionist()->create())
             ->get(route('appointments.show', $appointment->fresh()))
             ->assertOk()
-            ->assertSee($vehicle->registration_plate)
-            ->assertSee($customer->name)
-            ->assertSee('('.__('app.deleted').')')
-            ->assertSee('('.__('vehicles.show.owner_deleted').')')
+            ->assertSeeInOrder([
+                $vehicle->registration_plate,
+                '('.__('app.deleted').')',
+                $customer->name,
+                '('.__('app.deleted').')',
+            ])
             ->assertDontSee('href="'.route('vehicles.show', $vehicle).'"', false)
             ->assertDontSee('href="'.route('customers.show', $customer).'"', false);
     }

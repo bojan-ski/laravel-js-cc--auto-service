@@ -183,7 +183,7 @@ class VehicleManagementTest extends TestCase
             ->followingRedirects()
             ->patch(route('vehicles.restore', $vehicle))
             ->assertOk()
-            ->assertSee(__('vehicles.show.owner_deleted'));
+            ->assertSee(__('app.deleted'));
     }
 
     public function test_deleting_under_a_deleted_owner_lands_on_a_page_that_renders(): void

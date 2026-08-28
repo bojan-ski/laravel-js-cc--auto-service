@@ -52,22 +52,16 @@
             @endcan
 
             @can('delete', $item)
-                <form
-                    method="POST"
-                    action="{{ route('job-items.destroy', $item) }}"
-                    data-confirm="{{ __('jobs.items.delete.confirm', $context) }}"
+                <x-ui.action-form
+                    method="DELETE"
+                    variant="danger"
+                    :action="route('job-items.destroy', $item)"
+                    :confirm="__('jobs.items.delete.confirm', $context)"
+                    :aria-label="__('jobs.items.delete.label_line', $context)"
+                    :class="$control"
                 >
-                    @csrf
-                    @method('DELETE')
-
-                    <x-ui.button
-                        variant="danger"
-                        :aria-label="__('jobs.items.delete.label_line', $context)"
-                        :class="$control"
-                    >
-                        {{ __('jobs.items.delete.label') }}
-                    </x-ui.button>
-                </form>
+                    {{ __('jobs.items.delete.label') }}
+                </x-ui.action-form>
             @endcan
         </div>
     </td>

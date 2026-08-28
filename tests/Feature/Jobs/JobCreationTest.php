@@ -11,21 +11,17 @@ use App\Models\Job;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\JobReferenceGenerator;
-use App\Services\JobService;
 use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
+use Tests\Support\ResolvesJobService;
 use Tests\TestCase;
 
 class JobCreationTest extends TestCase
 {
     use LazilyRefreshDatabase;
-
-    private function service(): JobService
-    {
-        return app(JobService::class);
-    }
+    use ResolvesJobService;
 
     public function test_a_walk_in_job_is_created_received_and_unlocked(): void
     {

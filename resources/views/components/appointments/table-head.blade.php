@@ -1,4 +1,4 @@
-<thead role="rowgroup" class="sticky top-0 hidden border-b border-border-strong bg-surface-muted md:table-header-group">
+<thead role="rowgroup" class="sr-only border-b border-border-strong bg-surface-muted md:not-sr-only md:sticky md:top-0 md:table-header-group">
     <tr role="row">
         <th role="columnheader" scope="col" class="px-3 py-2 text-sm font-semibold uppercase tracking-wider">
             {{ __('appointments.columns.time') }}

@@ -6,18 +6,14 @@ use App\Models\Appointment;
 use App\Models\Job;
 use App\Models\User;
 use App\Models\Vehicle;
-use App\Services\JobService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Tests\Support\ResolvesJobService;
 use Tests\TestCase;
 
 class JobMileageTest extends TestCase
 {
     use LazilyRefreshDatabase;
-
-    private function service(): JobService
-    {
-        return app(JobService::class);
-    }
+    use ResolvesJobService;
 
     private function walkIn(Vehicle $vehicle, ?int $mileageIn): Job
     {

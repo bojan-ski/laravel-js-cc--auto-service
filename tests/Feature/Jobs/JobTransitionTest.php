@@ -6,23 +6,19 @@ use App\Enums\JobStatus;
 use App\Exceptions\InvalidJobTransition;
 use App\Models\Job;
 use App\Models\JobItem;
-use App\Services\JobService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Support\ResolvesJobService;
 use Tests\TestCase;
 
 class JobTransitionTest extends TestCase
 {
     use LazilyRefreshDatabase;
+    use ResolvesJobService;
 
     private const array TRANSITIONS = ['start', 'pause', 'resume', 'complete', 'cancel', 'reopen'];
 
     private const array TIMESTAMPS = ['started_at', 'awaiting_parts_at', 'completed_at', 'cancelled_at'];
-
-    private function service(): JobService
-    {
-        return app(JobService::class);
-    }
 
     public function test_start_moves_a_received_job_into_progress(): void
     {

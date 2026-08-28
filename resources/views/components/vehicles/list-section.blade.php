@@ -23,11 +23,11 @@
     @else
         <div class="mt-2 overflow-x-auto border border-border bg-surface">
             <table role="table" class="w-full text-left">
-                <thead role="rowgroup" class="hidden md:table-header-group">
+                <thead role="rowgroup" class="sr-only md:not-sr-only md:table-header-group">
                     <tr role="row" class="border-b border-border bg-surface-muted">
                         <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('vehicles.section.headers.plate') }}</th>
                         <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('vehicles.section.headers.vehicle') }}</th>
-                        <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('vehicles.section.headers.year') }}</th>
+                        <th role="columnheader" scope="col" class="{{ $cell }} hidden md:table-cell">{{ __('vehicles.section.headers.year') }}</th>
                         <th role="columnheader" scope="col" class="{{ $cell }} text-end">{{ __('vehicles.section.headers.actions') }}</th>
                     </tr>
                 </thead>

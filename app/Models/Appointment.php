@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AppointmentStatus;
+use App\Models\Concerns\HasHistoricalOwnership;
 use Carbon\CarbonInterface;
 use Database\Factories\AppointmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -10,7 +11,6 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['scheduled_at', 'duration_minutes', 'notes'])]
@@ -19,36 +19,14 @@ class Appointment extends Model
     /** @use HasFactory<AppointmentFactory> */
     use HasFactory;
 
+    use HasHistoricalOwnership;
+
     /**
      * @var array<string, mixed>
      */
     protected $attributes = [
         'status' => AppointmentStatus::Booked->value,
     ];
-
-    /**
-     * @return BelongsTo<Customer, $this>
-     */
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class)->withTrashed();
-    }
-
-    /**
-     * @return BelongsTo<Vehicle, $this>
-     */
-    public function vehicle(): BelongsTo
-    {
-        return $this->belongsTo(Vehicle::class)->withTrashed();
-    }
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function createdBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
-    }
 
     /**
      * @return HasOne<Job, $this>

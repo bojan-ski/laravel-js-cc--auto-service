@@ -73,11 +73,11 @@ class JobBoardViewTest extends TestCase
             ->assertDontSee('total');
     }
 
-    public function test_the_header_is_sticky_and_hidden_below_md(): void
+    public function test_the_header_is_sticky_and_screen_reader_only_below_md(): void
     {
         Job::factory()->create();
 
-        $this->board()->assertOk()->assertSee('sticky top-0 hidden border-b border-border-strong bg-surface-muted md:table-header-group', false);
+        $this->board()->assertOk()->assertSee('sr-only border-b border-border-strong bg-surface-muted md:not-sr-only md:sticky md:top-0 md:table-header-group', false);
     }
 
     public function test_the_no_jobs_empty_state_offers_a_new_job_to_front_office_only(): void
