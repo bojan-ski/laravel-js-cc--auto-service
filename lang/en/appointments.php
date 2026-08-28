@@ -86,7 +86,6 @@ return [
 
     'overlap' => [
         'warning' => '{1}1 other car is already booked in this window.|[2,*]:count other cars are already booked in this window.',
-        'none' => 'No other cars are booked in this window.',
     ],
 
     'flash' => [

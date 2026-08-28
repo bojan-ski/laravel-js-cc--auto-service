@@ -7,17 +7,7 @@
         </h1>
 
         <p class="mt-1 text-text-muted">
-            @if ($appointment->vehicle->trashed())
-                <span class="font-medium tabular-nums">{{ $appointment->vehicle->registration_plate }}</span>
-                <span class="text-sm">({{ __('app.deleted') }})</span>
-            @else
-                <a
-                    href="{{ route('vehicles.show', $appointment->vehicle) }}"
-                    class="font-medium tabular-nums underline underline-offset-2 hover:text-brand-dark"
-                >
-                    {{ $appointment->vehicle->registration_plate }}
-                </a>
-            @endif
+            <x-vehicles.plate :vehicle="$appointment->vehicle" />
 
             <span aria-hidden="true">&middot;</span>
             {{ $appointment->vehicle->make }} {{ $appointment->vehicle->model }}

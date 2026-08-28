@@ -4,8 +4,7 @@ namespace App\Http\Controllers\Customers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customers\CustomerIndexRequest;
-use App\Http\Requests\Customers\StoreCustomerRequest;
-use App\Http\Requests\Customers\UpdateCustomerRequest;
+use App\Http\Requests\Customers\CustomerRequest;
 use App\Models\Customer;
 use App\Models\Vehicle;
 use App\Services\CustomerService;
@@ -40,7 +39,7 @@ class CustomerController extends Controller
         return view('pages.customers.create');
     }
 
-    public function store(StoreCustomerRequest $request): RedirectResponse
+    public function store(CustomerRequest $request): RedirectResponse
     {
         Gate::authorize('create', Customer::class);
 
@@ -74,7 +73,7 @@ class CustomerController extends Controller
         return view('pages.customers.edit', ['customer' => $customer]);
     }
 
-    public function update(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
+    public function update(CustomerRequest $request, Customer $customer): RedirectResponse
     {
         Gate::authorize('update', $customer);
 

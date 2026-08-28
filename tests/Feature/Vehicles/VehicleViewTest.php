@@ -45,7 +45,7 @@ class VehicleViewTest extends TestCase
             ->assertOk();
 
         $response->assertSee('Milan Petrović');
-        $response->assertSee(__('vehicles.show.owner_deleted'));
+        $response->assertSee(__('app.deleted'));
         $response->assertDontSee(route('customers.show', $owner), false);
     }
 
@@ -57,7 +57,7 @@ class VehicleViewTest extends TestCase
             ->get(route('vehicles.show', $vehicle))
             ->assertOk()
             ->assertSee(route('customers.show', $vehicle->customer), false)
-            ->assertDontSee(__('vehicles.show.owner_deleted'));
+            ->assertDontSee(__('app.deleted'));
     }
 
     public function test_the_service_history_section_is_present_and_empty(): void

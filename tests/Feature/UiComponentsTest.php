@@ -256,4 +256,44 @@ class UiComponentsTest extends TestCase
         $this->assertStringContainsString('>'.$expected.'<', $html);
         $this->assertStringContainsString('tabular-nums', $html);
     }
+
+    /**
+     * Ten of the twelve call sites omit `method` and inherit this default. If it
+     * ever changed, every one of them would 405 in production against its PATCH
+     * route while the rest of the suite stayed green.
+     */
+    public function test_the_action_form_spoofs_patch_by_default(): void
+    {
+        $html = Blade::render('<x-ui.action-form action="/jobs/1/start">Start</x-ui.action-form>');
+
+        $this->assertStringContainsString('<form method="POST" action="/jobs/1/start">', $html);
+        $this->assertStringContainsString('name="_method" value="PATCH"', $html);
+        $this->assertStringContainsString('name="_token"', $html);
+    }
+
+    public function test_the_action_form_honours_an_explicit_method(): void
+    {
+        $html = Blade::render('<x-ui.action-form action="/customers/1" method="DELETE">Delete</x-ui.action-form>');
+
+        $this->assertStringContainsString('name="_method" value="DELETE"', $html);
+        $this->assertStringNotContainsString('value="PATCH"', $html);
+    }
+
+    public function test_the_action_form_carries_a_confirm_hook_only_when_asked(): void
+    {
+        $bare = Blade::render('<x-ui.action-form action="/jobs/1/start">Start</x-ui.action-form>');
+        $confirmed = Blade::render('<x-ui.action-form action="/jobs/1/cancel" confirm="Sure?">Cancel</x-ui.action-form>');
+
+        $this->assertStringNotContainsString('data-confirm', $bare);
+        $this->assertStringContainsString('data-confirm="Sure?"', $confirmed);
+    }
+
+    public function test_the_action_form_forwards_the_accessible_name_and_variant_to_its_button(): void
+    {
+        $html = Blade::render('<x-ui.action-form action="/customers/1" variant="danger" aria-label="Delete Ana Marić">Delete</x-ui.action-form>');
+
+        $this->assertSame(['bg-danger'], $this->backgroundUtilities(substr($html, strpos($html, '<button'))));
+        $this->assertStringContainsString('aria-label="Delete Ana Marić"', $html);
+        $this->assertSame(1, substr_count($html, 'aria-label='));
+    }
 }

@@ -4,7 +4,7 @@
     {{ trans_choice('appointments.index.count', $appointments->total(), ['count' => $appointments->total()]) }}
 </p>
 
-<div class="mt-2 overflow-x-auto border border-border bg-surface">
+<div class="mt-2 overflow-x-auto border border-border bg-surface md:overflow-x-visible">
     <table role="table" class="w-full text-left">
         <x-appointments.table-head />
 

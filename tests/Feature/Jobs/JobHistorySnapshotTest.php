@@ -8,19 +8,13 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\VehicleService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Tests\Support\AssertsJobLinks;
 use Tests\TestCase;
 
 class JobHistorySnapshotTest extends TestCase
 {
+    use AssertsJobLinks;
     use LazilyRefreshDatabase;
-
-    /**
-     * The full href, so that /jobs/1 never matches /jobs/12.
-     */
-    private function jobLink(Job $job): string
-    {
-        return 'href="'.route('jobs.show', $job).'"';
-    }
 
     public function test_a_sold_car_leaves_its_history_with_the_customer_who_paid_for_it(): void
     {

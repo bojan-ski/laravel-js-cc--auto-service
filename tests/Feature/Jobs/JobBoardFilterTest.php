@@ -8,14 +8,15 @@ use App\Models\Customer;
 use App\Models\Job;
 use App\Models\User;
 use App\Models\Vehicle;
-use App\Services\JobService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\Support\ResolvesJobService;
 use Tests\TestCase;
 
 class JobBoardFilterTest extends TestCase
 {
     use LazilyRefreshDatabase;
+    use ResolvesJobService;
 
     /**
      * @param  array<string, string>  $overrides
@@ -29,11 +30,6 @@ class JobBoardFilterTest extends TestCase
             'sort' => JobIndexRequest::DEFAULT_SORT,
             'direction' => JobIndexRequest::DEFAULT_DIRECTION,
         ], $overrides);
-    }
-
-    private function service(): JobService
-    {
-        return app(JobService::class);
     }
 
     public function test_default_order_is_newest_first(): void

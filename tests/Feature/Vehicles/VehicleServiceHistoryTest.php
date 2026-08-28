@@ -7,19 +7,13 @@ use App\Models\Job;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Tests\Support\AssertsJobLinks;
 use Tests\TestCase;
 
 class VehicleServiceHistoryTest extends TestCase
 {
+    use AssertsJobLinks;
     use LazilyRefreshDatabase;
-
-    /**
-     * The full href, so that /jobs/1 never matches /jobs/12.
-     */
-    private function jobLink(Job $job): string
-    {
-        return 'href="'.route('jobs.show', $job).'"';
-    }
 
     public function test_a_vehicle_never_serviced_shows_the_empty_state(): void
     {

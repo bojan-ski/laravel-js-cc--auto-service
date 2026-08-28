@@ -126,6 +126,27 @@ class CustomerManagementTest extends TestCase
         $this->assertSame('Milan Petrović', $customer->fresh()->name);
     }
 
+    /**
+     * Store and update share one CustomerRequest. Exercising the optional fields
+     * from the update route too is what would fail if it were ever split back
+     * into two classes that then diverged.
+     */
+    public function test_updating_rejects_a_malformed_email_and_over_length_notes(): void
+    {
+        $customer = Customer::factory()->create(['email' => 'milan@example.test']);
+
+        $this->actingAsReceptionist()
+            ->put(route('customers.update', $customer), [
+                'name' => 'Milan Petrović',
+                'phone' => '063 123 456',
+                'email' => 'not-an-address',
+                'notes' => str_repeat('a', 2001),
+            ])
+            ->assertSessionHasErrors(['email', 'notes']);
+
+        $this->assertSame('milan@example.test', $customer->fresh()->email);
+    }
+
     public function test_deleting_soft_deletes_and_removes_no_row(): void
     {
         $customer = Customer::factory()->create();

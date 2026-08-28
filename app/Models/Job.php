@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\JobItemType;
 use App\Enums\JobStatus;
 use App\Exceptions\JobLockedException;
+use App\Models\Concerns\HasHistoricalOwnership;
 use Database\Factories\JobFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -21,6 +22,8 @@ class Job extends Model
 {
     /** @use HasFactory<JobFactory> */
     use HasFactory;
+
+    use HasHistoricalOwnership;
 
     /**
      * @var array<string, mixed>
@@ -46,30 +49,6 @@ class Job extends Model
                 throw new JobLockedException($job, $changes);
             }
         });
-    }
-
-    /**
-     * @return BelongsTo<Customer, $this>
-     */
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class)->withTrashed();
-    }
-
-    /**
-     * @return BelongsTo<Vehicle, $this>
-     */
-    public function vehicle(): BelongsTo
-    {
-        return $this->belongsTo(Vehicle::class)->withTrashed();
-    }
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function createdBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     /**

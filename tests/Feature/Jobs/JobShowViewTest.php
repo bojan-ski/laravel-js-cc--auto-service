@@ -130,10 +130,12 @@ class JobShowViewTest extends TestCase
 
         $this->showPage($job->fresh())
             ->assertOk()
-            ->assertSee($vehicle->registration_plate)
-            ->assertSee($customer->name)
-            ->assertSee('('.__('app.deleted').')')
-            ->assertSee('('.__('vehicles.show.owner_deleted').')')
+            ->assertSeeInOrder([
+                $vehicle->registration_plate,
+                '('.__('app.deleted').')',
+                $customer->name,
+                '('.__('app.deleted').')',
+            ])
             ->assertDontSee('href="'.route('vehicles.show', $vehicle).'"', false)
             ->assertDontSee('href="'.route('customers.show', $customer).'"', false);
     }

@@ -29,7 +29,6 @@ return [
     'show' => [
         'details' => 'Vehicle details',
         'owner' => 'Owner',
-        'owner_deleted' => 'deleted',
         'year' => 'Year',
         'engine' => 'Engine',
         'vin' => 'VIN',

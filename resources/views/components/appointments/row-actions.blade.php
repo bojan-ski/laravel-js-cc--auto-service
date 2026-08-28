@@ -19,14 +19,12 @@
     @endcan
 
     @can('markNoShow', $appointment)
-        <form method="POST" action="{{ route('appointments.no-show', $appointment) }}">
-            @csrf
-            @method('PATCH')
-
-            <x-ui.button variant="secondary" :aria-label="__('appointments.actions.mark_no_show_for', $context)">
-                {{ __('appointments.actions.no_show') }}
-            </x-ui.button>
-        </form>
+        <x-ui.action-form
+            :action="route('appointments.no-show', $appointment)"
+            :aria-label="__('appointments.actions.mark_no_show_for', $context)"
+        >
+            {{ __('appointments.actions.no_show') }}
+        </x-ui.action-form>
     @endcan
 
     @can('update', $appointment)
@@ -40,17 +38,13 @@
     @endcan
 
     @can('cancel', $appointment)
-        <form
-            method="POST"
-            action="{{ route('appointments.cancel', $appointment) }}"
-            data-confirm="{{ __('appointments.actions.confirm_cancel', $context) }}"
+        <x-ui.action-form
+            variant="danger"
+            :action="route('appointments.cancel', $appointment)"
+            :confirm="__('appointments.actions.confirm_cancel', $context)"
+            :aria-label="__('appointments.actions.cancel_for', $context)"
         >
-            @csrf
-            @method('PATCH')
-
-            <x-ui.button variant="danger" :aria-label="__('appointments.actions.cancel_for', $context)">
-                {{ __('appointments.actions.cancel') }}
-            </x-ui.button>
-        </form>
+            {{ __('appointments.actions.cancel') }}
+        </x-ui.action-form>
     @endcan
 </div>

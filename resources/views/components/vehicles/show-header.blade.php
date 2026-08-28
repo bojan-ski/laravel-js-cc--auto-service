@@ -29,22 +29,15 @@
         @endcan
 
         @can('delete', $vehicle)
-            <form
-                method="POST"
-                action="{{ route('vehicles.destroy', $vehicle) }}"
-                data-confirm="{{ __('vehicles.delete.confirm', ['plate' => $vehicle->registration_plate]) }}"
+            <x-ui.action-form
+                method="DELETE"
+                variant="danger"
+                :action="route('vehicles.destroy', $vehicle)"
+                :confirm="__('vehicles.delete.confirm', ['plate' => $vehicle->registration_plate])"
+                :aria-label="__('vehicles.delete.action', ['plate' => $vehicle->registration_plate])"
             >
-                @csrf
-                @method('DELETE')
-
-                <x-ui.button
-                    type="submit"
-                    variant="danger"
-                    :aria-label="__('vehicles.delete.action', ['plate' => $vehicle->registration_plate])"
-                >
-                    {{ __('app.actions.delete') }}
-                </x-ui.button>
-            </form>
+                {{ __('app.actions.delete') }}
+            </x-ui.action-form>
         @endcan
     </div>
 </div>
