@@ -39,6 +39,14 @@ class JobItem extends Model
     }
 
     /**
+     * @return BelongsTo<Part, $this>
+     */
+    public function part(): BelongsTo
+    {
+        return $this->belongsTo(Part::class)->withTrashed();
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo

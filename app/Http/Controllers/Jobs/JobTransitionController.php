@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Job;
 use App\Services\JobService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class JobTransitionController extends Controller
@@ -50,11 +51,11 @@ class JobTransitionController extends Controller
         return $this->redirectToJob($job, 'completed');
     }
 
-    public function cancel(Job $job): RedirectResponse
+    public function cancel(Request $request, Job $job): RedirectResponse
     {
         Gate::authorize('cancel', $job);
 
-        $this->jobs->cancel($job);
+        $this->jobs->cancel($job, $request->user());
 
         return $this->redirectToJob($job, 'cancelled');
     }

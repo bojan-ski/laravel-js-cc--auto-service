@@ -4,6 +4,7 @@ namespace Tests\Feature\Jobs;
 
 use App\Models\Job;
 use App\Models\JobItem;
+use App\Models\Part;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -179,14 +180,50 @@ class JobShowLineItemsViewTest extends TestCase
         $this->assertCount(1, $jobSelects, implode("\n", array_column($queries, 'query')));
     }
 
-    private function queriesForJobWith(int $lines): int
+    public function test_the_part_picker_costs_exactly_one_extra_query_and_only_when_shown(): void
+    {
+        Part::factory()->count(4)->create();
+
+        $plain = $this->queriesForJobWith(3);
+        $addingLabor = $this->queriesForJobWith(3, ['add' => 'labor']);
+        $addingParts = $this->queriesForJobWith(3, ['add' => 'part']);
+
+        $this->assertSame($plain, $addingLabor, 'The labor form is the default; it must cost nothing extra.');
+        $this->assertSame($plain + 1, $addingParts);
+    }
+
+    public function test_the_picker_query_is_skipped_when_the_viewer_may_not_add_lines(): void
+    {
+        Part::factory()->count(4)->create();
+
+        $job = Job::factory()->completed()->create();
+        JobItem::factory()->forJob($job)->create();
+
+        DB::enableQueryLog();
+        $this->actingAs(User::factory()->receptionist()->create())
+            ->get(route('jobs.show', ['job' => $job, 'add' => 'part']))
+            ->assertOk();
+        $queries = array_column(DB::getQueryLog(), 'query');
+        DB::disableQueryLog();
+        DB::flushQueryLog();
+
+        $this->assertSame([], array_values(array_filter(
+            $queries,
+            fn (string $query): bool => str_contains($query, 'from `parts`'),
+        )));
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     */
+    private function queriesForJobWith(int $lines, array $query = []): int
     {
         $job = Job::factory()->inProgress()->create();
         JobItem::factory()->forJob($job)->count($lines)->create();
 
         DB::enableQueryLog();
         $this->actingAs(User::factory()->receptionist()->create())
-            ->get(route('jobs.show', $job))
+            ->get(route('jobs.show', ['job' => $job, ...$query]))
             ->assertOk();
         $count = count(DB::getQueryLog());
         DB::disableQueryLog();

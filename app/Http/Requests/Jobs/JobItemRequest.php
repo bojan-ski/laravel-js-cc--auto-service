@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Jobs;
 
+use App\Enums\JobItemType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -22,16 +23,37 @@ abstract class JobItemRequest extends FormRequest
     {
         return [
             'description' => ['required', 'string', 'max:255'],
-            'quantity' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:999999.99'],
+            'quantity' => JobItemType::Labor->quantityRules(),
             'user_id' => ['required', 'integer', Rule::exists('users', 'id')->whereNull('deleted_at')],
-            'unit_price' => [
-                Rule::prohibitedIf(fn (): bool => ! $this->user()->isFrontOffice()),
-                'nullable',
-                'numeric',
-                'decimal:0,2',
-                'min:0',
-                'max:99999999.99',
-            ],
+            'unit_price' => $this->unitPriceRules(),
+        ];
+    }
+
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    protected function partLineRules(): array
+    {
+        return [
+            'description' => ['nullable', 'string', 'max:255'],
+            'quantity' => JobItemType::Part->quantityRules(),
+            'user_id' => ['nullable', 'integer', Rule::exists('users', 'id')->whereNull('deleted_at')],
+            'unit_price' => $this->unitPriceRules(),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    protected function unitPriceRules(): array
+    {
+        return [
+            Rule::prohibitedIf(fn (): bool => ! $this->user()->isFrontOffice()),
+            'nullable',
+            'numeric',
+            'decimal:0,2',
+            'min:0',
+            'max:99999999.99',
         ];
     }
 

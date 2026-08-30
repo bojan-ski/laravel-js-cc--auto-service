@@ -2,11 +2,13 @@
 
 namespace Tests\Feature\Parts;
 
+use App\Enums\StockMovementReason;
 use App\Models\Job;
 use App\Models\JobItem;
 use App\Models\Part;
 use App\Models\StockMovement;
 use App\Models\User;
+use App\Services\JobItemService;
 use App\Services\StockService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -145,6 +147,45 @@ class PartMovementHistoryTest extends TestCase
 
         $this->assertStringContainsString(__('parts.reasons.job_use'), $row);
         $this->assertStringNotContainsString('<a ', $row);
+    }
+
+    /**
+     * The two tests above build their fixtures with StockMovementFactory. These two
+     * drive the real path instead: until spec 16 nothing in the application wrote a
+     * movement carrying a job_item_id, so the link had never been exercised end to end.
+     */
+    public function test_a_movement_written_by_adding_a_part_line_links_to_its_job(): void
+    {
+        $actor = User::factory()->receptionist()->create();
+        $part = Part::factory()->create();
+        $job = Job::factory()->inProgress()->create();
+
+        app(StockService::class)->record($part, 10, StockMovementReason::Restock, $actor);
+        app(JobItemService::class)->addPart($job, $part, $actor, ['quantity' => 2]);
+
+        $row = $this->rows($this->section($part))[0];
+
+        $this->assertStringContainsString(__('parts.reasons.job_use'), $row);
+        $this->assertStringContainsString(route('jobs.show', $job).'"', $row);
+        $this->assertStringContainsString($job->reference, $row);
+    }
+
+    public function test_a_return_outlives_the_line_deletion_that_caused_it_and_renders_without_a_link(): void
+    {
+        $actor = User::factory()->receptionist()->create();
+        $part = Part::factory()->create();
+        $job = Job::factory()->inProgress()->create();
+
+        app(StockService::class)->record($part, 10, StockMovementReason::Restock, $actor);
+        $item = app(JobItemService::class)->addPart($job, $part, $actor, ['quantity' => 2]);
+        app(JobItemService::class)->delete($item, $actor);
+
+        $rows = $this->rows($this->section($part));
+
+        $this->assertCount(3, $rows);
+        $this->assertStringContainsString(__('parts.reasons.job_return'), $rows[0]);
+        $this->assertStringNotContainsString('<a ', $rows[0]);
+        $this->assertStringNotContainsString('<a ', $rows[1]);
     }
 
     public function test_a_note_renders_beneath_its_reason_inside_the_same_row(): void

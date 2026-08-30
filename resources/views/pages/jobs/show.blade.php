@@ -12,7 +12,10 @@
                 :show-pricing="$showPricing"
                 :subtotal="$subtotal"
                 :editing="$editing"
+                :adding="$adding"
+                :show-part-form="$showPartForm"
                 :user-options="$userOptions"
+                :part-options="$partOptions"
                 :default-rate="$defaultRate"
             />
 

@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\JobItemType;
 use App\Models\Job;
 use App\Models\JobItem;
+use App\Models\Part;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -45,7 +46,18 @@ class JobItemFactory extends Factory
     {
         return $this->state(fn () => [
             'type' => JobItemType::Part,
+            'part_id' => Part::factory(),
             'user_id' => null,
+            'quantity' => 1,
+        ]);
+    }
+
+    public function forPart(Part $part): static
+    {
+        return $this->state(fn () => [
+            'type' => JobItemType::Part,
+            'part_id' => $part->getKey(),
+            'unit_price' => $part->unit_price,
         ]);
     }
 }

@@ -35,6 +35,14 @@ return [
         'negative' => 'Negative',
     ],
 
+    'picker' => [
+        'placeholder' => 'Select a part',
+        'option' => ':sku · :name · :stock in stock',
+        'shelf' => ':label · shelf :location',
+        'low_stock' => ':label · LOW',
+        'out_of_stock' => ':label · OUT OF STOCK',
+    ],
+
     'reasons' => [
         'job_use' => 'Job use',
         'job_return' => 'Job return',

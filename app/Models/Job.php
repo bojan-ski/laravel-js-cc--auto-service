@@ -75,6 +75,14 @@ class Job extends Model
         return $this->hasMany(JobItem::class)->where('type', JobItemType::Labor);
     }
 
+    /**
+     * @return HasMany<JobItem, $this>
+     */
+    public function partItems(): HasMany
+    {
+        return $this->hasMany(JobItem::class)->where('type', JobItemType::Part)->orderBy('id');
+    }
+
     #[Scope]
     protected function joinedForBoard(Builder $query): void
     {
@@ -152,6 +160,13 @@ class Job extends Model
         return $this->relationLoaded('items')
             ? $this->items->isNotEmpty()
             : $this->items()->exists();
+    }
+
+    public function partLineCount(): int
+    {
+        return $this->relationLoaded('items')
+            ? $this->items->where('type', JobItemType::Part)->count()
+            : $this->partItems()->count();
     }
 
     public function subtotal(): string

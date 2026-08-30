@@ -11,6 +11,7 @@ use App\Models\Job;
 use App\Models\JobItem;
 use App\Models\Vehicle;
 use App\Services\JobService;
+use App\Services\PartService;
 use App\Services\UserService;
 use App\Services\VehicleService;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -25,6 +26,7 @@ class JobController extends Controller
         private JobService $jobs,
         private VehicleService $vehicles,
         private UserService $users,
+        private PartService $parts,
     ) {}
 
     public function index(JobIndexRequest $request): View
@@ -85,13 +87,18 @@ class JobController extends Controller
         $job->items->each(fn (JobItem $item) => $item->setRelation('job', $job));
 
         $editing = $this->editableItem($job, $request->editingItemId());
+        $adding = $request->addingType();
+        $showPartForm = $editing === null && $adding === 'part' && Gate::allows('createItem', $job);
 
         return view('pages.jobs.show', [
             'job' => $job,
             'showPricing' => $showPricing,
             'subtotal' => $showPricing ? $job->subtotal() : null,
             'editing' => $editing,
+            'adding' => $adding,
+            'showPartForm' => $showPartForm,
             'userOptions' => $user->isFrontOffice() ? $this->users->pickerOptions() : [],
+            'partOptions' => $showPartForm ? $this->parts->pickerOptions($user) : [],
             'defaultRate' => $showPricing ? (string) config('shop.labor_rate') : null,
         ]);
     }

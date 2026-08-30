@@ -142,7 +142,7 @@ class JobItemServiceTest extends TestCase
     {
         $item = JobItem::factory()->create();
 
-        $this->service()->delete($item);
+        $this->service()->delete($item, User::factory()->receptionist()->create());
 
         $this->assertSame(0, JobItem::query()->count());
     }
