@@ -100,12 +100,25 @@ class JobBoardSortTest extends TestCase
 
     public function test_sort_controls_preserve_status_and_search_and_drop_the_page(): void
     {
-        Job::factory()->count(26)->received()->create();
+        $owner = Customer::factory()->create(['name' => 'Alexa Nox']);
+
+        Job::factory()
+            ->count(26)
+            ->received()
+            ->for(Vehicle::factory()->for($owner)->create())
+            ->create();
 
         $response = $this->actingAs(User::factory()->mechanic()->create())
             ->get(route('jobs.index', ['status' => 'received', 'search' => 'x', 'page' => 2]));
 
         $response->assertOk();
+
+        $this->assertSame(
+            26,
+            $response->viewData('jobs')->total(),
+            'The sort headers only render alongside a table, so every seeded job must match the search term.'
+        );
+
         $html = $response->getContent();
 
         $this->assertMatchesRegularExpression('/href="[^"]*status=received[^"]*sort=plate[^"]*direction=asc"/', $html);
