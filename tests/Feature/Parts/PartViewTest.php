@@ -128,7 +128,7 @@ class PartViewTest extends TestCase
         $this->assertSame($negative, str_contains($row, '>'.__('parts.stock.negative').'<'));
     }
 
-    public function test_the_movements_section_renders_a_heading_and_empty_state_with_no_controls(): void
+    public function test_a_part_with_no_movements_shows_the_empty_state_beside_the_adjust_control(): void
     {
         $part = Part::factory()->create();
 
@@ -141,9 +141,9 @@ class PartViewTest extends TestCase
 
         $section = $this->movementsSection($html);
 
+        $this->assertStringContainsString(route('parts.adjust.create', $part), $section);
+        $this->assertStringNotContainsString('<table', $section);
         $this->assertStringNotContainsString('<form', $section);
-        $this->assertStringNotContainsString('<button', $section);
-        $this->assertStringNotContainsString('<a ', $section);
     }
 
     public function test_the_delete_confirmation_warns_that_the_sku_stays_reserved(): void

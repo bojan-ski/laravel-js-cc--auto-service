@@ -64,6 +64,14 @@ class PartPolicy
     }
 
     /**
+     * Determine whether the user can record a stock movement by hand.
+     */
+    public function adjustStock(User $user): bool
+    {
+        return $user->isFrontOffice();
+    }
+
+    /**
      * Determine whether the user can see the selling price.
      */
     public function viewPricing(User $user): bool

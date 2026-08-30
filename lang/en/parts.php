@@ -35,6 +35,13 @@ return [
         'negative' => 'Negative',
     ],
 
+    'reasons' => [
+        'job_use' => 'Job use',
+        'job_return' => 'Job return',
+        'restock' => 'Restock',
+        'manual_adjustment' => 'Manual adjustment',
+    ],
+
     'show' => [
         'details' => 'Part details',
         'stock' => 'Stock',
@@ -45,6 +52,31 @@ return [
         'description' => 'Notes',
         'movements' => 'Stock movements',
         'movements_empty' => 'No movements recorded yet.',
+    ],
+
+    'movements' => [
+        'headers' => [
+            'when' => 'When',
+            'change' => 'Change',
+            'reason' => 'Reason',
+            'who' => 'Recorded by',
+        ],
+        'showing' => 'Showing :shown of :total movements',
+    ],
+
+    'adjust' => [
+        'title' => 'Adjust stock · :sku',
+        'action' => 'Adjust',
+        'action_for' => 'Adjust stock for :sku',
+        'current' => 'Current stock',
+        'reason_label' => 'What kind of movement is this?',
+        'quantity' => 'Quantity',
+        'note' => 'Note',
+        'submit' => 'Record',
+        'help' => [
+            'restock' => 'Stock arriving. The quantity must be positive.',
+            'manual_adjustment' => 'A correction after counting the shelf. It may be negative, and the note is required to say why.',
+        ],
     ],
 
     'create' => [
@@ -106,5 +138,7 @@ return [
         'updated' => ':sku has been updated.',
         'deleted' => ':sku has been deleted. Its SKU stays reserved.',
         'restored' => ':sku has been restored.',
+        'stock_recorded' => ':sku: :change recorded. Stock is now :balance.',
+        'stock_negative' => 'Stock for :sku is now :balance, below zero. The movement was saved anyway.',
     ],
 ];

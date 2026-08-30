@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Job;
 use App\Models\Part;
+use App\Models\StockMovement;
 use App\Models\User;
 use App\Models\Vehicle;
 use Carbon\CarbonImmutable;
@@ -41,7 +42,7 @@ class TableHeaderAccessibilityTest extends TestCase
         Appointment::factory()->for($customer)->for($vehicle)->create([
             'scheduled_at' => CarbonImmutable::today()->setTime(9, 0),
         ]);
-        Part::factory()->inStock()->create();
+        StockMovement::factory()->forPart(Part::factory()->inStock()->create())->manualAdjustment()->create();
 
         return $customer;
     }
@@ -58,6 +59,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'customer detail' => ['customers.show'],
             'vehicle detail' => ['vehicles.show'],
             'parts catalogue' => ['parts.index'],
+            'part detail' => ['parts.show'],
         ];
     }
 
@@ -69,6 +71,7 @@ class TableHeaderAccessibilityTest extends TestCase
         $url = match ($route) {
             'customers.show' => route($route, $customer),
             'vehicles.show' => route($route, $customer->vehicles()->sole()),
+            'parts.show' => route($route, Part::query()->sole()),
             default => route($route),
         };
 
@@ -94,6 +97,7 @@ class TableHeaderAccessibilityTest extends TestCase
         $url = match ($route) {
             'customers.show' => route($route, $customer),
             'vehicles.show' => route($route, $customer->vehicles()->sole()),
+            'parts.show' => route($route, Part::query()->sole()),
             default => route($route),
         };
 

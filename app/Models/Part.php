@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['sku', 'name', 'description', 'unit_price', 'cost_price', 'reorder_level', 'location'])]
@@ -36,6 +37,14 @@ class Part extends Model
      * @var list<string>
      */
     public const array PRICE_COLUMNS = ['unit_price', 'cost_price'];
+
+    /**
+     * @return HasMany<StockMovement, $this>
+     */
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class)->orderByDesc('id');
+    }
 
     #[Scope]
     protected function visibleTo(Builder $query, User $user): void

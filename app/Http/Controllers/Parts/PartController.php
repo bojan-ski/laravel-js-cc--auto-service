@@ -8,6 +8,7 @@ use App\Http\Requests\Parts\PartRequest;
 use App\Models\Part;
 use App\Models\User;
 use App\Services\PartService;
+use App\Services\StockService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +17,10 @@ use Illuminate\View\View;
 
 class PartController extends Controller
 {
-    public function __construct(private PartService $parts) {}
+    public function __construct(
+        private PartService $parts,
+        private StockService $stock,
+    ) {}
 
     public function index(PartIndexRequest $request): View
     {
@@ -56,7 +60,13 @@ class PartController extends Controller
     {
         Gate::authorize('view', $part);
 
-        return view('pages.parts.show', ['part' => $this->visible($part, $request->user())]);
+        $visible = $this->visible($part, $request->user());
+
+        return view('pages.parts.show', [
+            'part' => $visible,
+            'movements' => $this->stock->historyFor($visible),
+            'movementTotal' => $this->stock->movementCountFor($visible),
+        ]);
     }
 
     public function edit(Request $request, Part $part): View

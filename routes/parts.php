@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Parts\PartController;
+use App\Http\Controllers\Parts\StockAdjustmentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/parts', [PartController::class, 'index'])->name('parts.index');
@@ -11,3 +12,5 @@ Route::get('/parts/{part}/edit', [PartController::class, 'edit'])->name('parts.e
 Route::put('/parts/{part}', [PartController::class, 'update'])->name('parts.update');
 Route::delete('/parts/{part}', [PartController::class, 'destroy'])->name('parts.destroy');
 Route::patch('/parts/{part}/restore', [PartController::class, 'restore'])->withTrashed()->name('parts.restore');
+Route::get('/parts/{part}/adjust', [StockAdjustmentController::class, 'create'])->name('parts.adjust.create');
+Route::post('/parts/{part}/adjust', [StockAdjustmentController::class, 'store'])->name('parts.adjust.store');
