@@ -20,6 +20,9 @@ class StatusBadge extends Component
         'status-in-progress' => 'bg-status-in-progress/10 text-status-in-progress',
         'status-awaiting-parts' => 'bg-status-awaiting-parts/10 text-status-awaiting-parts',
         'status-completed' => 'bg-status-completed/10 text-status-completed',
+        'status-unpaid' => 'bg-status-unpaid/10 text-status-unpaid',
+        'status-paid' => 'bg-status-paid/10 text-status-paid',
+        'status-void' => 'bg-status-void/10 text-status-void',
     ];
 
     public function __construct(

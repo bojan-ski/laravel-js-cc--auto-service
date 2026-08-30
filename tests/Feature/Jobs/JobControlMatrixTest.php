@@ -130,6 +130,42 @@ class JobControlMatrixTest extends TestCase
         $this->assertSame($status, $job->refresh()->status);
     }
 
+    /**
+     * The Issue control is a GET link rather than one of the six PATCH forms, so
+     * it needs its own row. It appears on a completed job that carries a line
+     * item and holds no invoice, and only for front office.
+     *
+     * @return array<string, array{0: string, 1: string, 2: bool}>
+     */
+    public static function issueProvider(): array
+    {
+        $cases = [];
+
+        foreach (self::matrixProvider() as $name => [$state, $role]) {
+            $cases[$name] = [$state, $role, $state === 'completed' && $role !== 'mechanic'];
+        }
+
+        return $cases;
+    }
+
+    #[DataProvider('issueProvider')]
+    public function test_the_issue_control_appears_exactly_when_the_job_may_be_invoiced(string $state, string $role, bool $expected): void
+    {
+        $job = $this->jobWithLineItem($state);
+        $user = User::factory()->{$role}()->create();
+        $link = 'href="'.route('jobs.invoice.create', $job).'"';
+
+        $response = $this->actingAs($user)->get(route('jobs.show', $job))->assertOk();
+
+        $expected
+            ? $response->assertSee($link, false)
+            : $response->assertDontSee($link, false);
+
+        $this->actingAs($user)
+            ->get(route('jobs.invoice.create', $job))
+            ->assertStatus($expected ? 200 : 403);
+    }
+
     public function test_a_mechanic_never_sees_cancel_or_reopen(): void
     {
         $mechanic = User::factory()->mechanic()->create();

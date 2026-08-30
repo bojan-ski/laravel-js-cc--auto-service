@@ -94,4 +94,12 @@ class JobPolicy
     {
         return $user->isFrontOffice() && $job->canReopen();
     }
+
+    /**
+     * Determine whether the user can issue an invoice for the job.
+     */
+    public function issue(User $user, Job $job): bool
+    {
+        return $user->isFrontOffice() && $job->canBeInvoiced();
+    }
 }

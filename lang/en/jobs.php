@@ -91,6 +91,7 @@ return [
 
         'lock' => [
             'title' => 'Locked — invoiced :date',
+            'title_with_number' => 'Locked — invoice :number issued :date',
             'body' => 'Line items are read-only. An admin must void the invoice to reopen this job.',
         ],
     ],
@@ -190,6 +191,8 @@ return [
         'complete_for' => 'Complete job :reference for :plate',
         'cancel_for' => 'Cancel job :reference for :plate',
         'reopen_for' => 'Reopen job :reference for :plate',
+        'issue' => 'Issue invoice',
+        'issue_for' => 'Issue invoice for job :reference for :plate',
         'confirm_cancel' => 'Cancel job :reference for :plate? Cancelling is permanent — a cancelled job cannot be reopened.',
         'confirm_cancel_with_parts' => '{1} Cancel job :reference for :plate? One part line will be returned to stock. Cancelling is permanent — a cancelled job cannot be reopened.|[2,*] Cancel job :reference for :plate? :count part lines will be returned to stock. Cancelling is permanent — a cancelled job cannot be reopened.',
     ],
