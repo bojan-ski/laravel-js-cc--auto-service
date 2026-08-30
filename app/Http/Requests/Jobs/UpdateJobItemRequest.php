@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Jobs;
 
+use App\Enums\JobItemType;
 use App\Models\JobItem;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -14,9 +15,7 @@ class UpdateJobItemRequest extends JobItemRequest
      */
     public function rules(): array
     {
-        $item = $this->route('jobItem');
-
-        if (! $item instanceof JobItem || ! $item->isPart()) {
+        if ($this->lineType() !== JobItemType::Part) {
             return parent::rules();
         }
 
@@ -24,5 +23,14 @@ class UpdateJobItemRequest extends JobItemRequest
             'part_id' => ['prohibited'],
             ...$this->partLineRules(),
         ];
+    }
+
+    /**
+     * Read as a scalar rather than binding the model: a hydrated JobItem carries
+     * unit_price, and this request is reached by mechanics.
+     */
+    private function lineType(): ?JobItemType
+    {
+        return JobItem::query()->whereKey($this->route('jobItem'))->value('type');
     }
 }
