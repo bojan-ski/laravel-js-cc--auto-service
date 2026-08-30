@@ -12,7 +12,7 @@ class NavItemsTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_items_are_jobs_appointments_customers_in_that_order(): void
+    public function test_items_are_jobs_appointments_customers_parts_in_that_order(): void
     {
         $this->actingAs(User::factory()->create())
             ->get('/')
@@ -21,6 +21,7 @@ class NavItemsTest extends TestCase
                 'href="'.route('jobs.index').'"',
                 'href="'.route('appointments.index').'"',
                 'href="'.route('customers.index').'"',
+                'href="'.route('parts.index').'"',
             ], false);
     }
 
@@ -30,8 +31,22 @@ class NavItemsTest extends TestCase
 
         $labels = array_column((new Nav)->items, 'label');
 
-        $this->assertSame([__('app.nav.jobs'), __('app.nav.appointments'), __('app.nav.customers')], $labels);
+        $this->assertSame([
+            __('app.nav.jobs'),
+            __('app.nav.appointments'),
+            __('app.nav.customers'),
+            __('app.nav.parts'),
+        ], $labels);
         $this->assertFalse(Lang::has('app.nav.dashboard'));
+    }
+
+    public function test_the_parts_item_is_current_on_every_parts_route(): void
+    {
+        $this->actingAs(User::factory()->receptionist()->create())
+            ->get(route('parts.create'))
+            ->assertOk()
+            ->assertSee('href="'.route('parts.index').'"', false)
+            ->assertSee('aria-current="page"', false);
     }
 
     public function test_the_wordmark_is_a_link_to_the_dashboard(): void

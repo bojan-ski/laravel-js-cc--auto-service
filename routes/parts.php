@@ -1,0 +1,13 @@
+<?php
+
+use App\Http\Controllers\Parts\PartController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/parts', [PartController::class, 'index'])->name('parts.index');
+Route::get('/parts/create', [PartController::class, 'create'])->name('parts.create');
+Route::post('/parts', [PartController::class, 'store'])->name('parts.store');
+Route::get('/parts/{part}', [PartController::class, 'show'])->withTrashed()->name('parts.show');
+Route::get('/parts/{part}/edit', [PartController::class, 'edit'])->name('parts.edit');
+Route::put('/parts/{part}', [PartController::class, 'update'])->name('parts.update');
+Route::delete('/parts/{part}', [PartController::class, 'destroy'])->name('parts.destroy');
+Route::patch('/parts/{part}/restore', [PartController::class, 'restore'])->withTrashed()->name('parts.restore');
