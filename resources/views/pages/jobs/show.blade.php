@@ -1,7 +1,7 @@
 <x-layouts.app :title="$job->reference">
     <x-jobs.show-header :job="$job" />
 
-    <x-jobs.actions :job="$job" />
+    <x-jobs.actions :job="$job" :invoice="$invoice" />
 
     <div class="mt-4 grid items-start gap-4 lg:grid-cols-2">
         <x-jobs.details :job="$job" />

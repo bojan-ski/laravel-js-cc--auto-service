@@ -1,4 +1,4 @@
-@props(['job'])
+@props(['job', 'invoiceNumber' => null])
 
 @if ($job->isLocked())
     <div class="mt-4 flex gap-3 border border-border bg-surface-muted p-4">
@@ -6,7 +6,14 @@
 
         <div>
             <p class="font-semibold">
-                {{ __('jobs.show.lock.title', ['date' => $job->locked_at->isoFormat('D MMM')]) }}
+                @if ($invoiceNumber)
+                    {{ __('jobs.show.lock.title_with_number', [
+                        'number' => $invoiceNumber,
+                        'date' => $job->locked_at->isoFormat('D MMM'),
+                    ]) }}
+                @else
+                    {{ __('jobs.show.lock.title', ['date' => $job->locked_at->isoFormat('D MMM')]) }}
+                @endif
             </p>
 
             <p class="mt-1 text-sm text-text-muted">{{ __('jobs.show.lock.body') }}</p>

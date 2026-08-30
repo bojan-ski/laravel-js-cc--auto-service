@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Jobs\JobController;
+use App\Http\Controllers\Jobs\JobInvoiceController;
 use App\Http\Controllers\Jobs\JobItemController;
 use App\Http\Controllers\Jobs\JobPartLineController;
 use App\Http\Controllers\Jobs\JobTransitionController;
@@ -17,6 +18,9 @@ Route::patch('/jobs/{job}/resume', [JobTransitionController::class, 'resume'])->
 Route::patch('/jobs/{job}/complete', [JobTransitionController::class, 'complete'])->name('jobs.complete');
 Route::patch('/jobs/{job}/cancel', [JobTransitionController::class, 'cancel'])->name('jobs.cancel');
 Route::patch('/jobs/{job}/reopen', [JobTransitionController::class, 'reopen'])->name('jobs.reopen');
+
+Route::get('/jobs/{job}/invoice/create', [JobInvoiceController::class, 'create'])->name('jobs.invoice.create');
+Route::post('/jobs/{job}/invoice', [JobInvoiceController::class, 'store'])->name('jobs.invoice.store');
 
 Route::post('/jobs/{job}/items', [JobItemController::class, 'store'])->name('jobs.items.store');
 Route::post('/jobs/{job}/parts', [JobPartLineController::class, 'store'])->name('jobs.parts.store');

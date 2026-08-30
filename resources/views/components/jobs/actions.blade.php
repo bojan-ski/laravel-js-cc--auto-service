@@ -1,4 +1,4 @@
-@props(['job'])
+@props(['job', 'invoice' => null])
 
 @php
     $context = [
@@ -13,9 +13,9 @@
         : __('jobs.actions.confirm_cancel', $context);
 @endphp
 
-<x-jobs.lock-banner :job="$job" />
+<x-jobs.lock-banner :job="$job" :invoice-number="$invoice?->number" />
 
-@canany(['start', 'pause', 'resume', 'complete', 'cancel', 'reopen'], $job)
+@canany(['start', 'pause', 'resume', 'complete', 'cancel', 'reopen', 'issue'], $job)
     <div class="mt-4 flex flex-wrap gap-2">
         @can('start', $job)
             <x-ui.action-form
@@ -51,6 +51,15 @@
             >
                 {{ __('jobs.actions.complete') }}
             </x-ui.action-form>
+        @endcan
+
+        @can('issue', $job)
+            <x-ui.button
+                :href="route('jobs.invoice.create', $job)"
+                :aria-label="__('jobs.actions.issue_for', $context)"
+            >
+                {{ __('jobs.actions.issue') }}
+            </x-ui.button>
         @endcan
 
         @can('reopen', $job)

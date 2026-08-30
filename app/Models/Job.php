@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InvoiceStatus;
 use App\Enums\JobItemType;
 use App\Enums\JobStatus;
 use App\Exceptions\JobLockedException;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -65,6 +67,22 @@ class Job extends Model
     public function items(): HasMany
     {
         return $this->hasMany(JobItem::class);
+    }
+
+    /**
+     * @return HasMany<Invoice, $this>
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * @return HasOne<Invoice, $this>
+     */
+    public function activeInvoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class)->where('status', '!=', InvoiceStatus::Void->value);
     }
 
     /**
@@ -146,6 +164,19 @@ class Job extends Model
     public function canReopen(): bool
     {
         return $this->status === JobStatus::Completed && ! $this->isLocked();
+    }
+
+    public function canBeInvoiced(): bool
+    {
+        return $this->status === JobStatus::Completed
+            && ! $this->isLocked()
+            && $this->hasLineItems()
+            && ! $this->hasActiveInvoice();
+    }
+
+    public function hasActiveInvoice(): bool
+    {
+        return $this->activeInvoice()->exists();
     }
 
     public function needsLineItemsToComplete(): bool

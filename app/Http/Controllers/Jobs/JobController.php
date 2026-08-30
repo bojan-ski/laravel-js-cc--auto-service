@@ -7,6 +7,7 @@ use App\Http\Requests\Jobs\JobIndexRequest;
 use App\Http\Requests\Jobs\JobShowRequest;
 use App\Http\Requests\Jobs\StoreJobRequest;
 use App\Models\Appointment;
+use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobItem;
 use App\Models\Vehicle;
@@ -92,6 +93,7 @@ class JobController extends Controller
 
         return view('pages.jobs.show', [
             'job' => $job,
+            'invoice' => $this->activeInvoiceFor($job),
             'showPricing' => $showPricing,
             'subtotal' => $showPricing ? $job->subtotal() : null,
             'editing' => $editing,
@@ -101,6 +103,13 @@ class JobController extends Controller
             'partOptions' => $showPartForm ? $this->parts->pickerOptions($user) : [],
             'defaultRate' => $showPricing ? (string) config('shop.labor_rate') : null,
         ]);
+    }
+
+    private function activeInvoiceFor(Job $job): ?Invoice
+    {
+        return $job->isLocked() && Gate::allows('viewAny', Invoice::class)
+            ? $job->activeInvoice()->first()
+            : null;
     }
 
     private function editableItem(Job $job, ?int $itemId): ?JobItem
