@@ -30,6 +30,7 @@ class Nav extends Component
             ['label' => __('app.nav.jobs'), 'route' => 'jobs.index', 'pattern' => 'jobs.*'],
             ['label' => __('app.nav.appointments'), 'route' => 'appointments.index', 'pattern' => 'appointments.*'],
             ['label' => __('app.nav.customers'), 'route' => 'customers.index', 'pattern' => 'customers.*'],
+            ['label' => __('app.nav.parts'), 'route' => 'parts.index', 'pattern' => 'parts.*'],
         ];
 
         return array_map(fn (array $destination): array => [

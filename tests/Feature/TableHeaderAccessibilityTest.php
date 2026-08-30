@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Job;
+use App\Models\Part;
 use App\Models\User;
 use App\Models\Vehicle;
 use Carbon\CarbonImmutable;
@@ -40,6 +41,7 @@ class TableHeaderAccessibilityTest extends TestCase
         Appointment::factory()->for($customer)->for($vehicle)->create([
             'scheduled_at' => CarbonImmutable::today()->setTime(9, 0),
         ]);
+        Part::factory()->inStock()->create();
 
         return $customer;
     }
@@ -55,6 +57,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'appointments index' => ['appointments.index'],
             'customer detail' => ['customers.show'],
             'vehicle detail' => ['vehicles.show'],
+            'parts catalogue' => ['parts.index'],
         ];
     }
 
@@ -127,6 +130,7 @@ class TableHeaderAccessibilityTest extends TestCase
         return [
             'jobs board' => ['jobs.index'],
             'appointments index' => ['appointments.index'],
+            'parts catalogue' => ['parts.index'],
         ];
     }
 

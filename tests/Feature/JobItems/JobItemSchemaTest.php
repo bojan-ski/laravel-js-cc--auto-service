@@ -54,14 +54,15 @@ class JobItemSchemaTest extends TestCase
         }
     }
 
-    public function test_part_id_ships_without_its_foreign_key_until_the_parts_table_exists(): void
+    public function test_part_id_gained_its_deferred_foreign_key_once_parts_existed(): void
     {
-        $this->assertFalse(Schema::hasTable('parts'));
+        $this->assertTrue(Schema::hasTable('parts'));
 
-        $this->assertFalse(
+        $this->assertTrue(
             collect(Schema::getForeignKeys('job_items'))
-                ->contains(fn (array $key): bool => $key['columns'] === ['part_id']),
-            'part_id must stay unconstrained until spec 14 creates the parts table.'
+                ->contains(fn (array $key): bool => $key['columns'] === ['part_id']
+                    && $key['foreign_table'] === 'parts'),
+            'part_id must reference parts now that spec 14 has created the table.'
         );
     }
 

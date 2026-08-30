@@ -9,6 +9,7 @@ return [
         'jobs' => 'Jobs',
         'appointments' => 'Appointments',
         'customers' => 'Customers',
+        'parts' => 'Parts',
         'toggle' => 'Menu',
         'user_menu' => 'Account menu',
         'sign_out' => 'Sign out',
