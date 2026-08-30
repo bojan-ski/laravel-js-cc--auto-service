@@ -30,23 +30,32 @@ class JobItemController extends Controller
         return $this->redirectToJob($job->getKey(), 'added');
     }
 
-    public function update(UpdateJobItemRequest $request, JobItem $jobItem): RedirectResponse
+    public function update(UpdateJobItemRequest $request, int $jobItem): RedirectResponse
     {
-        Gate::authorize('update', $jobItem);
+        $item = $this->visibleItem($request, $jobItem);
 
-        $item = $this->items->update($jobItem, $request->user(), $request->validated());
+        Gate::authorize('update', $item);
+
+        $item = $this->items->update($item, $request->user(), $request->validated());
 
         return $this->redirectToJob($item->job_id, 'updated', $this->stockWarning($item));
     }
 
-    public function destroy(Request $request, JobItem $jobItem): RedirectResponse
+    public function destroy(Request $request, int $jobItem): RedirectResponse
     {
-        Gate::authorize('delete', $jobItem);
+        $item = $this->visibleItem($request, $jobItem);
 
-        $jobId = $jobItem->job_id;
-        $this->items->delete($jobItem, $request->user());
+        Gate::authorize('delete', $item);
+
+        $jobId = $item->job_id;
+        $this->items->delete($item, $request->user());
 
         return $this->redirectToJob($jobId, 'deleted');
+    }
+
+    private function visibleItem(Request $request, int $jobItem): JobItem
+    {
+        return JobItem::query()->visibleTo($request->user())->whereKey($jobItem)->firstOrFail();
     }
 
     /**
