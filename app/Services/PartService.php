@@ -45,6 +45,39 @@ class PartService
     }
 
     /**
+     * @return array<int, string>
+     */
+    public function pickerOptions(User $user): array
+    {
+        return Part::query()
+            ->visibleTo($user)
+            ->orderBy('name')
+            ->orderBy('id')
+            ->get()
+            ->mapWithKeys(fn (Part $part): array => [$part->getKey() => $this->pickerLabel($part)])
+            ->all();
+    }
+
+    private function pickerLabel(Part $part): string
+    {
+        $label = __('parts.picker.option', [
+            'sku' => $part->sku,
+            'name' => $part->name,
+            'stock' => $part->quantity_in_stock,
+        ]);
+
+        if ($part->location !== null) {
+            $label = __('parts.picker.shelf', ['label' => $label, 'location' => $part->location]);
+        }
+
+        if ($part->isOutOfStock()) {
+            return __('parts.picker.out_of_stock', ['label' => $label]);
+        }
+
+        return $part->isLowStock() ? __('parts.picker.low_stock', ['label' => $label]) : $label;
+    }
+
+    /**
      * @param  array<string, mixed>  $attributes
      */
     public function create(array $attributes): Part

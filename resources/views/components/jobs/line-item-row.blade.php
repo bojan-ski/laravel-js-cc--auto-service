@@ -31,7 +31,7 @@
     @endif
 
     <td role="cell" class="px-3 py-2">
-        {{ $item->user?->shortName() }}
+        <x-ui.value :value="$item->user?->shortName()" />
 
         @if ($item->user?->trashed())
             <span class="text-sm text-text-muted">({{ __('app.deleted') }})</span>

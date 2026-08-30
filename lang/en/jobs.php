@@ -117,16 +117,30 @@ return [
             'title' => 'Add labor',
             'description' => 'Description',
             'description_placeholder' => 'What was done?',
+            'description_placeholder_part' => 'Optional note about this part',
             'quantity' => 'Hours',
             'who' => 'Performed by',
             'who_placeholder' => 'Select who performed the work',
+            'who_unassigned' => 'Unassigned',
             'rate' => 'Hourly rate',
             'submit' => 'Add line',
+            'group_label' => 'Add a line item',
+            'labor_link' => '+ Labor',
+            'labor_link_label' => 'Add a labor line',
+            'part_link' => '+ Part',
+            'part_link_label' => 'Add a part line',
+            'no_parts' => 'The parts catalogue is empty, so there is no part to add yet.',
+            'part_title' => 'Add part',
+            'part' => 'Part',
+            'quantity_units' => 'Quantity',
+            'price' => 'Price (leave blank for the catalogue price)',
+            'submit_part' => 'Add part',
         ],
 
         'edit' => [
             'title' => 'Edit line item',
             'title_for' => 'Edit line item: :description',
+            'price' => 'Price',
             'row_marker' => 'This line is being edited below.',
             'open' => 'Edit',
             'open_line' => 'Edit :description',
@@ -143,8 +157,10 @@ return [
 
         'flash' => [
             'added' => 'Line item added.',
+            'part_added' => 'Part line added and taken off the shelf.',
             'updated' => 'Line item updated.',
             'deleted' => 'Line item deleted.',
+            'stock_negative' => ':name is now at :balance. Stock has gone negative.',
         ],
     ],
 
@@ -175,6 +191,7 @@ return [
         'cancel_for' => 'Cancel job :reference for :plate',
         'reopen_for' => 'Reopen job :reference for :plate',
         'confirm_cancel' => 'Cancel job :reference for :plate? Cancelling is permanent — a cancelled job cannot be reopened.',
+        'confirm_cancel_with_parts' => '{1} Cancel job :reference for :plate? One part line will be returned to stock. Cancelling is permanent — a cancelled job cannot be reopened.|[2,*] Cancel job :reference for :plate? :count part lines will be returned to stock. Cancelling is permanent — a cancelled job cannot be reopened.',
     ],
 
     'flash' => [

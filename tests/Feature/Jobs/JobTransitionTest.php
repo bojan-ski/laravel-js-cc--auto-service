@@ -108,7 +108,7 @@ class JobTransitionTest extends TestCase
         $job = Job::factory()->{$state}()->create();
         $before = $job->only(self::TIMESTAMPS);
 
-        $this->service()->cancel($job);
+        $this->transitionJob('cancel', $job);
 
         $this->assertSame(JobStatus::Cancelled, $job->status);
         $this->assertNotNull($job->cancelled_at);
@@ -162,7 +162,7 @@ class JobTransitionTest extends TestCase
         $snapshot = $job->fresh()->getAttributes();
 
         try {
-            $this->service()->{$transition}($job);
+            $this->transitionJob($transition, $job);
             $this->fail("Expected {$transition} from {$state} to throw.");
         } catch (InvalidJobTransition $exception) {
             $this->assertSame($transition, $exception->transition);
@@ -188,7 +188,7 @@ class JobTransitionTest extends TestCase
 
         $this->expectException(InvalidJobTransition::class);
 
-        $this->service()->{$transition}($job);
+        $this->transitionJob($transition, $job);
     }
 
     #[DataProvider('transitionProvider')]
@@ -208,7 +208,7 @@ class JobTransitionTest extends TestCase
         $this->expectException(InvalidJobTransition::class);
 
         try {
-            $this->service()->{$transition}($job);
+            $this->transitionJob($transition, $job);
         } finally {
             $this->assertSame($snapshot, $job->fresh()->getAttributes());
         }
@@ -237,12 +237,12 @@ class JobTransitionTest extends TestCase
         $first = Job::factory()->inProgress()->create();
         $second = Job::findOrFail($first->getKey());
 
-        $this->service()->cancel($first);
+        $this->transitionJob('cancel', $first);
 
         $this->expectException(InvalidJobTransition::class);
 
         try {
-            $this->service()->cancel($second);
+            $this->transitionJob('cancel', $second);
         } finally {
             $this->assertSame($first->cancelled_at->toDateTimeString(), $first->fresh()->cancelled_at->toDateTimeString());
         }

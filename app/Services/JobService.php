@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\JobStatus;
+use App\Enums\StockMovementReason;
 use App\Exceptions\InvalidAppointmentTransition;
 use App\Exceptions\InvalidJobTransition;
 use App\Models\Appointment;
@@ -28,6 +29,7 @@ class JobService
     public function __construct(
         private readonly JobReferenceGenerator $references,
         private readonly AppointmentService $appointments,
+        private readonly StockService $stock,
     ) {}
 
     /**
@@ -238,11 +240,11 @@ class JobService
         ]);
     }
 
-    public function cancel(Job $job): Job
+    public function cancel(Job $job, User $actor): Job
     {
         return $this->transition($job, 'cancel', fn (Job $job): bool => $job->canCancel(), JobStatus::Cancelled, [
             'cancelled_at' => now(),
-        ]);
+        ], fn (Job $locked) => $this->returnPartsToStock($locked, $actor));
     }
 
     public function reopen(Job $job): Job
@@ -255,14 +257,15 @@ class JobService
     /**
      * @param  Closure(Job): bool  $guard
      * @param  array<string, mixed>  $changes
+     * @param  (Closure(Job): void)|null  $inside
      */
-    private function transition(Job $job, string $name, Closure $guard, JobStatus $status, array $changes): Job
+    private function transition(Job $job, string $name, Closure $guard, JobStatus $status, array $changes, ?Closure $inside = null): Job
     {
         if (! $guard($job)) {
             throw new InvalidJobTransition($job, $name);
         }
 
-        DB::transaction(function () use ($job, $name, $guard, $status, $changes): void {
+        DB::transaction(function () use ($job, $name, $guard, $status, $changes, $inside): void {
             $locked = Job::query()->whereKey($job->getKey())->lockForUpdate()->firstOrFail();
 
             if (! $guard($locked)) {
@@ -277,9 +280,26 @@ class JobService
 
             $locked->save();
 
+            if ($inside !== null) {
+                $inside($locked);
+            }
+
             $job->setRawAttributes($locked->getAttributes(), true);
         });
 
         return $job;
+    }
+
+    private function returnPartsToStock(Job $job, User $actor): void
+    {
+        foreach ($job->partItems()->with('part')->get() as $item) {
+            $this->stock->record(
+                $item->part,
+                (int) $item->quantity,
+                StockMovementReason::JobReturn,
+                $actor,
+                $item,
+            );
+        }
     }
 }

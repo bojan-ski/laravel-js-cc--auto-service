@@ -5,6 +5,12 @@
         'reference' => $job->reference,
         'plate' => $job->vehicle->registration_plate,
     ];
+
+    $partLines = $job->partLineCount();
+
+    $confirmCancel = $partLines > 0
+        ? trans_choice('jobs.actions.confirm_cancel_with_parts', $partLines, [...$context, 'count' => $partLines])
+        : __('jobs.actions.confirm_cancel', $context);
 @endphp
 
 <x-jobs.lock-banner :job="$job" />
@@ -60,7 +66,7 @@
             <x-ui.action-form
                 variant="danger"
                 :action="route('jobs.cancel', $job)"
-                :confirm="__('jobs.actions.confirm_cancel', $context)"
+                :confirm="$confirmCancel"
                 :aria-label="__('jobs.actions.cancel_for', $context)"
             >
                 {{ __('jobs.actions.cancel') }}

@@ -28,4 +28,9 @@ class JobShowRequest extends FormRequest
     {
         return $this->filled('edit') ? $this->integer('edit') : null;
     }
+
+    public function addingType(): string
+    {
+        return $this->query('add') === 'part' ? 'part' : 'labor';
+    }
 }
