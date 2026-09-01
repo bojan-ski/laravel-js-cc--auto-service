@@ -156,4 +156,11 @@ class InvoiceModelTest extends TestCase
         $this->assertTrue($void->isVoid());
         $this->assertFalse($void->isUnpaid());
     }
+
+    public function test_only_an_unpaid_invoice_can_be_marked_paid(): void
+    {
+        $this->assertTrue(Invoice::factory()->unpaid()->create()->canBeMarkedPaid());
+        $this->assertFalse(Invoice::factory()->paid()->create()->canBeMarkedPaid());
+        $this->assertFalse(Invoice::factory()->void()->create()->canBeMarkedPaid());
+    }
 }

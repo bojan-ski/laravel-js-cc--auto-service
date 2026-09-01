@@ -50,11 +50,11 @@ class InvoiceIssueViewTest extends TestCase
     public function test_the_totals_are_shown_with_the_vat_rate(): void
     {
         $this->confirmation()
-            ->assertSee(__('invoices.issue.subtotal'))
+            ->assertSee(__('invoices.totals.subtotal'))
             ->assertSee('5,000.00')
-            ->assertSee(__('invoices.issue.vat', ['rate' => '20']))
+            ->assertSee(__('invoices.totals.vat', ['rate' => '20']))
             ->assertSee('1,000.00')
-            ->assertSee(__('invoices.issue.total'))
+            ->assertSee(__('invoices.totals.total'))
             ->assertSee('6,000.00');
     }
 

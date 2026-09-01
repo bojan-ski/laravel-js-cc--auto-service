@@ -40,7 +40,7 @@ class JobInvoiceController extends Controller
         }
 
         return redirect()
-            ->route('jobs.show', $job)
+            ->route('invoices.show', $invoice)
             ->with('success', __('invoices.flash.issued', ['number' => $invoice->number]));
     }
 }

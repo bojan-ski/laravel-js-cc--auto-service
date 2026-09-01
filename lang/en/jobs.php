@@ -91,8 +91,10 @@ return [
 
         'lock' => [
             'title' => 'Locked — invoiced :date',
-            'title_with_number' => 'Locked — invoice :number issued :date',
             'body' => 'Line items are read-only. An admin must void the invoice to reopen this job.',
+            'invoice' => 'Invoice',
+            'view_invoice' => 'View invoice',
+            'view_invoice_for' => 'View invoice :number',
         ],
     ],
 

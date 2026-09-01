@@ -4,12 +4,15 @@ namespace App\Services;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\JobStatus;
+use App\Exceptions\InvalidInvoiceTransition;
 use App\Exceptions\InvoiceNotIssuable;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Closure;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
@@ -17,7 +20,52 @@ class InvoiceService
 {
     public const int NUMBER_ATTEMPTS = 3;
 
+    public const int PER_PAGE = 25;
+
     public function __construct(private readonly InvoiceNumberGenerator $numbers) {}
+
+    /**
+     * @param  array{status: string, search: string}  $filters
+     * @return LengthAwarePaginator<int, Invoice>
+     */
+    public function paginateFiltered(array $filters): LengthAwarePaginator
+    {
+        return $this->listQuery($filters['search'])
+            ->with('job.customer')
+            ->when(
+                $filters['status'],
+                fn (Builder $query, string $status) => $query->where('invoices.status', $status),
+            )
+            ->orderByDesc('invoices.issued_at')
+            ->orderByDesc('invoices.id')
+            ->paginate(self::PER_PAGE)
+            ->withQueryString();
+    }
+
+    /**
+     * @param  array{status: string, search: string}  $filters
+     * @return array<string, int>
+     */
+    public function countByStatus(array $filters): array
+    {
+        $counts = $this->listQuery($filters['search'])
+            ->select('invoices.status', DB::raw('COUNT(*) AS aggregate'))
+            ->groupBy('invoices.status')
+            ->pluck('aggregate', 'invoices.status');
+
+        $result = [];
+
+        foreach (InvoiceStatus::cases() as $status) {
+            $result[$status->value] = (int) ($counts[$status->value] ?? 0);
+        }
+
+        return $result;
+    }
+
+    public function hasAny(): bool
+    {
+        return Invoice::query()->exists();
+    }
 
     public function issue(Job $job, User $issuedBy, ?CarbonInterface $dueAt = null): Invoice
     {
@@ -54,6 +102,29 @@ class InvoiceService
         });
     }
 
+    public function markPaid(Invoice $invoice): Invoice
+    {
+        return DB::transaction(function () use ($invoice): Invoice {
+            $locked = Invoice::query()->whereKey($invoice->getKey())->lockForUpdate()->firstOrFail();
+
+            if (! $locked->canBeMarkedPaid()) {
+                throw new InvalidInvoiceTransition(
+                    $locked,
+                    ['status' => InvoiceStatus::Paid->value],
+                    'only an unpaid invoice can be marked paid',
+                );
+            }
+
+            $locked->status = InvoiceStatus::Paid;
+            $locked->paid_at = now();
+            $locked->save();
+
+            $invoice->setRawAttributes($locked->getAttributes(), true);
+
+            return $invoice;
+        });
+    }
+
     /**
      * @return array{subtotal: string, rate: string, tax: string, total: string}
      */
@@ -71,14 +142,44 @@ class InvoiceService
         ];
     }
 
+    /**
+     * @return array{subtotal: string, rate: string, tax: string, total: string}
+     */
+    public function storedTotals(Invoice $invoice): array
+    {
+        return [
+            'subtotal' => $invoice->subtotal,
+            'rate' => self::trimRate($invoice->tax_rate),
+            'tax' => $invoice->tax_amount,
+            'total' => $invoice->total,
+        ];
+    }
+
     public function rate(): string
     {
         return (string) config('shop.vat_rate');
     }
 
+    private static function trimRate(string $rate): string
+    {
+        $trimmed = rtrim(rtrim($rate, '0'), '.');
+
+        return $trimmed === '' ? '0' : $trimmed;
+    }
+
     private static function taxOn(string $subtotal, string $rate): string
     {
         return bcadd(bcdiv(bcmul($subtotal, $rate, 4), '100', 4), '0.005', 2);
+    }
+
+    /**
+     * @return Builder<Invoice>
+     */
+    private function listQuery(string $search): Builder
+    {
+        return Invoice::query()
+            ->joinedForList()
+            ->when($search, fn (Builder $query, string $term) => $query->matching($term));
     }
 
     private function refuseUnlessIssuable(Job $job): void

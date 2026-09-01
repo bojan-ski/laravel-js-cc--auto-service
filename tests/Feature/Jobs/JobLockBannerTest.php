@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\InvoiceService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Lang;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -55,11 +56,38 @@ class JobLockBannerTest extends TestCase
             ->get(route('jobs.show', $job))
             ->assertOk()
             ->assertSee($number)
-            ->assertSee(__('jobs.show.lock.title_with_number', [
-                'number' => $number,
-                'date' => $job->locked_at->isoFormat('D MMM'),
-            ]))
+            ->assertSee(__('jobs.show.lock.title', ['date' => $job->locked_at->isoFormat('D MMM')]))
+            ->assertSee(__('jobs.show.lock.invoice'))
             ->assertSee(__('jobs.show.lock.body'));
+    }
+
+    /**
+     * The number is a link into the invoice, not plain text inside the
+     * sentence — an `<a>` cannot live inside a `{{ }}`-interpolated string, so
+     * the banner renders it as its own line beside a View invoice control.
+     */
+    #[DataProvider('frontOfficeRoles')]
+    public function test_the_banner_number_links_to_the_invoice(string $role): void
+    {
+        $job = $this->invoicedJob();
+        $invoice = Invoice::query()->sole();
+
+        $html = $this->actingAs(User::factory()->{$role}()->create())
+            ->get(route('jobs.show', $job))
+            ->assertOk()
+            ->assertSee(__('jobs.show.lock.view_invoice'))
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<a[^>]*href="'.preg_quote(route('invoices.show', $invoice), '/').'"[^>]*>\s*'.preg_quote($invoice->number, '/').'\s*<\/a>/',
+            $html,
+            'The invoice number itself must be the link text.',
+        );
+    }
+
+    public function test_the_deleted_lang_key_has_no_survivors(): void
+    {
+        $this->assertFalse(Lang::has('jobs.show.lock.title_with_number'));
     }
 
     public function test_a_mechanic_sees_the_lock_but_not_the_number(): void
