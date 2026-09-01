@@ -22,4 +22,12 @@ class InvoicePolicy
     {
         return $user->isFrontOffice();
     }
+
+    /**
+     * Determine whether the user can record payment of the model.
+     */
+    public function markPaid(User $user, Invoice $invoice): bool
+    {
+        return $user->isFrontOffice() && $invoice->canBeMarkedPaid();
+    }
 }

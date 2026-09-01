@@ -4,11 +4,14 @@ namespace Tests\Feature;
 
 use App\Models\Appointment;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Job;
+use App\Models\JobItem;
 use App\Models\Part;
 use App\Models\StockMovement;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\InvoiceService;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -44,6 +47,10 @@ class TableHeaderAccessibilityTest extends TestCase
         ]);
         StockMovement::factory()->forPart(Part::factory()->inStock()->create())->manualAdjustment()->create();
 
+        $invoiced = Job::factory()->completed()->create();
+        JobItem::factory()->forJob($invoiced)->create(['quantity' => 1, 'unit_price' => 100]);
+        app(InvoiceService::class)->issue($invoiced, User::factory()->receptionist()->create());
+
         return $customer;
     }
 
@@ -60,6 +67,8 @@ class TableHeaderAccessibilityTest extends TestCase
             'vehicle detail' => ['vehicles.show'],
             'parts catalogue' => ['parts.index'],
             'part detail' => ['parts.show'],
+            'invoices index' => ['invoices.index'],
+            'invoice detail' => ['invoices.show'],
         ];
     }
 
@@ -72,6 +81,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'customers.show' => route($route, $customer),
             'vehicles.show' => route($route, $customer->vehicles()->sole()),
             'parts.show' => route($route, Part::query()->sole()),
+            'invoices.show' => route($route, Invoice::query()->sole()),
             default => route($route),
         };
 
@@ -98,6 +108,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'customers.show' => route($route, $customer),
             'vehicles.show' => route($route, $customer->vehicles()->sole()),
             'parts.show' => route($route, Part::query()->sole()),
+            'invoices.show' => route($route, Invoice::query()->sole()),
             default => route($route),
         };
 
@@ -135,6 +146,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'jobs board' => ['jobs.index'],
             'appointments index' => ['appointments.index'],
             'parts catalogue' => ['parts.index'],
+            'invoices index' => ['invoices.index'],
         ];
     }
 

@@ -68,11 +68,12 @@ class InvoiceIssueRouteTest extends TestCase
     {
         $job = $this->invoiceableJob();
 
-        $this->actingAs(User::factory()->{$role}()->create())
-            ->post(route('jobs.invoice.store', $job))
-            ->assertRedirect(route('jobs.show', $job));
+        $response = $this->actingAs(User::factory()->{$role}()->create())
+            ->post(route('jobs.invoice.store', $job));
 
         $invoice = Invoice::query()->sole();
+
+        $response->assertRedirect(route('invoices.show', $invoice));
 
         $this->assertTrue($invoice->isUnpaid());
         $this->assertNotNull($job->fresh()->locked_at);
@@ -116,7 +117,7 @@ class InvoiceIssueRouteTest extends TestCase
 
         $this->actingAs(User::factory()->receptionist()->create())
             ->post(route('jobs.invoice.store', $job), ['due_at' => ''])
-            ->assertRedirect(route('jobs.show', $job));
+            ->assertRedirect(route('invoices.show', Invoice::query()->sole()));
 
         $this->assertNull(Invoice::query()->sole()->due_at);
     }

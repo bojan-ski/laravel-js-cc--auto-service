@@ -1,4 +1,4 @@
-<header class="relative border-b border-border-strong bg-surface-dark text-text-inverse">
+<header class="relative border-b border-border-strong bg-surface-dark text-text-inverse print:hidden">
     <div class="mx-auto flex w-full max-w-7xl items-center gap-6 px-3 md:px-4 lg:px-6">
         <a
             href="{{ route('dashboard') }}"

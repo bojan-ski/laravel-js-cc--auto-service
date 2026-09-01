@@ -6,6 +6,8 @@ use App\Enums\InvoiceStatus;
 use App\Exceptions\InvalidInvoiceTransition;
 use Database\Factories\InvoiceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -59,6 +61,26 @@ class Invoice extends Model
         return $this->belongsTo(User::class, 'issued_by')->withTrashed();
     }
 
+    #[Scope]
+    protected function joinedForList(Builder $query): void
+    {
+        $query
+            ->join('jobs', 'jobs.id', '=', 'invoices.job_id')
+            ->join('customers', 'customers.id', '=', 'jobs.customer_id')
+            ->select('invoices.*');
+    }
+
+    #[Scope]
+    protected function matching(Builder $query, string $term): void
+    {
+        $escaped = addcslashes($term, '%_\\');
+
+        $query->where(function (Builder $query) use ($escaped): void {
+            $query->where('invoices.number', 'like', "%{$escaped}%")
+                ->orWhere('customers.name', 'like', "%{$escaped}%");
+        });
+    }
+
     public function isUnpaid(): bool
     {
         return $this->status === InvoiceStatus::Unpaid;
@@ -72,6 +94,11 @@ class Invoice extends Model
     public function isVoid(): bool
     {
         return $this->status === InvoiceStatus::Void;
+    }
+
+    public function canBeMarkedPaid(): bool
+    {
+        return $this->isUnpaid();
     }
 
     /**

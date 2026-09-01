@@ -13,7 +13,7 @@
         : __('jobs.actions.confirm_cancel', $context);
 @endphp
 
-<x-jobs.lock-banner :job="$job" :invoice-number="$invoice?->number" />
+<x-jobs.lock-banner :job="$job" :invoice="$invoice" />
 
 @canany(['start', 'pause', 'resume', 'complete', 'cancel', 'reopen', 'issue'], $job)
     <div class="mt-4 flex flex-wrap gap-2">

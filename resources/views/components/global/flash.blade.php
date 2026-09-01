@@ -10,7 +10,7 @@
 @foreach ($regions as $key => $classes)
     @if (session()->has($key))
         <div
-            class="border-b {{ $classes }}"
+            class="border-b print:hidden {{ $classes }}"
             data-flash="{{ $key }}"
             role="{{ $key === 'error' ? 'alert' : 'status' }}"
             aria-live="{{ $key === 'error' ? 'assertive' : 'polite' }}"
