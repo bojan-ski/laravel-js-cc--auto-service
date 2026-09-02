@@ -8,11 +8,13 @@ use App\Models\Part;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\Support\ReadsLineItemsTable;
 use Tests\TestCase;
 
 class JobShowLineItemsViewTest extends TestCase
 {
     use LazilyRefreshDatabase;
+    use ReadsLineItemsTable;
 
     /**
      * job-items.update and job-items.destroy share a URI, so an `action="…"`
@@ -232,20 +234,34 @@ class JobShowLineItemsViewTest extends TestCase
         return $count;
     }
 
+    /**
+     * Both directions read the table head rather than the whole page. "Price"
+     * is a Faker surname, so a page-wide assertion fails for a customer called
+     * Price when the column is absent — and passes for that same customer when
+     * the column has been deleted.
+     */
     public function test_a_mechanics_table_has_no_price_column_and_front_offices_does(): void
     {
         $job = Job::factory()->inProgress()->create();
         JobItem::factory()->forJob($job)->create();
 
-        $this->actingAs(User::factory()->mechanic()->create())
+        $mechanic = $this->actingAs(User::factory()->mechanic()->create())
             ->get(route('jobs.show', $job))
             ->assertOk()
-            ->assertSee(__('jobs.items.headers.who'))
-            ->assertDontSee(__('jobs.items.headers.price'));
+            ->assertSee(__('jobs.items.headers.who'));
 
-        $this->actingAs(User::factory()->receptionist()->create())
+        $this->assertStringNotContainsString(
+            __('jobs.items.headers.price'),
+            $this->lineItemsTableHead($mechanic),
+        );
+
+        $frontOffice = $this->actingAs(User::factory()->receptionist()->create())
             ->get(route('jobs.show', $job))
-            ->assertOk()
-            ->assertSee(__('jobs.items.headers.price'));
+            ->assertOk();
+
+        $this->assertStringContainsString(
+            __('jobs.items.headers.price'),
+            $this->lineItemsTableHead($frontOffice),
+        );
     }
 }

@@ -2,17 +2,21 @@
 
 namespace Tests\Feature\JobItems;
 
+use App\Models\Customer;
 use App\Models\Job;
 use App\Models\JobItem;
 use App\Models\User;
+use App\Models\Vehicle;
 use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Gate;
+use Tests\Support\ReadsLineItemsTable;
 use Tests\TestCase;
 
 class JobItemVisibilityTest extends TestCase
 {
     use LazilyRefreshDatabase;
+    use ReadsLineItemsTable;
 
     public function test_a_mechanics_query_does_not_select_the_price_column(): void
     {
@@ -90,8 +94,44 @@ class JobItemVisibilityTest extends TestCase
         $response->assertDontSee('3,000.00');
         $response->assertDontSee('6,000.00');
         $response->assertDontSee(__('jobs.items.subtotal'));
-        $response->assertDontSee(__('jobs.items.headers.price'));
         $response->assertViewHas('subtotal', null);
+        $response->assertViewHas('showPricing', false);
+
+        $this->assertStringNotContainsString(
+            __('jobs.items.headers.price'),
+            $this->lineItemsTableHead($response),
+        );
+    }
+
+    /**
+     * The regression this fixes. "Price" is a Faker surname, so the page can
+     * legitimately contain the word without any price data reaching it — which
+     * used to fail the assertion above roughly once in a hundred runs. Pinning
+     * both names reproduces the old failure deterministically.
+     */
+    public function test_a_customer_or_mechanic_named_price_does_not_trip_the_money_boundary(): void
+    {
+        $customer = Customer::factory()->create(['name' => 'Ambrose Price']);
+        $vehicle = Vehicle::factory()->for($customer)->create();
+        $mechanic = User::factory()->mechanic()->create(['name' => 'Dana Price']);
+
+        $job = Job::factory()->for($customer)->for($vehicle)->inProgress()->create();
+        JobItem::factory()->forJob($job)->performedBy($mechanic)->create([
+            'quantity' => 1.5,
+            'unit_price' => 3000,
+        ]);
+
+        $response = $this->actingAs($mechanic)->get(route('jobs.show', $job))->assertOk();
+
+        $response->assertSee('Ambrose Price');
+        $response->assertSee('D. Price');
+
+        $this->assertStringNotContainsString(
+            __('jobs.items.headers.price'),
+            $this->lineItemsTableHead($response),
+        );
+
+        $response->assertDontSee('3,000.00');
         $response->assertViewHas('showPricing', false);
     }
 
