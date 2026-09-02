@@ -30,4 +30,12 @@ class InvoicePolicy
     {
         return $user->isFrontOffice() && $invoice->canBeMarkedPaid();
     }
+
+    /**
+     * Determine whether the user can void the model, unlocking its job.
+     */
+    public function void(User $user, Invoice $invoice): bool
+    {
+        return $user->isAdmin() && $invoice->canBeVoided();
+    }
 }

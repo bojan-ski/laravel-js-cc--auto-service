@@ -33,7 +33,7 @@ class InvoiceController extends Controller
     {
         Gate::authorize('view', $invoice);
 
-        $invoice->load(['job.customer', 'job.vehicle', 'issuedBy']);
+        $invoice->load(['job.customer', 'job.vehicle', 'issuedBy', 'voidedBy']);
 
         return view('pages.invoices.show', [
             'invoice' => $invoice,

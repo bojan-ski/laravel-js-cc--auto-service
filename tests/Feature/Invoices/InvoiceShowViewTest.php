@@ -271,4 +271,26 @@ class InvoiceShowViewTest extends TestCase
 
         $this->assertCount(6, $queries, "Expected 6 queries:\n".implode("\n", array_column($queries, 'query')));
     }
+
+    /**
+     * voidedBy is eager-loaded unconditionally. On a live invoice that costs
+     * nothing — Laravel skips a belongs-to eager query when every foreign key is
+     * null — so only a void invoice pays for the relation, and it trades that
+     * one query for the line-items query it no longer issues.
+     */
+    public function test_a_void_invoice_detail_page_issues_a_pinned_number_of_queries(): void
+    {
+        $job = $this->jobFor('M. Petrović');
+        JobItem::factory()->forJob($job)->create(['quantity' => 1, 'unit_price' => 2000]);
+
+        $invoice = Invoice::factory()->forJob($job)->void()->create();
+        $user = User::factory()->receptionist()->create();
+
+        DB::enableQueryLog();
+        $this->actingAs($user)->get(route('invoices.show', $invoice))->assertOk();
+        $queries = DB::getQueryLog();
+        DB::disableQueryLog();
+
+        $this->assertCount(6, $queries, "Expected 6 queries:\n".implode("\n", array_column($queries, 'query')));
+    }
 }

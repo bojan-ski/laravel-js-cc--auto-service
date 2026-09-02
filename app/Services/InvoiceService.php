@@ -125,6 +125,34 @@ class InvoiceService
         });
     }
 
+    public function void(Invoice $invoice, User $voidedBy): Invoice
+    {
+        return DB::transaction(function () use ($invoice, $voidedBy): Invoice {
+            $locked = Invoice::query()->whereKey($invoice->getKey())->lockForUpdate()->firstOrFail();
+            $job = Job::query()->whereKey($locked->job_id)->lockForUpdate()->firstOrFail();
+
+            if (! $locked->canBeVoided()) {
+                throw new InvalidInvoiceTransition(
+                    $locked,
+                    ['status' => InvoiceStatus::Void->value],
+                    'only an unpaid or paid invoice can be voided',
+                );
+            }
+
+            $locked->status = InvoiceStatus::Void;
+            $locked->voided_at = now();
+            $locked->voided_by = $voidedBy->getKey();
+            $locked->save();
+
+            $job->locked_at = null;
+            $job->save();
+
+            $invoice->setRawAttributes($locked->getAttributes(), true);
+
+            return $invoice;
+        });
+    }
+
     /**
      * @return array{subtotal: string, rate: string, tax: string, total: string}
      */
