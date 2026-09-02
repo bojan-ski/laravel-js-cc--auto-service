@@ -70,6 +70,39 @@ class InvoicePolicyTest extends TestCase
     }
 
     /**
+     * Voiding is the sole mechanism that reopens an invoiced job, so it is
+     * isAdmin() and never isFrontOffice(). A receptionist who could void could
+     * edit any invoiced job, and the rule the application is built around would
+     * be a formality.
+     */
+    public function test_only_an_admin_may_void_an_unpaid_or_paid_invoice(): void
+    {
+        $unpaid = Invoice::factory()->unpaid()->create();
+        $paid = Invoice::factory()->paid()->create();
+
+        foreach (['mechanic', 'receptionist'] as $role) {
+            $this->actingAs(User::factory()->{$role}()->create());
+
+            $this->assertFalse(Gate::allows('void', $unpaid), "A {$role} must not void an unpaid invoice.");
+            $this->assertFalse(Gate::allows('void', $paid), "A {$role} must not void a paid invoice.");
+        }
+
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->assertTrue(Gate::allows('void', $unpaid));
+        $this->assertTrue(Gate::allows('void', $paid));
+    }
+
+    public function test_not_even_an_admin_may_void_a_void_invoice(): void
+    {
+        $void = Invoice::factory()->void()->create();
+
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->assertFalse(Gate::allows('void', $void));
+    }
+
+    /**
      * Guards the standing convention that no Gate::before() exists: an admin is
      * denied an ability nothing grants, so the policies are the only authority.
      */

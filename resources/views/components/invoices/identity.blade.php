@@ -20,6 +20,12 @@
             <p class="tabular-nums">
                 {{ __('invoices.identity.issued', ['date' => $invoice->issued_at->isoFormat('D MMM YYYY')]) }}
             </p>
+
+            @if ($invoice->isVoid())
+                <p class="mt-2 border-2 border-danger px-3 py-1 text-2xl font-bold uppercase tracking-widest text-danger">
+                    {{ __('invoices.void.print_marker') }}
+                </p>
+            @endif
         </div>
     </div>
 

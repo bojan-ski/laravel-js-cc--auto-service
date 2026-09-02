@@ -90,6 +90,24 @@ return [
         'body' => 'Its job has been reopened and its line items may have changed since. The totals below are what was invoiced.',
         'view_job' => 'View job',
         'view_job_for' => 'View job :reference',
+
+        'action' => 'Void invoice',
+        'action_for' => 'Void invoice :number',
+        'page_title' => 'Void invoice · :number',
+        'heading' => 'Void invoice',
+        'warning_title' => 'This cancels the invoice and unlocks job :reference.',
+        'warning_body' => 'The job stays completed. Reopen it to edit its line items, then complete it again to issue a new invoice.',
+        'consequences' => [
+            'kept' => 'The invoice is kept and stays visible, marked void.',
+            'number' => 'Its number :number is never reused.',
+            'stock' => 'Parts already fitted are not returned to stock.',
+            'reissue' => 'A new invoice can then be issued, with new totals.',
+        ],
+        'paid_notice' => 'This invoice was marked paid on :date. Voiding it cancels a settled bill.',
+        'cancel' => 'Cancel',
+        'voided' => 'Voided',
+        'voided_by' => 'Voided by',
+        'print_marker' => 'VOID',
     ],
 
     'identity' => [
@@ -103,5 +121,7 @@ return [
         'not_issuable' => 'This job could not be invoiced. It may already have been invoiced by someone else.',
         'paid' => 'Invoice :number is marked paid.',
         'not_payable' => 'This invoice could not be marked paid. Its status may have changed since the page was loaded.',
+        'voided' => 'Invoice :number is void. Job :reference is unlocked.',
+        'not_voidable' => 'This invoice could not be voided. Its status may have changed since the page was loaded.',
     ],
 ];

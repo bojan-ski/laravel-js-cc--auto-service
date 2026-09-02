@@ -175,6 +175,38 @@ class InvoicePrintMarkupTest extends TestCase
         );
     }
 
+    /**
+     * A printed void invoice must not be mistakable for a live one. Whether the
+     * marker is visually prominent on paper is outside what this suite can see —
+     * only its presence in the print-only letterhead is asserted.
+     */
+    public function test_a_void_invoice_carries_a_print_marker_and_a_live_one_does_not(): void
+    {
+        $live = $this->issued();
+
+        $this->assertStringNotContainsString(
+            __('invoices.void.print_marker'),
+            $this->page($live),
+            'A live invoice must never print a VOID marker.',
+        );
+
+        $voided = $this->issued();
+        app(InvoiceService::class)->void($voided, User::factory()->admin()->create());
+
+        $html = $this->page($voided->fresh());
+
+        $this->assertStringContainsString(__('invoices.void.print_marker'), $html);
+
+        preg_match('/<div class="hidden print:block">.*?<\/div>\s*<div class="mt-6">/s', $html, $letterhead);
+
+        $this->assertNotEmpty($letterhead, 'The print-only letterhead did not render.');
+        $this->assertStringContainsString(
+            __('invoices.void.print_marker'),
+            $letterhead[0],
+            'The marker must live inside the print-only letterhead, not on the screen page.',
+        );
+    }
+
     public function test_the_print_control_is_a_slot_for_javascript_to_fill(): void
     {
         $html = $this->page($this->issued());

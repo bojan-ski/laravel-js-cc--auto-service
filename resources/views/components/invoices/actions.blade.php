@@ -14,5 +14,15 @@
         </x-ui.action-form>
     @endcan
 
+    @can('void', $invoice)
+        <x-ui.button
+            variant="danger"
+            :href="route('invoices.void.create', $invoice)"
+            :aria-label="__('invoices.void.action_for', ['number' => $invoice->number])"
+        >
+            {{ __('invoices.void.action') }}
+        </x-ui.button>
+    @endcan
+
     <span data-print-slot data-print-label="{{ __('invoices.show.print') }}"></span>
 </div>

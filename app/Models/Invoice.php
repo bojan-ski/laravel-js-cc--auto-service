@@ -61,6 +61,14 @@ class Invoice extends Model
         return $this->belongsTo(User::class, 'issued_by')->withTrashed();
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function voidedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'voided_by')->withTrashed();
+    }
+
     #[Scope]
     protected function joinedForList(Builder $query): void
     {
@@ -99,6 +107,11 @@ class Invoice extends Model
     public function canBeMarkedPaid(): bool
     {
         return $this->isUnpaid();
+    }
+
+    public function canBeVoided(): bool
+    {
+        return $this->isUnpaid() || $this->isPaid();
     }
 
     /**

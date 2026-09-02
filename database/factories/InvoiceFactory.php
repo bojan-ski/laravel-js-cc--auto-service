@@ -74,6 +74,7 @@ class InvoiceFactory extends Factory
         return $this->state(fn () => [
             'status' => InvoiceStatus::Void,
             'voided_at' => now()->subMinutes(10),
+            'voided_by' => User::factory()->admin(),
         ]);
     }
 

@@ -53,5 +53,21 @@
         <dd @class(['tabular-nums', 'text-text-muted' => $due === null])>
             <x-ui.value :value="$due" />
         </dd>
+
+        @if ($invoice->isVoid())
+            <dt class="{{ $label }}">{{ __('invoices.void.voided') }}</dt>
+
+            <dd class="tabular-nums">{{ $invoice->voided_at->isoFormat('D MMM YYYY') }}</dd>
+
+            <dt class="{{ $label }}">{{ __('invoices.void.voided_by') }}</dt>
+
+            <dd>
+                {{ $invoice->voidedBy->name }}
+
+                @if ($invoice->voidedBy->trashed())
+                    <span class="text-sm text-text-muted">({{ __('app.deleted') }})</span>
+                @endif
+            </dd>
+        @endif
     </dl>
 </section>
