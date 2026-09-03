@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Jobs\AttachmentDownloadController;
+use App\Http\Controllers\Jobs\JobAttachmentController;
 use App\Http\Controllers\Jobs\JobController;
 use App\Http\Controllers\Jobs\JobInvoiceController;
 use App\Http\Controllers\Jobs\JobItemController;
@@ -26,3 +28,9 @@ Route::post('/jobs/{job}/items', [JobItemController::class, 'store'])->name('job
 Route::post('/jobs/{job}/parts', [JobPartLineController::class, 'store'])->name('jobs.parts.store');
 Route::put('/job-items/{jobItem}', [JobItemController::class, 'update'])->name('job-items.update');
 Route::delete('/job-items/{jobItem}', [JobItemController::class, 'destroy'])->name('job-items.destroy');
+
+Route::post('/jobs/{job}/attachments', [JobAttachmentController::class, 'store'])->name('jobs.attachments.store');
+Route::get('/attachments/{attachment}/{variant?}', [AttachmentDownloadController::class, 'show'])
+    ->whereIn('variant', ['thumb', 'full', 'original'])
+    ->name('attachments.show');
+Route::delete('/attachments/{attachment}', [JobAttachmentController::class, 'destroy'])->name('attachments.destroy');

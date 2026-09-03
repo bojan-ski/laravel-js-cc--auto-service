@@ -167,6 +167,48 @@ return [
         ],
     ],
 
+    'attachments' => [
+        'types' => [
+            'photo' => 'Photo',
+            'document' => 'Document',
+        ],
+
+        'photos_label' => 'Photos',
+        'documents_label' => 'Documents',
+        'uploaded_by' => ':name · :date',
+        'photo_alt' => 'Photo of job :reference uploaded by :name',
+        'open_photo' => 'Open full-size photo of job :reference uploaded by :name on :date',
+
+        'upload' => [
+            'label' => 'Add a photo or document',
+            'action' => 'Upload',
+            'action_for' => 'Upload a file to job :reference',
+            'hint' => 'JPEG, PNG or WebP up to 10 MB, or a PDF up to 20 MB.',
+        ],
+
+        'download' => [
+            'action' => 'Download',
+            'action_for' => 'Download :filename',
+        ],
+
+        'delete' => [
+            'action' => 'Delete',
+            'action_for' => 'Delete :filename',
+            'confirm' => 'Delete :filename? The file is removed permanently and cannot be restored.',
+        ],
+
+        'lightbox' => [
+            'label' => 'Photo viewer',
+            'close' => 'Close photo viewer',
+        ],
+
+        'flash' => [
+            'uploaded' => 'File uploaded.',
+            'deleted' => 'File deleted.',
+            'unreadable' => 'That file could not be read as an image and was not saved.',
+        ],
+    ],
+
     'history' => [
         'view_all' => 'View all :count jobs',
 

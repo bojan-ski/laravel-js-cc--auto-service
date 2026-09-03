@@ -19,7 +19,7 @@
                 :default-rate="$defaultRate"
             />
 
-            <x-jobs.attachments />
+            <x-jobs.attachments :job="$job" :photos="$photos" :documents="$documents" />
         </div>
     </div>
 </x-layouts.app>
