@@ -17,10 +17,32 @@ class Nav extends Component
 
     public User $user;
 
+    /**
+     * @var array{label: string, url: string, active: bool}|null
+     */
+    public ?array $staffLink;
+
     public function __construct()
     {
         $this->user = auth()->user();
         $this->items = $this->buildItems();
+        $this->staffLink = $this->buildStaffLink();
+    }
+
+    /**
+     * @return array{label: string, url: string, active: bool}|null
+     */
+    private function buildStaffLink(): ?array
+    {
+        if (Gate::denies('viewAny', User::class)) {
+            return null;
+        }
+
+        return [
+            'label' => __('app.nav.staff'),
+            'url' => route('admin.users.index'),
+            'active' => request()->routeIs('admin.users.*'),
+        ];
     }
 
     /**

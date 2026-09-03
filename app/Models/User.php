@@ -6,6 +6,8 @@ use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -49,6 +51,28 @@ class User extends Authenticatable
     public function isFrontOffice(): bool
     {
         return (bool) $this->role?->isFrontOffice();
+    }
+
+    public function isOffboarded(): bool
+    {
+        return $this->deleted_at !== null;
+    }
+
+    #[Scope]
+    protected function activeAdmins(Builder $query): void
+    {
+        $query->where('role', UserRole::Admin)->whereNull('deleted_at');
+    }
+
+    #[Scope]
+    protected function matching(Builder $query, string $term): void
+    {
+        $escaped = addcslashes($term, '%_\\');
+
+        $query->where(function (Builder $query) use ($escaped) {
+            $query->where('name', 'like', "%{$escaped}%")
+                ->orWhere('email', 'like', "%{$escaped}%");
+        });
     }
 
     public function shortName(): string

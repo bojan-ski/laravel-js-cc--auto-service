@@ -27,6 +27,16 @@
                     {{ $user->role->label() }}
                 </p>
 
+                @if ($staffLink !== null)
+                    <a
+                        href="{{ $staffLink['url'] }}"
+                        @if ($staffLink['active']) aria-current="page" @endif
+                        class="block px-3 py-2 text-sm font-medium text-text-inverse/80 hover:bg-text-inverse/10 hover:text-text-inverse focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                    >
+                        {{ $staffLink['label'] }}
+                    </a>
+                @endif
+
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
@@ -60,6 +70,16 @@
                     <p class="px-3 pb-1 text-xs font-medium uppercase tracking-wider text-text-muted">
                         {{ $user->role->label() }}
                     </p>
+
+                    @if ($staffLink !== null)
+                        <a
+                            href="{{ $staffLink['url'] }}"
+                            @if ($staffLink['active']) aria-current="page" @endif
+                            class="block rounded-sm px-3 py-2 text-sm font-medium text-text-inverse/80 hover:bg-text-inverse/10 hover:text-text-inverse focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                        >
+                            {{ $staffLink['label'] }}
+                        </a>
+                    @endif
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

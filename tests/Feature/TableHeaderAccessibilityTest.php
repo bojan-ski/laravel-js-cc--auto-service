@@ -29,12 +29,21 @@ class TableHeaderAccessibilityTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    private function page(string $url): string
+    /**
+     * The staff section is admin-only, so the actor cannot stay hardcoded to a
+     * receptionist — they get 403 there and the assertions would never run.
+     */
+    private function page(string $url, string $role = 'receptionist'): string
     {
-        return $this->actingAs(User::factory()->receptionist()->create())
+        return $this->actingAs(User::factory()->{$role}()->create())
             ->get($url)
             ->assertOk()
             ->getContent();
+    }
+
+    private function actorFor(string $route): string
+    {
+        return str_starts_with($route, 'admin.') ? 'admin' : 'receptionist';
     }
 
     private function fixture(): Customer
@@ -69,6 +78,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'part detail' => ['parts.show'],
             'invoices index' => ['invoices.index'],
             'invoice detail' => ['invoices.show'],
+            'staff index' => ['admin.users.index'],
         ];
     }
 
@@ -85,7 +95,7 @@ class TableHeaderAccessibilityTest extends TestCase
             default => route($route),
         };
 
-        $heads = $this->tableHeads($this->page($url));
+        $heads = $this->tableHeads($this->page($url, $this->actorFor($route)));
 
         $this->assertNotEmpty($heads, "No <thead> was rendered on {$route}.");
 
@@ -112,7 +122,7 @@ class TableHeaderAccessibilityTest extends TestCase
             default => route($route),
         };
 
-        $html = $this->page($url);
+        $html = $this->page($url, $this->actorFor($route));
 
         $headerCounts = array_map($this->countShownBelowMd(...), $this->tableHeads($html));
         $rowCounts = array_map($this->countShownBelowMd(...), $this->firstBodyRows($html));
@@ -147,6 +157,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'appointments index' => ['appointments.index'],
             'parts catalogue' => ['parts.index'],
             'invoices index' => ['invoices.index'],
+            'staff index' => ['admin.users.index'],
         ];
     }
 
@@ -155,7 +166,7 @@ class TableHeaderAccessibilityTest extends TestCase
     {
         $this->fixture();
 
-        $html = $this->page(route($route));
+        $html = $this->page(route($route), $this->actorFor($route));
 
         $heads = $this->tableHeads($html);
         $this->assertNotEmpty($heads, "No <thead> was rendered on {$route}.");
