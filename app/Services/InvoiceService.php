@@ -6,9 +6,12 @@ use App\Enums\InvoiceStatus;
 use App\Enums\JobStatus;
 use App\Exceptions\InvalidInvoiceTransition;
 use App\Exceptions\InvoiceNotIssuable;
+use App\Mail\InvoiceIssuedMail;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\User;
+use App\Models\Vehicle;
 use Carbon\CarbonInterface;
 use Closure;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -22,7 +25,10 @@ class InvoiceService
 
     public const int PER_PAGE = 25;
 
-    public function __construct(private readonly InvoiceNumberGenerator $numbers) {}
+    public function __construct(
+        private readonly InvoiceNumberGenerator $numbers,
+        private readonly CustomerMailer $mailer,
+    ) {}
 
     /**
      * @param  array{status: string, search: string}  $filters
@@ -97,6 +103,8 @@ class InvoiceService
             $locked->save();
 
             $job->setRawAttributes($locked->getAttributes(), true);
+
+            $this->announceIssue($invoice, $locked);
 
             return $invoice;
         });
@@ -177,7 +185,7 @@ class InvoiceService
     {
         return [
             'subtotal' => $invoice->subtotal,
-            'rate' => self::trimRate($invoice->tax_rate),
+            'rate' => $invoice->taxRateLabel(),
             'tax' => $invoice->tax_amount,
             'total' => $invoice->total,
         ];
@@ -186,13 +194,6 @@ class InvoiceService
     public function rate(): string
     {
         return (string) config('shop.vat_rate');
-    }
-
-    private static function trimRate(string $rate): string
-    {
-        $trimmed = rtrim(rtrim($rate, '0'), '.');
-
-        return $trimmed === '' ? '0' : $trimmed;
     }
 
     private static function taxOn(string $subtotal, string $rate): string
@@ -208,6 +209,14 @@ class InvoiceService
         return Invoice::query()
             ->joinedForList()
             ->when($search, fn (Builder $query, string $term) => $query->matching($term));
+    }
+
+    private function announceIssue(Invoice $invoice, Job $job): void
+    {
+        $customer = Customer::withTrashed()->findOrFail($job->customer_id);
+        $vehicle = Vehicle::withTrashed()->findOrFail($job->vehicle_id);
+
+        $this->mailer->send($customer, new InvoiceIssuedMail($invoice, $customer, $vehicle));
     }
 
     private function refuseUnlessIssuable(Job $job): void

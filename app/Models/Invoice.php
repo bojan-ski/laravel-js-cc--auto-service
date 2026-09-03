@@ -114,6 +114,13 @@ class Invoice extends Model
         return $this->isUnpaid() || $this->isPaid();
     }
 
+    public function taxRateLabel(): string
+    {
+        $trimmed = rtrim(rtrim($this->tax_rate, '0'), '.');
+
+        return $trimmed === '' ? '0' : $trimmed;
+    }
+
     /**
      * @return array<string, string>
      */

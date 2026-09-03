@@ -6,6 +6,7 @@ use App\Enums\JobStatus;
 use App\Enums\StockMovementReason;
 use App\Exceptions\InvalidAppointmentTransition;
 use App\Exceptions\InvalidJobTransition;
+use App\Mail\JobCompletedMail;
 use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Job;
@@ -30,6 +31,7 @@ class JobService
         private readonly JobReferenceGenerator $references,
         private readonly AppointmentService $appointments,
         private readonly StockService $stock,
+        private readonly CustomerMailer $mailer,
     ) {}
 
     /**
@@ -237,7 +239,15 @@ class JobService
     {
         return $this->transition($job, 'complete', fn (Job $job): bool => $job->canComplete(), JobStatus::Completed, [
             'completed_at' => now(),
-        ]);
+        ], fn (Job $locked) => $this->announceCompletion($locked));
+    }
+
+    private function announceCompletion(Job $job): void
+    {
+        $customer = Customer::withTrashed()->findOrFail($job->customer_id);
+        $vehicle = Vehicle::withTrashed()->findOrFail($job->vehicle_id);
+
+        $this->mailer->send($customer, new JobCompletedMail($job, $customer, $vehicle));
     }
 
     public function cancel(Job $job, User $actor): Job
