@@ -7,6 +7,7 @@ use App\Exceptions\InvalidInvoiceTransition;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class InvoiceModelTest extends TestCase
@@ -162,5 +163,27 @@ class InvoiceModelTest extends TestCase
         $this->assertTrue(Invoice::factory()->unpaid()->create()->canBeMarkedPaid());
         $this->assertFalse(Invoice::factory()->paid()->create()->canBeMarkedPaid());
         $this->assertFalse(Invoice::factory()->void()->create()->canBeMarkedPaid());
+    }
+
+    #[DataProvider('taxRates')]
+    public function test_the_tax_rate_label_drops_only_trailing_zeros(string $stored, string $expected): void
+    {
+        $invoice = Invoice::factory()->create(['tax_rate' => $stored]);
+
+        $this->assertSame($expected, $invoice->taxRateLabel());
+    }
+
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function taxRates(): array
+    {
+        return [
+            'whole number' => ['20.00', '20'],
+            'one decimal' => ['17.50', '17.5'],
+            'two decimals' => ['20.10', '20.1'],
+            'both decimals significant' => ['12.60', '12.6'],
+            'zero' => ['0.00', '0'],
+        ];
     }
 }

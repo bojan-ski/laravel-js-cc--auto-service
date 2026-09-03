@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobItem;
 use App\Models\User;
+use App\Services\CustomerMailer;
 use App\Services\InvoiceNumberGenerator;
 use App\Services\InvoiceService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -153,7 +154,7 @@ class RefusingVoidService extends InvoiceService
 {
     public function __construct()
     {
-        parent::__construct(new InvoiceNumberGenerator);
+        parent::__construct(new InvoiceNumberGenerator, new CustomerMailer);
     }
 
     public function void(Invoice $invoice, User $voidedBy): Invoice

@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobItem;
 use App\Models\User;
+use App\Services\CustomerMailer;
 use App\Services\InvoiceNumberGenerator;
 use App\Services\InvoiceService;
 use Carbon\CarbonInterface;
@@ -205,7 +206,7 @@ class RefusingInvoiceService extends InvoiceService
 {
     public function __construct()
     {
-        parent::__construct(new InvoiceNumberGenerator);
+        parent::__construct(new InvoiceNumberGenerator, new CustomerMailer);
     }
 
     public function issue(Job $job, User $issuedBy, ?CarbonInterface $dueAt = null): Invoice
