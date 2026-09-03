@@ -13,6 +13,7 @@ return [
         'invoices' => 'Invoices',
         'toggle' => 'Menu',
         'user_menu' => 'Account menu',
+        'staff' => 'Staff',
         'sign_out' => 'Sign out',
     ],
 

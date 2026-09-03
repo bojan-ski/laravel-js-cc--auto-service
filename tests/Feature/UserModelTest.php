@@ -63,4 +63,55 @@ class UserModelTest extends TestCase
         $this->assertNull(User::find($user->id));
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
+
+    public function test_is_offboarded_reports_the_soft_delete(): void
+    {
+        $this->assertFalse(User::factory()->create()->isOffboarded());
+        $this->assertTrue(User::factory()->trashed()->create()->isOffboarded());
+    }
+
+    public function test_active_admins_excludes_other_roles(): void
+    {
+        $admin = User::factory()->admin()->create();
+        User::factory()->receptionist()->create();
+        User::factory()->mechanic()->create();
+
+        $this->assertSame([$admin->id], User::query()->activeAdmins()->pluck('id')->all());
+    }
+
+    /**
+     * The scope carries its own `deleted_at is null` rather than relying on the
+     * SoftDeletingScope, because the staff list applies withTrashed() — which
+     * removes that scope from the builder. Without the explicit clause the
+     * lockout guard would count offboarded admins as survivors.
+     */
+    public function test_active_admins_excludes_trashed_admins_even_under_with_trashed(): void
+    {
+        $admin = User::factory()->admin()->create();
+        User::factory()->admin()->trashed()->create();
+
+        $this->assertSame([$admin->id], User::withTrashed()->activeAdmins()->pluck('id')->all());
+        $this->assertSame(2, User::withTrashed()->where('role', UserRole::Admin)->count());
+    }
+
+    public function test_matching_searches_name_or_email(): void
+    {
+        $byName = User::factory()->create(['name' => 'Dragan Jovanovic', 'email' => 'dj@shop.rs']);
+        $byEmail = User::factory()->create(['name' => 'Milan Petrov', 'email' => 'jovanovic@shop.rs']);
+        User::factory()->create(['name' => 'Someone Else', 'email' => 'else@shop.rs']);
+
+        $found = User::query()->matching('jovanovic')->pluck('id')->all();
+
+        $this->assertCount(2, $found);
+        $this->assertContains($byName->id, $found);
+        $this->assertContains($byEmail->id, $found);
+    }
+
+    public function test_matching_treats_wildcards_as_literal_characters(): void
+    {
+        User::factory()->create(['name' => 'Percent Free', 'email' => 'free@shop.rs']);
+        $literal = User::factory()->create(['name' => 'Fifty%_Off', 'email' => 'fifty@shop.rs']);
+
+        $this->assertSame([$literal->id], User::query()->matching('%_')->pluck('id')->all());
+    }
 }
