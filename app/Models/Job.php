@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AttachmentType;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobItemType;
 use App\Enums\JobStatus;
@@ -99,6 +100,30 @@ class Job extends Model
     public function partItems(): HasMany
     {
         return $this->hasMany(JobItem::class)->where('type', JobItemType::Part)->orderBy('id');
+    }
+
+    /**
+     * @return HasMany<JobAttachment, $this>
+     */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(JobAttachment::class);
+    }
+
+    /**
+     * @return HasMany<JobAttachment, $this>
+     */
+    public function photos(): HasMany
+    {
+        return $this->attachments()->where('type', AttachmentType::Photo)->orderBy('id');
+    }
+
+    /**
+     * @return HasMany<JobAttachment, $this>
+     */
+    public function documents(): HasMany
+    {
+        return $this->attachments()->where('type', AttachmentType::Document)->orderBy('id');
     }
 
     #[Scope]

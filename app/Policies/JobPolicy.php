@@ -72,6 +72,14 @@ class JobPolicy
     }
 
     /**
+     * Determine whether the user can attach a photo or document to the job.
+     */
+    public function upload(User $user, Job $job): bool
+    {
+        return true;
+    }
+
+    /**
      * Determine whether the user can see prices, line totals, and job totals.
      */
     public function viewPricing(User $user): bool

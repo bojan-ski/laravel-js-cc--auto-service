@@ -9,6 +9,7 @@ use App\Http\Requests\Jobs\StoreJobRequest;
 use App\Models\Appointment;
 use App\Models\Invoice;
 use App\Models\Job;
+use App\Models\JobAttachment;
 use App\Models\JobItem;
 use App\Models\Vehicle;
 use App\Services\JobService;
@@ -83,6 +84,7 @@ class JobController extends Controller
             'createdBy',
             'appointment',
             'items' => fn (HasMany $query) => $query->visibleTo($user)->with('user')->orderBy('id'),
+            'attachments' => fn (HasMany $query) => $query->with('uploadedBy')->orderBy('id'),
         ]);
 
         $job->items->each(fn (JobItem $item) => $item->setRelation('job', $job));
@@ -102,6 +104,8 @@ class JobController extends Controller
             'userOptions' => $user->isFrontOffice() ? $this->users->pickerOptions() : [],
             'partOptions' => $showPartForm ? $this->parts->pickerOptions($user) : [],
             'defaultRate' => $showPricing ? (string) config('shop.labor_rate') : null,
+            'photos' => $job->attachments->filter(fn (JobAttachment $a): bool => $a->isPhoto())->values(),
+            'documents' => $job->attachments->filter(fn (JobAttachment $a): bool => $a->isDocument())->values(),
         ]);
     }
 
