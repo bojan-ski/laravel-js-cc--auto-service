@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Parts\PartController;
+use App\Http\Controllers\Parts\PartImportController;
 use App\Http\Controllers\Parts\PartNumberController;
 use App\Http\Controllers\Parts\StockAdjustmentController;
 use Illuminate\Support\Facades\Route;
@@ -8,6 +9,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/parts', [PartController::class, 'index'])->name('parts.index');
 Route::get('/parts/create', [PartController::class, 'create'])->name('parts.create');
 Route::post('/parts', [PartController::class, 'store'])->name('parts.store');
+
+// Declared before /parts/{part}: the wildcard would otherwise swallow "import".
+Route::get('/parts/import', [PartImportController::class, 'create'])->name('parts.import.create');
+Route::post('/parts/import', [PartImportController::class, 'store'])->name('parts.import.store');
+Route::get('/parts/import/template', [PartImportController::class, 'template'])->name('parts.import.template');
+
 Route::get('/parts/{part}', [PartController::class, 'show'])->name('parts.show');
 Route::get('/parts/{part}/edit', [PartController::class, 'edit'])->name('parts.edit');
 Route::put('/parts/{part}', [PartController::class, 'update'])->name('parts.update');
