@@ -30,6 +30,17 @@ enum JobStatus: string implements ProvidesStatusPresentation
         return ! $this->isWorking();
     }
 
+    /**
+     * @return list<self>
+     */
+    public static function working(): array
+    {
+        return array_values(array_filter(
+            self::cases(),
+            fn (self $status): bool => $status->isWorking(),
+        ));
+    }
+
     public static function sortExpression(): string
     {
         $values = array_map(fn (self $status): string => "'{$status->value}'", self::cases());

@@ -41,6 +41,11 @@ class Appointment extends Model
         return $this->status === AppointmentStatus::Booked;
     }
 
+    public function isArrived(): bool
+    {
+        return $this->status === AppointmentStatus::Arrived;
+    }
+
     public function isTerminal(): bool
     {
         return $this->status->isTerminal();
