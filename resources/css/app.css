@@ -34,21 +34,21 @@
     --color-border-strong: #A8A29E;
 
     /* Status — job lifecycle */
-    --color-status-received: #78716C;
+    --color-status-received: #57534E;
     --color-status-in-progress: #0369A1;
-    --color-status-awaiting-parts: #CA8A04;
-    --color-status-completed: #15803D;
+    --color-status-awaiting-parts: #854D0E;
+    --color-status-completed: #166534;
     --color-status-cancelled: #B91C1C;
 
     /* Status — appointment lifecycle */
     --color-status-booked: #0369A1;
-    --color-status-arrived: #15803D;
+    --color-status-arrived: #166534;
     --color-status-no-show: #B91C1C;
 
     /* Status — invoice lifecycle */
-    --color-status-unpaid: #CA8A04;
-    --color-status-paid: #15803D;
-    --color-status-void: #78716C;
+    --color-status-unpaid: #854D0E;
+    --color-status-paid: #166534;
+    --color-status-void: #57534E;
 
     /* Inventory warning */
     --color-status-low-stock: #B91C1C;
