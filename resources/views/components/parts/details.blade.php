@@ -8,6 +8,25 @@
     <h2 class="sr-only">{{ __('parts.show.details') }}</h2>
 
     <dl class="grid gap-x-4 gap-y-2 sm:grid-cols-[8rem_1fr]">
+        <dt class="{{ $term }}">{{ __('parts.show.brand') }}</dt>
+        <dd @class(['text-text-muted' => $part->brand === null])>
+            @if ($part->brand === null)
+                <x-ui.value :value="null" />
+            @else
+                {{ $part->brand->name }}
+                <span class="text-sm text-text-muted">({{ $part->brand->quality_tier->label() }})</span>
+
+                @if ($part->brand->trashed())
+                    <span class="text-sm text-text-muted">({{ __('app.deleted') }})</span>
+                @endif
+            @endif
+        </dd>
+
+        <dt class="{{ $term }}">{{ __('parts.show.category') }}</dt>
+        <dd @class(['text-text-muted' => $part->category === null])>
+            <x-ui.value :value="$part->category" />
+        </dd>
+
         <dt class="{{ $term }}">{{ __('parts.show.stock') }}</dt>
         <dd><x-parts.stock :part="$part" /></dd>
 

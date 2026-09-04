@@ -8,6 +8,7 @@ use App\Models\Part;
 use App\Models\StockMovement;
 use App\Models\User;
 use App\Services\StockService;
+use App\Services\SupplierService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -15,7 +16,10 @@ use Illuminate\View\View;
 
 class StockAdjustmentController extends Controller
 {
-    public function __construct(private StockService $stock) {}
+    public function __construct(
+        private StockService $stock,
+        private SupplierService $suppliers,
+    ) {}
 
     public function create(Request $request, int $part): View
     {
@@ -23,7 +27,10 @@ class StockAdjustmentController extends Controller
 
         Gate::authorize('adjustStock', Part::class);
 
-        return view('pages.parts.adjust', ['part' => $visible]);
+        return view('pages.parts.adjust', [
+            'part' => $visible,
+            'suppliers' => $this->suppliers->pickerOptions(),
+        ]);
     }
 
     public function store(RecordStockMovementRequest $request, int $part): RedirectResponse
@@ -38,6 +45,7 @@ class StockAdjustmentController extends Controller
             $request->reason(),
             $request->user(),
             note: $request->validated('note'),
+            supplier: $this->suppliers->resolveByName($request->validated('supplier_name')),
         );
 
         return $this->redirectAfter($visible, $movement);

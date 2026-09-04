@@ -29,6 +29,10 @@
             </a>
         @endif
 
+        @if ($movement->supplier !== null)
+            <span class="ms-1 text-sm text-text-muted">{{ __('parts.movements.from_supplier', ['name' => $movement->supplier->name]) }}</span>
+        @endif
+
         @if ($movement->note !== null)
             <p class="text-sm text-text-muted">{{ $movement->note }}</p>
         @endif

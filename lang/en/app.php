@@ -14,6 +14,7 @@ return [
         'toggle' => 'Menu',
         'user_menu' => 'Account menu',
         'staff' => 'Staff',
+        'brands' => 'Brands',
         'sign_out' => 'Sign out',
     ],
 

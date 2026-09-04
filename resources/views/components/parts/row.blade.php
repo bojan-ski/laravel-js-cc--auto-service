@@ -19,6 +19,10 @@
         @endif
     </td>
 
+    <td role="cell" @class(['hidden lg:table-cell lg:px-3 lg:py-2', 'text-text-muted' => $part->brand === null])>
+        <x-ui.value :value="$part->brand?->name" />
+    </td>
+
     <td role="cell" class="col-start-2 row-start-1 row-span-2 self-center text-end md:table-cell md:px-3 md:py-2 md:text-start">
         <x-parts.stock :part="$part" />
     </td>

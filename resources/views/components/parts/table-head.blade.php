@@ -8,6 +8,7 @@
     <tr role="row">
         <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('parts.headers.sku') }}</th>
         <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('parts.headers.name') }}</th>
+        <th role="columnheader" scope="col" class="{{ $cell }} hidden lg:table-cell">{{ __('parts.headers.brand') }}</th>
         <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('parts.headers.stock') }}</th>
 
         @can('viewPricing', App\Models\Part::class)

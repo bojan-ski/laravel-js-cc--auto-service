@@ -18,10 +18,10 @@ class PartViewTest extends TestCase
     public static function roleColumnProvider(): array
     {
         return [
-            // role, columns: sku, name, stock, shelf (+ price, + cost)
-            'mechanic' => ['mechanic', 4],
-            'receptionist' => ['receptionist', 5],
-            'admin' => ['admin', 6],
+            // role, columns: sku, name, brand, stock, shelf (+ price, + cost)
+            'mechanic' => ['mechanic', 5],
+            'receptionist' => ['receptionist', 6],
+            'admin' => ['admin', 7],
         ];
     }
 

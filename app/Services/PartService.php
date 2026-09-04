@@ -27,6 +27,7 @@ class PartService
     {
         return $this->baseQuery($filters, $withTrashed)
             ->visibleTo($user)
+            ->with('brand:id,name,quality_tier,deleted_at')
             ->orderBy('name')
             ->orderBy('id')
             ->paginate(self::PER_PAGE)
@@ -45,6 +46,22 @@ class PartService
             'all' => $this->baseQuery($search, $withTrashed)->count(),
             'low_stock' => $this->baseQuery($search, $withTrashed)->lowStock()->count(),
         ];
+    }
+
+    /**
+     * Distinct categories already in use, for the form's datalist.
+     *
+     * @return list<string>
+     */
+    public function categoryOptions(): array
+    {
+        return Part::query()
+            ->withTrashed()
+            ->whereNotNull('category')
+            ->distinct()
+            ->orderBy('category')
+            ->pluck('category')
+            ->all();
     }
 
     public function hasAny(bool $withTrashed = false): bool

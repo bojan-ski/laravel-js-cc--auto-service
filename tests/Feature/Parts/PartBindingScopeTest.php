@@ -72,9 +72,19 @@ class PartBindingScopeTest extends TestCase
                 ->assertOk()
         );
 
-        $this->assertCount(1, $reads, implode("\n", $reads));
+        // Two reads: the scoped record, then the distinct-category projection
+        // feeding the datalist. Both are asserted, so neither can start
+        // carrying a price column unnoticed.
+        $this->assertCount(2, $reads, implode("\n", $reads));
+
         $this->assertStringNotContainsString('select *', $reads[0]);
-        $this->assertStringNotContainsString('cost_price', $reads[0]);
+        $this->assertStringContainsString('`sku`', $reads[0]);
+
+        $this->assertStringStartsWith('select distinct `category` from `parts`', $reads[1]);
+
+        foreach ($reads as $read) {
+            $this->assertStringNotContainsString('cost_price', $read, $read);
+        }
     }
 
     public function test_an_update_never_reads_the_cost_price_for_a_receptionist(): void

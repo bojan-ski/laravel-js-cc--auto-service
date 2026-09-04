@@ -23,6 +23,14 @@ enum StockMovementReason: string
         };
     }
 
+    public function acceptsSupplier(): bool
+    {
+        return match ($this) {
+            self::Restock, self::ManualAdjustment => true,
+            self::JobUse, self::JobReturn => false,
+        };
+    }
+
     public function isRecordableByHand(): bool
     {
         return match ($this) {

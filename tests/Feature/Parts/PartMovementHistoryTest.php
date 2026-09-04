@@ -263,12 +263,12 @@ class PartMovementHistoryTest extends TestCase
     }
 
     /**
-     * Four: the visibility-scoped resolve, the capped movement list, its users,
-     * and the total. It was five until the route stopped binding the model —
-     * binding ran an unscoped `select *` that hydrated both price columns for
-     * every role before the scoped read replaced it. The `jobItem` eager load
-     * costs nothing here: Laravel skips a belongs-to eager query outright when
-     * every foreign key is null.
+     * Five: the visibility-scoped resolve, the part's identifiers, the capped
+     * movement list, its users, and the total. It was four before the part
+     * numbers section, and five before that — route binding used to run an
+     * unscoped `select *` that hydrated both price columns for every role.
+     * The `jobItem` and `supplier` eager loads cost nothing here: Laravel
+     * skips a belongs-to eager query outright when every foreign key is null.
      */
     #[DataProvider('roleProvider')]
     public function test_the_page_issues_a_bounded_number_of_queries(string $role): void
@@ -285,7 +285,7 @@ class PartMovementHistoryTest extends TestCase
 
         $response->assertOk();
 
-        $this->assertCount(4, $queries, implode("\n", array_column($queries, 'query')));
+        $this->assertCount(5, $queries, implode("\n", array_column($queries, 'query')));
     }
 
     public function test_a_page_of_job_linked_movements_stays_bounded(): void
@@ -310,7 +310,7 @@ class PartMovementHistoryTest extends TestCase
 
         $response->assertOk();
 
-        $this->assertCount(6, $queries, implode("\n", array_column($queries, 'query')));
+        $this->assertCount(7, $queries, implode("\n", array_column($queries, 'query')));
     }
 
     public function test_the_row_count_does_not_change_the_query_count(): void

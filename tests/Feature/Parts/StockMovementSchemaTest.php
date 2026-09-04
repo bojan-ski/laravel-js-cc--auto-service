@@ -21,7 +21,7 @@ class StockMovementSchemaTest extends TestCase
         $columns = Schema::getColumnListing('stock_movements');
 
         $this->assertEqualsCanonicalizing([
-            'id', 'part_id', 'job_item_id', 'user_id',
+            'id', 'part_id', 'job_item_id', 'user_id', 'supplier_id',
             'quantity_change', 'reason', 'note',
             'created_at', 'updated_at',
         ], $columns);
@@ -35,7 +35,7 @@ class StockMovementSchemaTest extends TestCase
             fn (array $column): array => [$column['name'] => $column['nullable']]
         );
 
-        foreach (['job_item_id', 'note'] as $column) {
+        foreach (['job_item_id', 'supplier_id', 'note'] as $column) {
             $this->assertTrue($nullable[$column], "{$column} should be nullable");
         }
 

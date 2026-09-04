@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Services\IdentifierNormalizer;
 use Database\Factories\PartFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['sku', 'name', 'description', 'unit_price', 'cost_price', 'reorder_level', 'location'])]
+#[Fillable(['sku', 'name', 'brand_id', 'category', 'description', 'unit_price', 'cost_price', 'reorder_level', 'location'])]
 class Part extends Model
 {
     /** @use HasFactory<PartFactory> */
@@ -24,6 +26,8 @@ class Part extends Model
         'id',
         'sku',
         'name',
+        'brand_id',
+        'category',
         'description',
         'quantity_in_stock',
         'reorder_level',
@@ -46,6 +50,22 @@ class Part extends Model
         return $this->hasMany(StockMovement::class)->orderByDesc('id');
     }
 
+    /**
+     * @return BelongsTo<Brand, $this>
+     */
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Brand::class)->withTrashed();
+    }
+
+    /**
+     * @return HasMany<PartNumber, $this>
+     */
+    public function numbers(): HasMany
+    {
+        return $this->hasMany(PartNumber::class)->orderBy('type')->orderBy('number_normalized');
+    }
+
     #[Scope]
     protected function visibleTo(Builder $query, User $user): void
     {
@@ -62,10 +82,22 @@ class Part extends Model
     protected function matching(Builder $query, string $term): void
     {
         $escaped = addcslashes($term, '%_\\');
+        $normalized = IdentifierNormalizer::normalize($term);
 
-        $query->where(function (Builder $query) use ($escaped) {
+        $query->where(function (Builder $query) use ($escaped, $normalized) {
             $query->where('sku', 'like', "%{$escaped}%")
                 ->orWhere('name', 'like', "%{$escaped}%");
+
+            if ($normalized === '') {
+                return;
+            }
+
+            $prefix = addcslashes($normalized, '%_\\');
+
+            $query->orWhereHas(
+                'numbers',
+                fn (Builder $numbers) => $numbers->where('number_normalized', 'like', "{$prefix}%"),
+            );
         });
     }
 

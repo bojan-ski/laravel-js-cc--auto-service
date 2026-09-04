@@ -14,8 +14,12 @@ class AdjustForm extends Component
      */
     public array $reasons;
 
+    /**
+     * @param  list<string>  $suppliers
+     */
     public function __construct(
         public Part $part,
+        public array $suppliers = [],
     ) {
         $this->reasons = $this->buildReasons();
     }

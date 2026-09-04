@@ -2,6 +2,7 @@
 
 namespace App\View\Components\Global;
 
+use App\Models\Brand;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -18,31 +19,41 @@ class Nav extends Component
     public User $user;
 
     /**
-     * @var array{label: string, url: string, active: bool}|null
+     * @var array<int, array{label: string, url: string, active: bool}>
      */
-    public ?array $staffLink;
+    public array $adminLinks;
 
     public function __construct()
     {
         $this->user = auth()->user();
         $this->items = $this->buildItems();
-        $this->staffLink = $this->buildStaffLink();
+        $this->adminLinks = $this->buildAdminLinks();
     }
 
     /**
-     * @return array{label: string, url: string, active: bool}|null
+     * @return array<int, array{label: string, url: string, active: bool}>
      */
-    private function buildStaffLink(): ?array
+    private function buildAdminLinks(): array
     {
-        if (Gate::denies('viewAny', User::class)) {
-            return null;
+        $links = [];
+
+        if (Gate::allows('viewAny', User::class)) {
+            $links[] = [
+                'label' => __('app.nav.staff'),
+                'url' => route('admin.users.index'),
+                'active' => request()->routeIs('admin.users.*'),
+            ];
         }
 
-        return [
-            'label' => __('app.nav.staff'),
-            'url' => route('admin.users.index'),
-            'active' => request()->routeIs('admin.users.*'),
-        ];
+        if (Gate::allows('viewAny', Brand::class)) {
+            $links[] = [
+                'label' => __('app.nav.brands'),
+                'url' => route('admin.brands.index'),
+                'active' => request()->routeIs('admin.brands.*'),
+            ];
+        }
+
+        return $links;
     }
 
     /**
