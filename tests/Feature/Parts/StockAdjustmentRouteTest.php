@@ -209,10 +209,11 @@ class StockAdjustmentRouteTest extends TestCase
     }
 
     /**
-     * Route-model binding bypasses the visibility scope, so the form must
-     * re-resolve the part exactly as every PartController action does. Asserted
-     * at SQL level: a rendered page cannot tell a column that is absent from one
-     * that is merely not printed.
+     * The route no longer binds the model, so there is exactly one read of the
+     * parts table and it carries the role's scope. Previously binding ran an
+     * unscoped `select *` first, hydrating cost_price for every role before the
+     * scoped read replaced it. Asserted at SQL level: a rendered page cannot tell
+     * a column that is absent from one that is merely not printed.
      *
      * @return array<string, array{0: string, 1: bool}>
      */
@@ -244,7 +245,11 @@ class StockAdjustmentRouteTest extends TestCase
             fn (string $query): bool => str_contains($query, 'from `parts`'),
         ));
 
-        $this->assertCount(2, $resolving, "The form did not re-resolve the part:\n".implode("\n", $queries));
+        $this->assertCount(
+            1,
+            $resolving,
+            "The parts table must be read exactly once, through the scope:\n".implode("\n", $queries),
+        );
 
         $scoped = end($resolving);
 
