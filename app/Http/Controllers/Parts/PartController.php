@@ -56,11 +56,11 @@ class PartController extends Controller
             ->with('success', __('parts.flash.created', ['sku' => $part->sku]));
     }
 
-    public function show(Request $request, Part $part): View
+    public function show(Request $request, int $part): View
     {
-        Gate::authorize('view', $part);
+        $visible = $this->visible($part, $request->user(), allowTrashed: true);
 
-        $visible = $this->visible($part, $request->user());
+        Gate::authorize('view', $visible);
 
         return view('pages.parts.show', [
             'part' => $visible,
@@ -69,51 +69,67 @@ class PartController extends Controller
         ]);
     }
 
-    public function edit(Request $request, Part $part): View
+    public function edit(Request $request, int $part): View
     {
-        Gate::authorize('update', $part);
+        $visible = $this->visible($part, $request->user());
 
-        return view('pages.parts.edit', ['part' => $this->visible($part, $request->user())]);
+        Gate::authorize('update', $visible);
+
+        return view('pages.parts.edit', ['part' => $visible]);
     }
 
-    public function update(PartRequest $request, Part $part): RedirectResponse
+    public function update(PartRequest $request, int $part): RedirectResponse
     {
-        Gate::authorize('update', $part);
+        $visible = $this->visible($part, $request->user());
 
-        $this->parts->update($part, $request->validated());
+        Gate::authorize('update', $visible);
 
-        return redirect()->route('parts.show', $part)
-            ->with('success', __('parts.flash.updated', ['sku' => $part->sku]));
+        $this->parts->update($visible, $request->validated());
+
+        return redirect()->route('parts.show', $visible)
+            ->with('success', __('parts.flash.updated', ['sku' => $visible->sku]));
     }
 
-    public function destroy(Part $part): RedirectResponse
+    public function destroy(Request $request, int $part): RedirectResponse
     {
-        Gate::authorize('delete', $part);
+        $visible = $this->visible($part, $request->user());
 
-        $this->parts->delete($part);
+        Gate::authorize('delete', $visible);
+
+        $this->parts->delete($visible);
 
         return redirect()->route('parts.index')
-            ->with('success', __('parts.flash.deleted', ['sku' => $part->sku]));
+            ->with('success', __('parts.flash.deleted', ['sku' => $visible->sku]));
     }
 
-    public function restore(Part $part): RedirectResponse
+    public function restore(Request $request, int $part): RedirectResponse
     {
-        Gate::authorize('restore', $part);
+        $visible = $this->visible($part, $request->user(), allowTrashed: true);
 
-        $this->parts->restore($part);
+        Gate::authorize('restore', $visible);
 
-        return redirect()->route('parts.show', $part)
-            ->with('success', __('parts.flash.restored', ['sku' => $part->sku]));
+        $this->parts->restore($visible);
+
+        return redirect()->route('parts.show', $visible)
+            ->with('success', __('parts.flash.restored', ['sku' => $visible->sku]));
     }
 
-    private function visible(Part $part, User $user): Part
+    /**
+     * Resolves the part through the role's column scope rather than letting route
+     * binding hydrate every column. Trashed parts are reachable only where the
+     * action needs them — show and restore — and then only for an admin, so a
+     * non-admin's request for a deleted part is a natural 404 rather than a 403.
+     * Editing, updating and deleting never see a trashed part at all: it must be
+     * restored first.
+     */
+    private function visible(int $part, User $user, bool $allowTrashed = false): Part
     {
         return Part::query()
             ->visibleTo($user)
             ->when(
-                Gate::allows('viewDeleted', Part::class),
+                $allowTrashed && Gate::allows('viewDeleted', Part::class),
                 fn (Builder $query) => $query->withTrashed(),
             )
-            ->findOrFail($part->getKey());
+            ->findOrFail($part);
     }
 }

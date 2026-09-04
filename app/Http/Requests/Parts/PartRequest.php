@@ -25,8 +25,8 @@ class PartRequest extends FormRequest
     {
         $sku = Rule::unique('parts', 'sku')->withoutTrashed();
 
-        if ($this->part() !== null) {
-            $sku->ignore($this->part());
+        if ($this->route('part') !== null) {
+            $sku->ignore($this->route('part'));
         }
 
         return [
@@ -56,13 +56,6 @@ class PartRequest extends FormRequest
         return [
             fn (Validator $validator) => $this->rejectDeletedConflict($validator),
         ];
-    }
-
-    private function part(): ?Part
-    {
-        $part = $this->route('part');
-
-        return $part instanceof Part ? $part : null;
     }
 
     private function rejectDeletedConflict(Validator $validator): void
