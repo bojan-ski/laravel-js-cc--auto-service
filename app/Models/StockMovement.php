@@ -51,6 +51,14 @@ class StockMovement extends Model
         return $this->belongsTo(User::class, 'user_id')->withTrashed();
     }
 
+    /**
+     * @return BelongsTo<Supplier, $this>
+     */
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
     public function isIncrease(): bool
     {
         return $this->quantity_change > 0;

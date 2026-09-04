@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Brand;
 use App\Models\Part;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -32,6 +33,8 @@ class PartFactory extends Factory
         return [
             'sku' => $prefix.'-'.fake()->unique()->numberBetween(1000, 9999),
             'name' => fake()->randomElement(self::CATALOGUE[$prefix]),
+            'brand_id' => null,
+            'category' => null,
             'description' => fake()->sentence(),
             'unit_price' => fake()->randomFloat(2, 200, 9000),
             'cost_price' => fake()->randomFloat(2, 100, 6000),
@@ -48,6 +51,18 @@ class PartFactory extends Factory
             'cost_price' => null,
             'location' => null,
         ]);
+    }
+
+    public function forBrand(?Brand $brand = null): static
+    {
+        return $this->state(fn (): array => [
+            'brand_id' => $brand?->getKey() ?? Brand::factory(),
+        ]);
+    }
+
+    public function inCategory(string $category = 'Filters'): static
+    {
+        return $this->state(fn (): array => ['category' => $category]);
     }
 
     public function inStock(int $quantity = 12): static

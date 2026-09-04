@@ -16,7 +16,7 @@ class PartSchemaTest extends TestCase
     public function test_the_table_has_exactly_the_specified_columns(): void
     {
         $this->assertEqualsCanonicalizing([
-            'id', 'sku', 'name', 'description', 'unit_price', 'cost_price',
+            'id', 'sku', 'name', 'brand_id', 'category', 'description', 'unit_price', 'cost_price',
             'quantity_in_stock', 'reorder_level', 'location',
             'deleted_at', 'created_at', 'updated_at',
         ], Schema::getColumnListing('parts'));
@@ -28,7 +28,7 @@ class PartSchemaTest extends TestCase
             fn (array $column): array => [$column['name'] => $column['nullable']]
         );
 
-        foreach (['description', 'cost_price', 'location', 'deleted_at'] as $column) {
+        foreach (['brand_id', 'category', 'description', 'cost_price', 'location', 'deleted_at'] as $column) {
             $this->assertTrue($nullable[$column], "{$column} should be nullable");
         }
 

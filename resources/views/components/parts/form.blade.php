@@ -2,6 +2,8 @@
     'action',
     'method' => 'POST',
     'part' => null,
+    'brands',
+    'categories',
     'submit',
     'cancel',
 ])
@@ -23,6 +25,27 @@
     />
 
     <x-forms.field name="name" :label="__('parts.form.name')" :value="$part?->name" required />
+
+    <x-forms.select
+        name="brand_id"
+        :label="__('parts.form.brand_id')"
+        :options="$brands"
+        :selected="$part?->brand_id"
+        :placeholder="__('brands.picker.placeholder')"
+    />
+
+    <x-forms.field
+        name="category"
+        :label="__('parts.form.category')"
+        :value="$part?->category"
+        list="part-categories"
+    />
+
+    <datalist id="part-categories">
+        @foreach ($categories as $category)
+            <option value="{{ $category }}"></option>
+        @endforeach
+    </datalist>
 
     <x-forms.textarea name="description" :label="__('parts.form.description')" :value="$part?->description" />
 

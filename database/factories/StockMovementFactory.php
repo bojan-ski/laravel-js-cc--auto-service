@@ -6,6 +6,7 @@ use App\Enums\StockMovementReason;
 use App\Models\JobItem;
 use App\Models\Part;
 use App\Models\StockMovement;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -30,10 +31,18 @@ class StockMovementFactory extends Factory
             'part_id' => Part::factory(),
             'job_item_id' => null,
             'user_id' => User::factory()->receptionist(),
+            'supplier_id' => null,
             'quantity_change' => fake()->numberBetween(1, 20),
             'reason' => StockMovementReason::Restock,
             'note' => null,
         ];
+    }
+
+    public function fromSupplier(?Supplier $supplier = null): static
+    {
+        return $this->state(fn (): array => [
+            'supplier_id' => $supplier?->getKey() ?? Supplier::factory(),
+        ]);
     }
 
     public function forPart(Part $part): static

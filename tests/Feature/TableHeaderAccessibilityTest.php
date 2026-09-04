@@ -54,7 +54,10 @@ class TableHeaderAccessibilityTest extends TestCase
         Appointment::factory()->for($customer)->for($vehicle)->create([
             'scheduled_at' => CarbonImmutable::today()->setTime(9, 0),
         ]);
-        StockMovement::factory()->forPart(Part::factory()->inStock()->create())->manualAdjustment()->create();
+        StockMovement::factory()
+            ->forPart(Part::factory()->inStock()->forBrand()->create())
+            ->manualAdjustment()
+            ->create();
 
         $invoiced = Job::factory()->completed()->create();
         JobItem::factory()->forJob($invoiced)->create(['quantity' => 1, 'unit_price' => 100]);
@@ -79,6 +82,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'invoices index' => ['invoices.index'],
             'invoice detail' => ['invoices.show'],
             'staff index' => ['admin.users.index'],
+            'brands index' => ['admin.brands.index'],
         ];
     }
 
@@ -158,6 +162,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'parts catalogue' => ['parts.index'],
             'invoices index' => ['invoices.index'],
             'staff index' => ['admin.users.index'],
+            'brands index' => ['admin.brands.index'],
         ];
     }
 

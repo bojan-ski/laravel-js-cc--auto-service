@@ -16,6 +16,15 @@ class PartRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        foreach (['brand_id', 'category'] as $field) {
+            if ($this->input($field) === '') {
+                $this->merge([$field => null]);
+            }
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -32,6 +41,8 @@ class PartRequest extends FormRequest
         return [
             'sku' => ['required', 'string', 'max:40', $sku],
             'name' => ['required', 'string', 'max:120'],
+            'brand_id' => ['nullable', 'integer', Rule::exists('brands', 'id')->whereNull('deleted_at')],
+            'category' => ['nullable', 'string', 'max:60'],
             'description' => ['nullable', 'string', 'max:2000'],
             'unit_price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'cost_price' => [

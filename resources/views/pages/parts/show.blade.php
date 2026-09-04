@@ -3,5 +3,7 @@
 
     <x-parts.details :part="$part" />
 
+    <x-parts.numbers-section :part="$part" :numbers="$numbers" :types="$numberTypes" />
+
     <x-parts.movements-section :part="$part" :movements="$movements" :total="$movementTotal" />
 </x-layouts.app>

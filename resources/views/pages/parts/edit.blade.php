@@ -2,6 +2,8 @@
     <h1 class="text-2xl font-bold">{{ __('parts.edit.title', ['sku' => $part->sku]) }}</h1>
 
     <x-parts.form
+        :brands="$brands"
+        :categories="$categories"
         method="PUT"
         :action="route('parts.update', $part)"
         :part="$part"

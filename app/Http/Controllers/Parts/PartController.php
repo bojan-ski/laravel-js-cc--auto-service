@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Parts;
 
+use App\Enums\PartNumberType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Parts\PartIndexRequest;
 use App\Http\Requests\Parts\PartRequest;
 use App\Models\Part;
 use App\Models\User;
+use App\Services\BrandService;
 use App\Services\PartService;
 use App\Services\StockService;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,6 +22,7 @@ class PartController extends Controller
     public function __construct(
         private PartService $parts,
         private StockService $stock,
+        private BrandService $brands,
     ) {}
 
     public function index(PartIndexRequest $request): View
@@ -43,7 +46,7 @@ class PartController extends Controller
     {
         Gate::authorize('create', Part::class);
 
-        return view('pages.parts.create');
+        return view('pages.parts.create', $this->formOptions());
     }
 
     public function store(PartRequest $request): RedirectResponse
@@ -62,8 +65,12 @@ class PartController extends Controller
 
         Gate::authorize('view', $visible);
 
+        $visible->load(['brand:id,name,quality_tier,deleted_at', 'numbers']);
+
         return view('pages.parts.show', [
             'part' => $visible,
+            'numbers' => $visible->numbers,
+            'numberTypes' => PartNumberType::options(),
             'movements' => $this->stock->historyFor($visible),
             'movementTotal' => $this->stock->movementCountFor($visible),
         ]);
@@ -75,7 +82,18 @@ class PartController extends Controller
 
         Gate::authorize('update', $visible);
 
-        return view('pages.parts.edit', ['part' => $visible]);
+        return view('pages.parts.edit', ['part' => $visible, ...$this->formOptions()]);
+    }
+
+    /**
+     * @return array{brands: array<int, string>, categories: list<string>}
+     */
+    private function formOptions(): array
+    {
+        return [
+            'brands' => $this->brands->pickerOptions(),
+            'categories' => $this->parts->categoryOptions(),
+        ];
     }
 
     public function update(PartRequest $request, int $part): RedirectResponse

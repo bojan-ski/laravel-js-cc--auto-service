@@ -27,15 +27,15 @@
                     {{ $user->role->label() }}
                 </p>
 
-                @if ($staffLink !== null)
+                @foreach ($adminLinks as $adminLink)
                     <a
-                        href="{{ $staffLink['url'] }}"
-                        @if ($staffLink['active']) aria-current="page" @endif
+                        href="{{ $adminLink['url'] }}"
+                        @if ($adminLink['active']) aria-current="page" @endif
                         class="block px-3 py-2 text-sm font-medium text-text-inverse/80 hover:bg-text-inverse/10 hover:text-text-inverse focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                     >
-                        {{ $staffLink['label'] }}
+                        {{ $adminLink['label'] }}
                     </a>
-                @endif
+                @endforeach
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
@@ -71,15 +71,15 @@
                         {{ $user->role->label() }}
                     </p>
 
-                    @if ($staffLink !== null)
+                    @foreach ($adminLinks as $adminLink)
                         <a
-                            href="{{ $staffLink['url'] }}"
-                            @if ($staffLink['active']) aria-current="page" @endif
+                            href="{{ $adminLink['url'] }}"
+                            @if ($adminLink['active']) aria-current="page" @endif
                             class="block rounded-sm px-3 py-2 text-sm font-medium text-text-inverse/80 hover:bg-text-inverse/10 hover:text-text-inverse focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                         >
-                            {{ $staffLink['label'] }}
+                            {{ $adminLink['label'] }}
                         </a>
-                    @endif
+                    @endforeach
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

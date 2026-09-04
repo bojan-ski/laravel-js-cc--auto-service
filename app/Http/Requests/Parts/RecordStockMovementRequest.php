@@ -25,6 +25,10 @@ class RecordStockMovementRequest extends FormRequest
         if ($this->input('note') === '') {
             $this->merge(['note' => null]);
         }
+
+        if (is_string($this->input('supplier_name')) && trim($this->input('supplier_name')) === '') {
+            $this->merge(['supplier_name' => null]);
+        }
     }
 
     /**
@@ -50,7 +54,20 @@ class RecordStockMovementRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'supplier_name' => [
+                Rule::prohibitedIf(fn (): bool => ! $this->reasonAcceptsSupplier()),
+                'nullable',
+                'string',
+                'max:120',
+            ],
         ];
+    }
+
+    private function reasonAcceptsSupplier(): bool
+    {
+        $reason = StockMovementReason::tryFrom((string) $this->input('reason'));
+
+        return $reason !== null && $reason->acceptsSupplier();
     }
 
     public function reason(): StockMovementReason

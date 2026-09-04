@@ -5,7 +5,7 @@ return [
     'new' => 'New part',
     'count' => '{0} No parts|{1} 1 part|[2,*] :count parts',
     'search_label' => 'Search parts',
-    'search_placeholder' => 'Search SKU or name',
+    'search_placeholder' => 'Search SKU, name or part number',
     'view_part' => 'View :sku',
 
     'tabs' => [
@@ -23,6 +23,7 @@ return [
     'headers' => [
         'sku' => 'SKU',
         'name' => 'Name',
+        'brand' => 'Brand',
         'stock' => 'Stock',
         'price' => 'Price',
         'cost' => 'Cost',
@@ -50,8 +51,40 @@ return [
         'manual_adjustment' => 'Manual adjustment',
     ],
 
+    'numbers' => [
+        'section' => 'Part numbers',
+        'empty' => 'No part numbers recorded yet. Add the OE number to make this part findable by it.',
+        'add' => 'Add part number',
+        'submit' => 'Add number',
+        'type_label' => 'Type',
+        'number_label' => 'Number',
+        'delete_action' => 'Delete :number',
+        'confirm_remove' => 'Delete :number from this part? It stops matching searches for that number.',
+        'note' => 'Spacing, dashes and case are ignored when searching, so 1K0 615 301 AA and 1k0-615-301-aa find the same part.',
+
+        'types' => [
+            'oe' => 'OE',
+            'catalog' => 'Catalogue',
+            'ean' => 'Barcode',
+            'supplier' => 'Supplier',
+        ],
+
+        'validation' => [
+            'not_a_number' => 'That is not a usable part number — it must contain at least one letter or digit.',
+            'duplicate' => 'This part already carries that number under the same type.',
+        ],
+
+        'flash' => [
+            'added' => ':number has been added.',
+            'removed' => ':number has been removed.',
+            'catalogue_conflict' => ':number is also a catalogue number on :sku (:name) under the same brand. Both were kept — check whether one is a duplicate.',
+        ],
+    ],
+
     'show' => [
         'details' => 'Part details',
+        'brand' => 'Brand',
+        'category' => 'Category',
         'stock' => 'Stock',
         'reorder_level' => 'Reorder at',
         'price' => 'Price',
@@ -70,6 +103,7 @@ return [
             'who' => 'Recorded by',
         ],
         'showing' => 'Showing :shown of :total movements',
+        'from_supplier' => 'from :name',
     ],
 
     'adjust' => [
@@ -80,6 +114,8 @@ return [
         'reason_label' => 'What kind of movement is this?',
         'quantity' => 'Quantity',
         'note' => 'Note',
+        'supplier' => 'Supplier (optional)',
+        'supplier_note' => 'Who this batch came from. A new name is remembered for next time; spacing and case are ignored when matching.',
         'submit' => 'Record',
         'help' => [
             'restock' => 'Stock arriving. The quantity must be positive.',
@@ -101,6 +137,9 @@ return [
     'form' => [
         'sku' => 'SKU',
         'name' => 'Name',
+        'brand_id' => 'Brand (optional)',
+        'category' => 'Category (optional)',
+        'numbers_note' => 'OE and catalogue numbers are added on the part page once it exists.',
         'description' => 'Notes (optional)',
         'unit_price' => 'Selling price',
         'cost_price' => 'Cost price (optional)',
@@ -128,7 +167,7 @@ return [
         ],
         'no_matches' => [
             'title' => 'No parts match that search',
-            'body' => 'Check the SKU or try part of the name.',
+            'body' => 'Check the SKU, or try part of the name or an OE number.',
         ],
         'none_low' => [
             'title' => 'Nothing is low on stock',
