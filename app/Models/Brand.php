@@ -34,6 +34,12 @@ class Brand extends Model
         $query->where('name', 'like', "%{$escaped}%");
     }
 
+    #[Scope]
+    protected function named(Builder $query, string $name): void
+    {
+        $query->where('name', trim($name));
+    }
+
     /**
      * @return array<string, string>
      */

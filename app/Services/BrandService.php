@@ -51,6 +51,19 @@ class BrandService
     }
 
     /**
+     * Exact, case-insensitive resolution by name — the `brands` table is
+     * `utf8mb4_unicode_ci`, verified against the live schema, so no normalized
+     * column is needed. Trashed brands never resolve: a deleted brand is not
+     * selectable on the part form either.
+     */
+    public function resolveByName(string $name): ?Brand
+    {
+        return trim($name) === ''
+            ? null
+            : Brand::query()->named($name)->first();
+    }
+
+    /**
      * @param  array<string, mixed>  $attributes
      */
     public function create(array $attributes): Brand

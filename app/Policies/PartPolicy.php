@@ -64,6 +64,15 @@ class PartPolicy
     }
 
     /**
+     * Importing both creates parts and moves stock, so it is the conjunction of
+     * create and adjustStock — which carry this same rule.
+     */
+    public function import(User $user): bool
+    {
+        return $user->isFrontOffice();
+    }
+
+    /**
      * Determine whether the user can record a stock movement by hand.
      */
     public function adjustStock(User $user): bool
