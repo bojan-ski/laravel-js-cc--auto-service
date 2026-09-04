@@ -27,6 +27,8 @@ class JobService
 
     public const int HISTORY_LIMIT = 10;
 
+    public const int ACTIVE_LIMIT = 10;
+
     public function __construct(
         private readonly JobReferenceGenerator $references,
         private readonly AppointmentService $appointments,
@@ -79,6 +81,32 @@ class JobService
     public function hasAny(): bool
     {
         return Job::query()->exists();
+    }
+
+    /**
+     * @return Collection<int, Job>
+     */
+    public function active(): Collection
+    {
+        return $this->activeQuery()
+            ->with('vehicle')
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->limit(self::ACTIVE_LIMIT)
+            ->get();
+    }
+
+    public function countActive(): int
+    {
+        return $this->activeQuery()->count();
+    }
+
+    /**
+     * @return Builder<Job>
+     */
+    private function activeQuery(): Builder
+    {
+        return Job::query()->whereIn('status', JobStatus::working());
     }
 
     /**

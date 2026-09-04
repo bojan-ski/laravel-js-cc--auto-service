@@ -6,10 +6,18 @@ use App\Models\Part;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class PartService
 {
     public const int PER_PAGE = 25;
+
+    public const int LOW_STOCK_LIMIT = 12;
+
+    /**
+     * @var list<string>
+     */
+    private const LOW_STOCK_COLUMNS = ['id', 'name', 'quantity_in_stock', 'reorder_level'];
 
     /**
      * @param  array{search: string, filter: string, trashed: string}  $filters
@@ -42,6 +50,25 @@ class PartService
     public function hasAny(bool $withTrashed = false): bool
     {
         return Part::query()->when($withTrashed, fn (Builder $query) => $query->withTrashed())->exists();
+    }
+
+    /**
+     * @return Collection<int, Part>
+     */
+    public function lowStock(): Collection
+    {
+        return Part::query()
+            ->lowStock()
+            ->select(self::LOW_STOCK_COLUMNS)
+            ->orderBy('name')
+            ->orderBy('id')
+            ->limit(self::LOW_STOCK_LIMIT)
+            ->get();
+    }
+
+    public function countLowStock(): int
+    {
+        return Part::query()->lowStock()->count();
     }
 
     /**

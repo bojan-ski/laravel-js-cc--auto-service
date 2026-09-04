@@ -43,11 +43,6 @@ return [
         'info' => 'Information',
     ],
 
-    'dashboard' => [
-        'title' => 'Dashboard',
-        'empty' => 'Nothing to show yet.',
-    ],
-
     'auth' => [
         'login' => [
             'title' => 'Sign in',

@@ -33,6 +33,20 @@ class AppointmentService
     }
 
     /**
+     * @return Collection<int, Appointment>
+     */
+    public function scheduledOn(CarbonImmutable $day): Collection
+    {
+        return Appointment::query()
+            ->with('vehicle')
+            ->where('scheduled_at', '>=', $day->startOfDay())
+            ->where('scheduled_at', '<', $day->startOfDay()->addDay())
+            ->orderBy('scheduled_at')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
      * @param  array{view: string, date: CarbonImmutable, status: string}  $filters
      * @return array<int, CarbonImmutable>
      */
