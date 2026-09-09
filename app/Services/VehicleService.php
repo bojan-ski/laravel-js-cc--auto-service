@@ -13,14 +13,16 @@ class VehicleService
     public function pickerOptions(): array
     {
         return Vehicle::query()
-            ->with('customer')
+            ->with(['customer' => fn ($query) => $query->withTrashed()])
             ->orderBy('registration_plate')
             ->get()
             ->mapWithKeys(fn (Vehicle $vehicle): array => [
                 $vehicle->getKey() => __('vehicles.picker.option', [
                     'plate' => $vehicle->registration_plate,
                     'vehicle' => $vehicle->make.' '.$vehicle->model,
-                    'owner' => $vehicle->customer->name,
+                    'owner' => $vehicle->customer->trashed()
+                        ? __('vehicles.picker.owner_deleted', ['name' => $vehicle->customer->name])
+                        : $vehicle->customer->name,
                 ]),
             ])
             ->all();

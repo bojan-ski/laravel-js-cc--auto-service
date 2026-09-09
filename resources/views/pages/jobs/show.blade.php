@@ -6,7 +6,7 @@
     <div class="mt-4 grid items-start gap-4 lg:grid-cols-2">
         <x-jobs.details :job="$job" />
 
-        <div class="space-y-4">
+        <div class="min-w-0 space-y-4">
             <x-jobs.line-items
                 :job="$job"
                 :show-pricing="$showPricing"

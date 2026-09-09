@@ -199,7 +199,6 @@ return [
         'name' => 'Name',
         'brand_id' => 'Brand (optional)',
         'category' => 'Category (optional)',
-        'numbers_note' => 'OE and catalogue numbers are added on the part page once it exists.',
         'description' => 'Notes (optional)',
         'unit_price' => 'Selling price',
         'cost_price' => 'Cost price (optional)',

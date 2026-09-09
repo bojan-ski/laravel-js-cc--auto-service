@@ -5,7 +5,7 @@
     $labelColumns = 3;
 @endphp
 
-<div class="mt-2 overflow-x-auto border border-border">
+<div class="relative mt-2 overflow-x-auto border border-border">
     <table role="table" class="w-full text-left">
         <thead role="rowgroup">
             <tr role="row" class="border-b border-border bg-surface-muted">
