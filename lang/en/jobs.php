@@ -141,14 +141,12 @@ return [
         ],
 
         'edit' => [
-            'title' => 'Edit line item',
             'title_for' => 'Edit line item: :description',
             'price' => 'Price',
             'row_marker' => 'This line is being edited below.',
             'open' => 'Edit',
             'open_line' => 'Edit :description',
             'save' => 'Save',
-            'save_line' => 'Save changes to :description',
             'cancel' => 'Cancel',
         ],
 

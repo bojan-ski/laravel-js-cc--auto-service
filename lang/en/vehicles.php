@@ -1,8 +1,6 @@
 <?php
 
 return [
-    'title' => 'Vehicles',
-
     'section' => [
         'title' => 'Vehicles',
         'empty' => 'No vehicles recorded yet.',
@@ -53,6 +51,7 @@ return [
 
     'picker' => [
         'option' => ':plate · :vehicle · :owner',
+        'owner_deleted' => ':name (deleted)',
     ],
 
     'form' => [

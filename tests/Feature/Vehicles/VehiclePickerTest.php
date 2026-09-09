@@ -37,6 +37,23 @@ class VehiclePickerTest extends TestCase
         $this->assertArrayNotHasKey($gone->getKey(), $options);
     }
 
+    /**
+     * A customer can be soft-deleted while still owning vehicles, and the
+     * picker feeds both the walk-in job form and the appointment form. Found
+     * by spec 26's route sweep: the owner load omitted withTrashed(), so one
+     * deleted customer turned both forms into a 500 for every receptionist.
+     */
+    public function test_a_vehicle_whose_owner_is_soft_deleted_is_still_offered_and_marked(): void
+    {
+        $owner = Customer::factory()->create(['name' => 'Mira Petrović']);
+        $vehicle = Vehicle::factory()->for($owner)->create(['registration_plate' => 'BG123AA', 'make' => 'VW', 'model' => 'Golf IV']);
+        $owner->delete();
+
+        $options = app(VehicleService::class)->pickerOptions();
+
+        $this->assertSame('BG123AA · VW Golf IV · Mira Petrović (deleted)', $options[$vehicle->getKey()]);
+    }
+
     public function test_owners_are_eager_loaded(): void
     {
         Vehicle::factory()->count(5)->create();
