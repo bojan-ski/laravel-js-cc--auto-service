@@ -1,58 +1,151 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🔧 Auto Service
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Auto Service** is an internal garage management application for a single auto repair shop.
+It runs the whole working day without paper: booking appointments, receiving cars, recording labor and parts, tracking stock, and invoicing the customer. It is built as dense, fast, high-contrast shop equipment for staff working at a counter.
 
-## About Laravel
+Every user is a staff member. Accounts are created by an admin, and there is no public registration. Customers are records, not users: they never log in, and they are contacted only by email. The core rule is that **once a job is invoiced it is locked**, and only an admin voiding the invoice can reopen it.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 🔩 Mechanic
+- 🔐 Authentication: Sign in, Forgot/Reset password
+- 📋 Jobs board with status tabs, search by plate or customer, sorting, and pagination
+- 🔄 Move jobs through their lifecycle (Received → In progress ⇄ Awaiting parts → Completed)
+- 🛠️ Record their own labor lines and the parts they take off the shelf (stock falls immediately)
+- 📸 Upload job photos (optimized into two WebP sizes with **Intervention Image**) and PDF documents
+- 🚗 View customers, vehicles, and full vehicle service history (read-only)
+- 🗓️ View appointments and mark cars as arrived or no-show
+- 📦 View the parts catalogue and stock levels
+- 🙈 **Never sees money**: prices, totals, and invoices are withheld at the query level, not just hidden in the page
 
-## Learning Laravel
+### 🧾 Receptionist
+- ✅ Everything a mechanic can do, with prices visible
+- 👥 Create and edit customers and vehicles, with plate and VIN uniqueness
+- 🗓️ Book appointments (with a non-blocking overlap warning) and create jobs from an arrival or as a walk-in
+- 🛠️ Manage every job line regardless of who recorded it; cancel and reopen jobs
+- 📦 Create and edit parts, record OE, catalogue, barcode, and supplier numbers, restock, and adjust stock. Every change is written to an audit trail
+- 📥 Import parts from a CSV file (all-or-nothing) using a generated template
+- 💶 Issue invoices from completed jobs (VAT stamped at issue time), mark them paid, and print them
+- 📧 Customers are emailed automatically when their car is ready and when an invoice is issued
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 🛡️ Admin
+- ✅ Everything a receptionist can do, plus part cost prices
+- 👤 Manage staff accounts (create, edit, offboard), with safeguards so the last admin cannot be removed
+- ❌ Void invoices. This is the only way to unlock an invoiced job
+- 🏷️ Manage part brands and their quality tiers
+- 🗑️ Delete and restore customers, vehicles, and parts. Nothing is ever purged, so every past job keeps its history
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 🛠️ Tech Stack
+- **Framework**: [Laravel 13](https://laravel.com/) on PHP 8.4
+- **Database**: [MySQL](https://www.mysql.com/)
+- **Templating**: [Blade Templates](https://laravel.com/docs/blade) + vanilla JavaScript modules (progressive enhancement, no frontend framework)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/), built with [Vite 8](https://vite.dev/)
+- **Image Handling**: [Intervention Image 4](https://image.intervention.io/) (WebP thumbnail and full-size variants, GD driver)
+- **Queue**: [Laravel Queues](https://laravel.com/docs/queues) (database driver) for all customer email
+- **Email**: [Laravel Mail](https://laravel.com/docs/mail) (Mailables), with [Mailtrap](https://mailtrap.io/) for development and staging
+- **Testing**: [PHPUnit](https://phpunit.de/)
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## 🚀 Getting Started
 
+### 1. Clone the Repository
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/bojan-ski/laravel-js-cc--auto-service
+cd laravel-js-cc--auto-service
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install Dependencies
+```bash
+composer install
+npm install
+```
 
-## Contributing
+### 3. Create the Databases
+Create two MySQL databases: `auto_service` for the app and `auto_service_testing` for the test suite (configured in `phpunit.xml`).
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Create Accounts
+[Mailtrap](https://mailtrap.io/) catches every outgoing email in a sandbox inbox, so no real customer is ever emailed during development or on staging.
 
-## Code of Conduct
+### 5. Environment Setup - .env
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```env
+# Application
+APP_NAME="Auto Service"
+APP_URL=http://localhost:8000
 
-## Security Vulnerabilities
+# Database
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=auto_service
+DB_USERNAME=
+DB_PASSWORD=
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Queue (all customer email is queued)
+QUEUE_CONNECTION=database
 
-## License
+# Mail (Mailtrap sandbox)
+MAIL_MAILER=smtp
+MAIL_HOST=
+MAIL_PORT=
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM_ADDRESS=
+MAIL_FROM_NAME="Auto Service"
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# First admin account (created by the seeder)
+ADMIN_EMAIL=
+ADMIN_PASSWORD=
+
+# Shop settings (VAT is stamped onto each invoice at issue time)
+SHOP_LABOR_RATE=3000
+SHOP_VAT_RATE=20
+SHOP_IDENTITY_NAME=
+SHOP_IDENTITY_ADDRESS=
+SHOP_IDENTITY_PHONE=
+SHOP_IDENTITY_TAX_NUMBER=
+```
+
+### 6. Run Migrations & Seed Database
+```bash
+php artisan migrate --seed
+```
+The seeder creates the first admin account from `ADMIN_EMAIL` and `ADMIN_PASSWORD`. It refuses to run without a password, and it is safe to run again. Sign in as that admin to create the other staff accounts. There is no demo data.
+
+> Do **not** run `php artisan storage:link`. Job photos and documents are staff-only files. They live on the private disk and are served only through an authorized route.
+
+### 7. Start Servers
+```bash
+php artisan serve
+npm run dev
+php artisan queue:work
+```
+Without the queue worker, customer emails wait unsent in the `queue_jobs` table.
+
+### 8. Run the Tests
+```bash
+php artisan test --compact
+```
+
+---
+
+## 🌐 Deployment
+- The web server's document root must be `public/`
+- Build the frontend with `npm run build`
+- Keep a queue worker running. On shared hosting without Supervisor, run a cron job every minute: `php artisan queue:work --stop-when-empty --max-time=50`
+- Raise PHP's `upload_max_filesize` to at least 24M and `post_max_size` to at least 32M. With lower limits a large photo or PDF upload fails as a "419 page expired" error
+- The application is deliberately kept out of search engines on every host: `robots.txt` disallows everything, and every response carries `X-Robots-Tag: noindex`
+
+---
+
+## 👨‍💻 Author
+Developed with ❤️ by BPdevelopment (bojan-ski)
