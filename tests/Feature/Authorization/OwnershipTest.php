@@ -170,13 +170,11 @@ class OwnershipTest extends TestCase
     }
 
     /**
-     * Row 5, the row to read carefully. "A mechanic cannot create a job" and "a
-     * mechanic can mark an appointment arrived, which creates a job" are both
-     * true; authorization follows the ORIGIN. A test asserting only the first
-     * half would pass against an implementation that has broken arrivals for
-     * mechanics entirely.
+     * Row 5. Authorization follows the ORIGIN: a walk-in asks JobPolicy::create,
+     * an arrival asks AppointmentPolicy::markArrived. A mechanic holds neither,
+     * so both doors must be shut, and each is asserted separately.
      */
-    public function test_a_mechanic_cannot_open_a_walk_in_but_can_open_a_job_from_an_arrival(): void
+    public function test_a_mechanic_cannot_open_a_job_from_either_origin(): void
     {
         $mechanic = User::factory()->mechanic()->create();
         $appointment = Appointment::factory()->booked()->create();
@@ -191,16 +189,16 @@ class OwnershipTest extends TestCase
 
         $this->actingAs($mechanic)
             ->get(route('jobs.create', ['appointment' => $appointment->getKey()]))
-            ->assertOk();
+            ->assertForbidden();
 
         $this->actingAs($mechanic)
             ->post(route('jobs.store'), [
                 'appointment_id' => $appointment->getKey(),
                 'complaint' => 'Service due',
             ])
-            ->assertRedirect();
+            ->assertForbidden();
 
-        $this->assertSame(1, Job::query()->count());
+        $this->assertSame(0, Job::query()->count());
     }
 
     public function test_a_mechanic_may_delete_their_own_attachment_and_is_refused_a_colleagues(): void

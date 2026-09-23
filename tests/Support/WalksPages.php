@@ -82,7 +82,7 @@ trait WalksPages
                 'search' => QaFixture::PLATE_FRAGMENT,
             ]),
             'jobs.create' => self::plain('jobs.create', self::FRONT_OFFICE),
-            'jobs.create:appointment' => self::page('jobs.create', self::ALL_STAFF, query: fn (QaFixture $shop): array => [
+            'jobs.create:appointment' => self::page('jobs.create', self::FRONT_OFFICE, query: fn (QaFixture $shop): array => [
                 'appointment' => $shop->bookedAppointment->getKey(),
             ]),
             'jobs.show:locked' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->lockedJob]),
@@ -171,6 +171,8 @@ trait WalksPages
             'admin.brands.index:search' => self::page('admin.brands.index', self::ADMIN_ONLY, query: fn (): array => ['search' => 'Bosch']),
             'admin.brands.create' => self::plain('admin.brands.create', self::ADMIN_ONLY),
             'admin.brands.edit' => self::page('admin.brands.edit', self::ADMIN_ONLY, fn (QaFixture $shop): array => [$shop->brand]),
+
+            'admin.appointment-hours.edit' => self::plain('admin.appointment-hours.edit', self::ADMIN_ONLY),
 
             'login' => self::plain('login', self::GUEST_ONLY),
             'password.request' => self::plain('password.request', self::GUEST_ONLY),

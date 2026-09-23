@@ -1,10 +1,13 @@
 @props([
     'appointment' => null,
     'vehicleOptions' => [],
+    'hours',
+    'earliest' => null,
 ])
 
 @php
     $isEdit = $appointment !== null;
+    $scheduleHintId = $errors->has('scheduled_at') ? null : 'scheduled_at-hint';
 @endphp
 
 <form
@@ -44,14 +47,22 @@
         />
     @endif
 
-    <x-forms.field
-        name="scheduled_at"
-        type="datetime-local"
-        :label="__('appointments.form.scheduled_at')"
-        :value="$isEdit ? $appointment->scheduled_at->format('Y-m-d\TH:i') : null"
-        data-appointment-overlap-input
-        required
-    />
+    <div>
+        <x-forms.field
+            name="scheduled_at"
+            type="datetime-local"
+            :label="__('appointments.form.scheduled_at')"
+            :value="$isEdit ? $appointment->scheduled_at->format('Y-m-d\TH:i') : null"
+            :min="$earliest"
+            :aria-describedby="$scheduleHintId"
+            data-appointment-overlap-input
+            required
+        />
+
+        <p id="scheduled_at-hint" class="mt-1 text-sm text-text-muted tabular-nums">
+            {{ __('appointments.form.scheduled_at_hint', ['open' => $hours->opensAt(), 'close' => $hours->closesAt()]) }}
+        </p>
+    </div>
 
     <p data-appointment-overlap-output class="text-sm text-status-awaiting-parts" role="status" aria-live="polite"></p>
 

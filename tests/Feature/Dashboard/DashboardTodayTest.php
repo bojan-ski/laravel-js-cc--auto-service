@@ -161,4 +161,32 @@ class DashboardTodayTest extends TestCase
 
         $this->page()->assertSee(__('dashboard.today.empty'));
     }
+
+    /**
+     * The whole row is the link, so the anchor must hold the time and the
+     * plate, not wrap the plate alone.
+     */
+    public function test_every_row_is_one_link_to_its_appointment(): void
+    {
+        $today = CarbonImmutable::today();
+        $booked = $this->bookAt('BG123', $today->setTime(8, 0));
+        $missed = $this->bookAt('NS887', $today->setTime(10, 30), 'noShow');
+
+        $html = $this->actingAs(User::factory()->mechanic()->create())
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->getContent();
+
+        foreach ([[$booked, '08:00', 'BG123'], [$missed, '10:30', 'NS887']] as [$appointment, $time, $plate]) {
+            preg_match(
+                '/<li\b[^>]*>\s*<a\b[^>]*href="'.preg_quote(route('appointments.show', $appointment), '/').'"[^>]*>(.*?)<\/a>\s*<\/li>/s',
+                $html,
+                $row,
+            );
+
+            $this->assertNotEmpty($row, "{$plate} must be a whole-row link.");
+            $this->assertStringContainsString($time, $row[1]);
+            $this->assertStringContainsString($plate, $row[1]);
+        }
+    }
 }

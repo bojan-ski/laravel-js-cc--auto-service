@@ -51,7 +51,7 @@ class JobIntakeViewTest extends TestCase
         $appointment = Appointment::factory()->create(['scheduled_at' => now()->addDay()->setTime(10, 30)]);
         $appointment->load(['vehicle', 'customer', 'createdBy']);
 
-        $this->actingAs(User::factory()->mechanic()->create())
+        $this->actingAs(User::factory()->receptionist()->create())
             ->get(route('jobs.create', ['appointment' => $appointment->getKey()]))
             ->assertOk()
             ->assertSee('name="appointment_id"', false)

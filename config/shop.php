@@ -28,6 +28,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Default Appointment Hours
+    |--------------------------------------------------------------------------
+    |
+    | The window new and rescheduled appointments must fit inside until an
+    | admin sets the shop's own hours from the appointments page.
+    |
+    */
+
+    'appointment_hours' => [
+        'open' => '08:00',
+        'close' => '20:00',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Shop Identity
     |--------------------------------------------------------------------------
     |

@@ -28,18 +28,6 @@ class JobIntakeRouteTest extends TestCase
         ];
     }
 
-    /**
-     * @return array<string, array{0: string}>
-     */
-    public static function everyRoleProvider(): array
-    {
-        return [
-            'mechanic' => ['mechanic'],
-            'receptionist' => ['receptionist'],
-            'admin' => ['admin'],
-        ];
-    }
-
     public function test_both_routes_sit_in_the_auth_band(): void
     {
         foreach (['jobs.create', 'jobs.store'] as $name) {
@@ -73,8 +61,8 @@ class JobIntakeRouteTest extends TestCase
         $this->assertSame(0, Job::query()->count());
     }
 
-    #[DataProvider('everyRoleProvider')]
-    public function test_every_role_may_open_and_submit_the_appointment_path(string $role): void
+    #[DataProvider('frontOfficeProvider')]
+    public function test_front_office_may_open_and_submit_the_appointment_path(string $role): void
     {
         $user = User::factory()->{$role}()->create();
         $appointment = Appointment::factory()->create(['scheduled_at' => now()->addDay()->setTime(10, 30)]);
@@ -214,18 +202,20 @@ class JobIntakeRouteTest extends TestCase
         $this->assertSame(1, Job::query()->count());
     }
 
-    public function test_the_appointment_path_does_not_consult_job_create(): void
+    public function test_a_mechanic_may_not_open_or_submit_the_appointment_path(): void
     {
         $mechanic = User::factory()->mechanic()->create();
         $appointment = Appointment::factory()->create();
 
-        $this->assertFalse($mechanic->can('create', Job::class));
+        $this->actingAs($mechanic)
+            ->get(route('jobs.create', ['appointment' => $appointment->getKey()]))
+            ->assertForbidden();
 
         $this->actingAs($mechanic)
             ->post(route('jobs.store'), ['appointment_id' => $appointment->getKey(), 'complaint' => 'Booked car'])
-            ->assertRedirect()
-            ->assertSessionHas('success');
+            ->assertForbidden();
 
-        $this->assertSame(1, Job::query()->count());
+        $this->assertSame(0, Job::query()->count());
+        $this->assertTrue($appointment->fresh()->isBooked());
     }
 }

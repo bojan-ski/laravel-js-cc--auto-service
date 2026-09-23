@@ -20,7 +20,7 @@ class AppointmentTransitionController extends Controller
 
         $this->appointments->markNoShow($appointment);
 
-        return $this->redirectToDay($appointment, 'no_show');
+        return $this->redirectToAppointment($appointment, 'no_show');
     }
 
     public function cancel(Appointment $appointment): RedirectResponse
@@ -29,15 +29,15 @@ class AppointmentTransitionController extends Controller
 
         $this->appointments->cancel($appointment);
 
-        return $this->redirectToDay($appointment, 'cancelled');
+        return $this->redirectToAppointment($appointment, 'cancelled');
     }
 
-    private function redirectToDay(Appointment $appointment, string $flashKey): RedirectResponse
+    private function redirectToAppointment(Appointment $appointment, string $flashKey): RedirectResponse
     {
         $appointment->load('vehicle');
 
         return redirect()
-            ->route('appointments.index', ['date' => $appointment->scheduled_at->format('Y-m-d')])
+            ->route('appointments.show', $appointment)
             ->with('success', __("appointments.flash.{$flashKey}", [
                 'plate' => $appointment->vehicle->registration_plate,
             ]));

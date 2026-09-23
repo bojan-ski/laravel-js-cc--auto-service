@@ -2,16 +2,11 @@
 
 namespace App\Http\Requests\Appointments;
 
+use App\Models\Appointment;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateAppointmentRequest extends FormRequest
+class UpdateAppointmentRequest extends AppointmentScheduleRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -19,10 +14,17 @@ class UpdateAppointmentRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'scheduled_at' => ['required', 'date'],
-            'duration_minutes' => ['required', 'integer', 'min:15', 'max:480'],
-            'notes' => ['nullable', 'string', 'max:2000'],
-        ];
+        return $this->scheduleRules();
+    }
+
+    protected function changesSchedule(): bool
+    {
+        /** @var Appointment $appointment */
+        $appointment = $this->route('appointment');
+        $submitted = strtotime((string) $this->input('scheduled_at'));
+
+        return $submitted === false
+            || $submitted !== $appointment->scheduled_at->getTimestamp()
+            || $this->integer('duration_minutes') !== $appointment->duration_minutes;
     }
 }

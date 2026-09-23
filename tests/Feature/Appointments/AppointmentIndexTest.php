@@ -46,26 +46,58 @@ class AppointmentIndexTest extends TestCase
             ->assertDontSee($tomorrow->vehicle->registration_plate);
     }
 
-    public function test_a_booked_row_links_arrival_to_the_job_intake_form(): void
+    /**
+     * The actions live on the appointment page. Asserted as front office, the
+     * role that would otherwise see all four on a booked row.
+     */
+    public function test_the_list_carries_no_actions(): void
     {
         $booked = $this->bookedAt('2026-09-02 10:00:00');
-        $arrived = Appointment::factory()->arrived()->create(['scheduled_at' => CarbonImmutable::parse('2026-09-02 11:00:00')]);
 
-        $response = $this->get(route('appointments.index'))->assertOk();
-
-        $response->assertSee(route('jobs.create', ['appointment' => $booked->getKey()]), false);
-        $response->assertDontSee(route('jobs.create', ['appointment' => $arrived->getKey()]), false);
-        $response->assertDontSee('/arrive"', false);
+        $this->get(route('appointments.index'))
+            ->assertOk()
+            ->assertSee('href="'.route('appointments.show', $booked).'"', false)
+            ->assertDontSee(route('jobs.create', ['appointment' => $booked->getKey()]), false)
+            ->assertDontSee(route('appointments.no-show', $booked), false)
+            ->assertDontSee(route('appointments.edit', $booked), false)
+            ->assertDontSee(route('appointments.cancel', $booked), false);
     }
 
-    public function test_the_arrival_link_is_visible_to_a_mechanic(): void
+    /**
+     * A link cannot wrap a <tr>, so the plate link's ::after is stretched over
+     * the positioned row. Only a browser can prove the hit-testing (checked by
+     * hand); this pins the two classes it depends on so neither is dropped.
+     */
+    public function test_the_row_link_covers_the_whole_row(): void
     {
         $booked = $this->bookedAt('2026-09-02 10:00:00');
 
-        $this->actingAs(User::factory()->mechanic()->create())
-            ->get(route('appointments.index'))
-            ->assertOk()
-            ->assertSee(route('jobs.create', ['appointment' => $booked->getKey()]), false);
+        $html = $this->get(route('appointments.index'))->assertOk()->getContent();
+
+        preg_match('/<tr\b[^>]*>(?:(?!<\/tr>).)*?href="'.preg_quote(route('appointments.show', $booked), '/').'".*?<\/tr>/s', $html, $row);
+
+        $this->assertNotEmpty($row);
+        $this->assertMatchesRegularExpression('/^<tr\b[^>]*class="[^"]*\brelative\b/', $row[0]);
+        $this->assertMatchesRegularExpression('/<a\b[^>]*class="[^"]*after:absolute after:inset-0/', $row[0]);
+    }
+
+    public function test_each_row_links_to_its_appointment_page(): void
+    {
+        $booked = $this->bookedAt('2026-09-02 10:00:00');
+
+        $html = $this->get(route('appointments.index'))->assertOk()->getContent();
+
+        preg_match('/<a\b[^>]*href="'.preg_quote(route('appointments.show', $booked), '/').'"[^>]*>([^<]*)<\/a>/', $html, $link);
+
+        $this->assertNotEmpty($link, 'The row must link to the appointment page.');
+        $this->assertSame($booked->vehicle->registration_plate, trim($link[1]));
+        $this->assertStringContainsString(
+            'aria-label="'.e(__('appointments.show.title', [
+                'plate' => $booked->vehicle->registration_plate,
+                'time' => $booked->scheduled_at->isoFormat('D MMM HH:mm'),
+            ])).'"',
+            $link[0],
+        );
     }
 
     public function test_day_mode_shows_only_the_anchor_day(): void

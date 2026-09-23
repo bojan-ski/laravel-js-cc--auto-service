@@ -19,6 +19,7 @@ class AppointmentBookingTest extends TestCase
     {
         parent::setUp();
 
+        $this->travelTo(CarbonImmutable::parse('2026-09-09 12:00:00'));
         $this->actingAs(User::factory()->receptionist()->create());
     }
 
@@ -148,14 +149,13 @@ class AppointmentBookingTest extends TestCase
             ->assertSessionHasErrors('duration_minutes');
     }
 
-    public function test_booking_in_the_past_is_allowed(): void
+    public function test_booking_in_the_past_is_refused(): void
     {
         $vehicle = Vehicle::factory()->create();
 
         $this->post(route('appointments.store'), $this->payload($vehicle, at: '2020-01-01T09:00'))
-            ->assertRedirect()
-            ->assertSessionHasNoErrors();
+            ->assertSessionHasErrors(['scheduled_at' => __('appointments.validation.not_before_tomorrow')]);
 
-        $this->assertSame(1, Appointment::query()->count());
+        $this->assertSame(0, Appointment::query()->count());
     }
 }

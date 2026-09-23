@@ -3,16 +3,10 @@
 namespace App\Http\Requests\Appointments;
 
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreAppointmentRequest extends FormRequest
+class StoreAppointmentRequest extends AppointmentScheduleRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -25,9 +19,12 @@ class StoreAppointmentRequest extends FormRequest
                 'required',
                 Rule::exists('vehicles', 'id')->whereNull('deleted_at'),
             ],
-            'scheduled_at' => ['required', 'date'],
-            'duration_minutes' => ['required', 'integer', 'min:15', 'max:480'],
-            'notes' => ['nullable', 'string', 'max:2000'],
+            ...$this->scheduleRules(),
         ];
+    }
+
+    protected function changesSchedule(): bool
+    {
+        return true;
     }
 }

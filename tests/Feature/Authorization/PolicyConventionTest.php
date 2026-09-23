@@ -104,7 +104,7 @@ class PolicyConventionTest extends TestCase
      * Authorization Summary rather than written down. It cannot be: `context/`
      * is gitignored (.gitignore:31), so the overview is not in the repository
      * and a committed test that parsed it would fail on any fresh clone. The
-     * derivation happened when this matrix was written — the overview's 38
+     * derivation happened when this matrix was written — the overview's
      * capabilities were counted by hand — and the literal below is the tripwire
      * that fails loudly if the matrix later shrinks.
      *
@@ -113,17 +113,17 @@ class PolicyConventionTest extends TestCase
      * neither this count nor the route drift guard. Nothing in the repository
      * can see the overview, so no test can close that gap.
      */
-    public function test_the_matrix_holds_every_capability_and_the_eleven_admin_only_rows(): void
+    public function test_the_matrix_holds_every_capability_and_the_twelve_admin_only_rows(): void
     {
-        // 38 capabilities in the Authorization Summary, five of which split
+        // 39 capabilities in the Authorization Summary, five of which split
         // into a lettered second row (4a, 10a, 10b, 16a, 20a) because they are
         // separate routes carrying different verdicts.
-        $this->assertCount(43, self::matrix());
+        $this->assertCount(44, self::matrix());
 
         // Cast: PHP stores a numeric row key as an integer, so '13' comes back
         // as 13 while the lettered keys stay strings.
         $this->assertSame(
-            ['13', '14', '27', '20a', '21', '28', '29', '37', '25', '26', '33'],
+            ['13', '14', '27', '20a', '21', '28', '29', '37', '25', '26', '33', '39'],
             array_map(strval(...), array_keys(self::adminOnlyMatrix())),
         );
     }

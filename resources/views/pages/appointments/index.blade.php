@@ -1,5 +1,5 @@
 <x-layouts.app :title="__('appointments.title')">
-    <x-appointments.index-header />
+    <x-appointments.index-header :hours="$hours" />
 
     <x-appointments.toolbar :filters="$filters" />
 

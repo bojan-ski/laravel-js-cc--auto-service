@@ -15,9 +15,5 @@
         <th role="columnheader" scope="col" class="px-3 py-2 text-sm font-semibold uppercase tracking-wider">
             {{ __('appointments.columns.status') }}
         </th>
-
-        <th role="columnheader" scope="col" class="px-3 py-2 text-sm font-semibold uppercase tracking-wider">
-            <span class="sr-only">{{ __('appointments.columns.actions') }}</span>
-        </th>
     </tr>
 </thead>
