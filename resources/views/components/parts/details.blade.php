@@ -55,8 +55,6 @@
         </dd>
 
         <dt class="{{ $term }}">{{ __('parts.show.description') }}</dt>
-        <dd @class(['whitespace-pre-line', 'text-text-muted' => $part->description === null])>
-            <x-ui.value :value="$part->description" />
-        </dd>
+        <dd @class(['whitespace-pre-line', 'text-text-muted' => $part->description === null])><x-ui.value :value="$part->description" /></dd>
     </dl>
 </section>

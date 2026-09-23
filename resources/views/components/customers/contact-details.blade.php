@@ -22,9 +22,7 @@
                 'whitespace-pre-line',
                 'tabular-nums' => $key === 'phone',
                 'text-text-muted' => $value === null,
-            ])>
-                <x-ui.value :value="$value" />
-            </dd>
+            ])><x-ui.value :value="$value" /></dd>
         @endforeach
     </dl>
 </section>
