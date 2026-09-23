@@ -42,6 +42,7 @@ return [
         'error' => 'Error',
         'warning' => 'Warning',
         'info' => 'Information',
+        'dismiss' => 'Dismiss',
     ],
 
     'auth' => [

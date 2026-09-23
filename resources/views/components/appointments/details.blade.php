@@ -44,9 +44,7 @@
             {{ __('appointments.show.notes') }}
         </dt>
 
-        <dd @class(['whitespace-pre-line', 'text-text-muted' => $appointment->notes === null])>
-            <x-ui.value :value="$appointment->notes" />
-        </dd>
+        <dd @class(['whitespace-pre-line', 'text-text-muted' => $appointment->notes === null])><x-ui.value :value="$appointment->notes" /></dd>
 
         @foreach ($timestamps as $key => $value)
             <dt class="text-xs font-medium uppercase tracking-wider text-text-muted sm:pt-0.5">

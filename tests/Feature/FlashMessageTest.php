@@ -73,4 +73,65 @@ class FlashMessageTest extends TestCase
             ->get('/')
             ->assertSee(__('app.flash.warning'));
     }
+
+    /**
+     * The stack is an overlay: fixed-position, so showing a message never
+     * pushes the page down.
+     */
+    public function test_the_flashes_render_inside_one_fixed_overlay_stack(): void
+    {
+        $html = $this->withSession(['success' => 'Saved.', 'error' => 'Job is locked.'])
+            ->get('/')
+            ->getContent();
+
+        $this->assertSame(1, preg_match_all('/<div\b[^>]*data-flash-stack[^>]*>/', $html, $stacks));
+        $this->assertMatchesRegularExpression('/class="[^"]*\bfixed\b[^"]*"/', $stacks[0][0]);
+    }
+
+    /**
+     * Success and info fade on their own. Errors and warnings stay until closed,
+     * because a message that vanishes after three seconds is easy to miss.
+     */
+    public function test_only_success_and_info_carry_an_auto_dismiss_timeout(): void
+    {
+        $html = $this->withSession([
+            'success' => 'Job completed.',
+            'error' => 'Job is locked.',
+            'warning' => 'Stock is negative.',
+            'info' => 'Invoice emailed.',
+        ])->get('/')->getContent();
+
+        preg_match_all('/<div\b[^>]*data-flash="(\w+)"[^>]*>/', $html, $toasts, PREG_SET_ORDER);
+
+        $this->assertCount(4, $toasts);
+
+        foreach ($toasts as [$tag, $key]) {
+            if (in_array($key, ['success', 'info'], true)) {
+                $this->assertStringContainsString('data-flash-timeout="3000"', $tag, "{$key} must auto-dismiss.");
+            } else {
+                $this->assertStringNotContainsString('data-flash-timeout', $tag, "{$key} must stay until closed.");
+            }
+        }
+    }
+
+    /**
+     * The close button does nothing without JavaScript, so it ships hidden and
+     * the flash module reveals it.
+     */
+    public function test_every_flash_carries_a_hidden_labelled_dismiss_button(): void
+    {
+        $html = $this->withSession(['success' => 'Saved.', 'error' => 'Job is locked.'])
+            ->get('/')
+            ->getContent();
+
+        preg_match_all('/<button\b[^>]*data-flash-dismiss[^>]*>.*?<\/button>/s', $html, $buttons);
+
+        $this->assertCount(2, $buttons[0]);
+
+        foreach ($buttons[0] as $button) {
+            $this->assertMatchesRegularExpression('/<button\b[^>]*\bhidden\b[^>]*>/', $button);
+            $this->assertStringContainsString('type="button"', $button);
+            $this->assertStringContainsString('<span class="sr-only">'.__('app.flash.dismiss').'</span>', $button);
+        }
+    }
 }

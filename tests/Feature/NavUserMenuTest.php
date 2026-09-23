@@ -43,6 +43,23 @@ class NavUserMenuTest extends TestCase
         $response->assertSee('<summary', false);
     }
 
+    /**
+     * `data-dropdown` is the hook the dropdown module uses to close a menu on
+     * an outside click or Escape. Both menus need it, desktop and mobile.
+     */
+    public function test_both_menus_are_hooked_for_outside_click_dismissal(): void
+    {
+        $html = $this->actingAs(User::factory()->create())->get('/')->getContent();
+
+        preg_match_all('/<details\b[^>]*>/', $html, $disclosures);
+
+        $this->assertCount(2, $disclosures[0]);
+
+        foreach ($disclosures[0] as $disclosure) {
+            $this->assertStringContainsString('data-dropdown', $disclosure);
+        }
+    }
+
     public function test_the_disclosure_does_not_override_the_visible_name_with_an_aria_label(): void
     {
         $user = User::factory()->create(['name' => 'Dragan Jovanovic']);

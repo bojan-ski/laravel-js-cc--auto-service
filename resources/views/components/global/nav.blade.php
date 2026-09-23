@@ -13,7 +13,7 @@
             @endforeach
         </nav>
 
-        <details class="relative ms-auto hidden md:block">
+        <details class="relative ms-auto hidden md:block" data-dropdown>
             <summary
                 class="cursor-pointer list-none py-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden"
             >
@@ -50,7 +50,7 @@
             </div>
         </details>
 
-        <details class="ms-auto md:hidden">
+        <details class="ms-auto md:hidden" data-dropdown>
             <summary
                 class="cursor-pointer list-none py-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden"
             >

@@ -60,9 +60,9 @@ class InvoicePrintMarkupTest extends TestCase
 
         $this->assertStringContainsString('data-flash="success"', $html, 'The flash region must render for this to mean anything.');
         $this->assertMatchesRegularExpression(
-            '/<div\s+class="[^"]*\bprint:hidden\b[^"]*"\s+data-flash="success"/',
+            '/<div\s+class="[^"]*\bprint:hidden\b[^"]*"\s+data-flash-stack\b[^>]*>\s*<div\b[^>]*data-flash="success"/',
             $html,
-            'The flash region must carry print:hidden.',
+            'The flash stack holding the region must carry print:hidden.',
         );
     }
 
