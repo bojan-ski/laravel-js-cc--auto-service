@@ -9,6 +9,8 @@
 
     <title>{{ __('app.document_title', ['page' => $title, 'app' => __('app.name')]) }}</title>
 
+    <x-global.favicons />
+
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
