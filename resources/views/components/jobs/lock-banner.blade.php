@@ -12,26 +12,16 @@
             <p class="mt-1 text-sm text-text-muted">{{ __('jobs.show.lock.body') }}</p>
 
             @if ($invoice)
-                <div class="mt-3 flex flex-wrap items-center gap-3">
-                    <span>
-                        <span class="text-sm text-text-muted">{{ __('jobs.show.lock.invoice') }}</span>
+                <p class="mt-3">
+                    <span class="text-sm text-text-muted">{{ __('jobs.show.lock.invoice') }}</span>
 
-                        <a
-                            href="{{ route('invoices.show', $invoice) }}"
-                            class="font-medium tabular-nums underline underline-offset-2 hover:text-brand-dark"
-                        >
-                            {{ $invoice->number }}
-                        </a>
-                    </span>
-
-                    <x-ui.button
-                        variant="secondary"
-                        :href="route('invoices.show', $invoice)"
-                        :aria-label="__('jobs.show.lock.view_invoice_for', ['number' => $invoice->number])"
+                    <a
+                        href="{{ route('invoices.show', $invoice) }}"
+                        class="font-medium tabular-nums underline underline-offset-2 hover:text-brand-dark"
                     >
-                        {{ __('jobs.show.lock.view_invoice') }}
-                    </x-ui.button>
-                </div>
+                        {{ $invoice->number }}
+                    </a>
+                </p>
             @endif
         </div>
     </div>
