@@ -8,11 +8,13 @@ use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\Support\AssertsJobLinks;
+use Tests\Support\AssertsRowLinks;
 use Tests\TestCase;
 
 class VehicleServiceHistoryTest extends TestCase
 {
     use AssertsJobLinks;
+    use AssertsRowLinks;
     use LazilyRefreshDatabase;
 
     public function test_a_vehicle_never_serviced_shows_the_empty_state(): void
@@ -37,6 +39,19 @@ class VehicleServiceHistoryTest extends TestCase
             ->assertOk()
             ->assertSee($this->jobLink($mine), false)
             ->assertDontSee($this->jobLink($theirs), false);
+    }
+
+    public function test_each_history_row_is_one_link_to_its_job(): void
+    {
+        $vehicle = Vehicle::factory()->create();
+        $job = Job::factory()->for($vehicle)->create();
+
+        $html = $this->actingAs(User::factory()->receptionist()->create())
+            ->get(route('vehicles.show', $vehicle))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertRowIsOneLinkTo($html, route('jobs.show', $job));
     }
 
     public function test_the_history_shows_reference_customer_status_date_and_mileage(): void

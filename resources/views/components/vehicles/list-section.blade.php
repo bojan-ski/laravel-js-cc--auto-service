@@ -27,9 +27,7 @@
                     <tr role="row" class="border-b border-border bg-surface-muted">
                         <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('vehicles.section.headers.plate') }}</th>
                         <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('vehicles.section.headers.vehicle') }}</th>
-                        <th role="columnheader" scope="col" class="{{ $cell }} hidden md:table-cell">{{ __('vehicles.section.headers.year') }}</th>
-                        <th role="columnheader" scope="col" class="{{ $cell }} text-end">{{ __('vehicles.section.headers.actions') }}</th>
-                    </tr>
+                        <th role="columnheader" scope="col" class="{{ $cell }} hidden md:table-cell">{{ __('vehicles.section.headers.year') }}</th>                    </tr>
                 </thead>
 
                 <tbody role="rowgroup">

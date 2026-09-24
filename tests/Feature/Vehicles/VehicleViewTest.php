@@ -8,10 +8,12 @@ use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Support\AssertsRowLinks;
 use Tests\TestCase;
 
 class VehicleViewTest extends TestCase
 {
+    use AssertsRowLinks;
     use LazilyRefreshDatabase;
 
     public function test_absent_optional_values_render_an_em_dash(): void
@@ -82,6 +84,27 @@ class VehicleViewTest extends TestCase
             ->assertOk()
             ->assertSee('BG123-ZZ')
             ->assertDontSee('NS887-AB');
+    }
+
+    public function test_each_vehicle_row_on_the_customer_page_is_one_link_with_no_actions_column(): void
+    {
+        $customer = Customer::factory()->create();
+        $vehicles = Vehicle::factory()->for($customer)->count(2)->create();
+
+        $html = $this->actingAs(User::factory()->receptionist()->create())
+            ->get(route('customers.show', $customer))
+            ->assertOk()
+            ->getContent();
+
+        foreach ($vehicles as $vehicle) {
+            $this->assertRowIsOneLinkTo($html, route('vehicles.show', $vehicle));
+        }
+
+        $section = Blade::render('<x-vehicles.list-section :customer="$customer" />', ['customer' => $customer->load('vehicles')]);
+
+        $this->assertSame(3, substr_count($section, 'role="columnheader"'));
+        $this->assertStringNotContainsString(__('vehicles.section.headers.actions'), $section);
+        $this->assertDoesNotMatchRegularExpression('/>\s*View\s*</', $section);
     }
 
     public function test_only_an_admin_sees_the_deleted_vehicles_section(): void
@@ -207,7 +230,6 @@ class VehicleViewTest extends TestCase
     {
         return [
             'add vehicle' => ['vehicles.section.add', 'vehicles.section.add_for'],
-            'view vehicle' => ['app.actions.view', 'vehicles.section.view_vehicle'],
             'restore vehicle' => ['vehicles.deleted.restore', 'vehicles.deleted.restore_vehicle'],
             'edit vehicle' => ['app.actions.edit', 'vehicles.edit.title'],
             'reassign vehicle' => ['vehicles.reassign.action', 'vehicles.reassign.action_vehicle'],

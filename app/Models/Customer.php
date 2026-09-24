@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\IdentifierNormalizer;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -53,10 +54,18 @@ class Customer extends Model
     protected function matching(Builder $query, string $term): void
     {
         $escaped = addcslashes($term, '%_\\');
+        $plate = IdentifierNormalizer::normalize($term);
 
-        $query->where(function (Builder $query) use ($escaped) {
+        $query->where(function (Builder $query) use ($escaped, $plate) {
             $query->where('name', 'like', "%{$escaped}%")
-                ->orWhere('phone', 'like', "%{$escaped}%");
+                ->orWhere('phone', 'like', "%{$escaped}%")
+                ->orWhereHas('vehicles', fn (Builder $vehicles) => $vehicles
+                    ->whereRaw("CONCAT(make, ' ', model) like ?", ["%{$escaped}%"])
+                    ->orWhere('vin', 'like', "%{$escaped}%")
+                    ->when($plate !== '', fn (Builder $vehicles) => $vehicles->orWhereRaw(
+                        "REPLACE(REPLACE(registration_plate, '-', ''), ' ', '') like ?",
+                        ["%{$plate}%"],
+                    )));
         });
     }
 }

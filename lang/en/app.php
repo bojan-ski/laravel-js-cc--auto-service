@@ -23,7 +23,6 @@ return [
     'deleted' => 'deleted',
 
     'actions' => [
-        'view' => 'View',
         'edit' => 'Edit',
         'delete' => 'Delete',
         'cancel' => 'Cancel',

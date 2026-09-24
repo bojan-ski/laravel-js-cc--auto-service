@@ -5,13 +5,14 @@ return [
 
     'index' => [
         'search_label' => 'Search customers',
-        'search_placeholder' => 'Name or phone',
+        'search_placeholder' => 'Name, phone, plate or vehicle',
         'new' => 'New customer',
         'count' => ':count customer|:count customers',
 
         'headers' => [
             'name' => 'Name',
             'phone' => 'Phone',
+            'vehicles' => 'Vehicles',
             'email' => 'Email',
         ],
     ],
