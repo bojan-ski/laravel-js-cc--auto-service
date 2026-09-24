@@ -17,7 +17,7 @@
 
         @if ($member->isOffboarded())
             <span class="block text-xs font-medium uppercase tracking-wider">
-                {{ __('staff.offboarded.on', ['date' => $member->deleted_at->format('j M Y')]) }}
+                {{ __('staff.offboarded.on', ['date' => $member->deleted_at->translatedFormat('j M Y')]) }}
             </span>
         @endif
     </td>

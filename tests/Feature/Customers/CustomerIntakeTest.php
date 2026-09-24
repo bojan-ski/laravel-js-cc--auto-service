@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Customers;
 
+use App\Enums\Locale;
 use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Job;
@@ -111,6 +112,25 @@ class CustomerIntakeTest extends TestCase
             ]);
 
         $this->assertSame(0, Appointment::query()->count());
+    }
+
+    /**
+     * The field names inside these messages come from each language's own
+     * lang file. English lowercases them mid-sentence; German capitalises
+     * every noun, so case-folding them in code would print "kennzeichen".
+     */
+    public function test_the_missing_field_is_named_in_the_users_language_and_casing(): void
+    {
+        $german = User::factory()->receptionist()->create();
+        $german->locale = Locale::De;
+        $german->save();
+
+        $this->actingAs($german);
+
+        $this->book([])->assertSessionHasErrors([
+            'new_customer_name' => __('customers.intake.required_customer', ['attribute' => 'Name'], 'de'),
+            'new_vehicle_plate' => __('customers.intake.required_vehicle', ['attribute' => 'Kennzeichen'], 'de'),
+        ]);
     }
 
     public function test_an_existing_customer_needs_no_customer_fields_but_still_needs_a_vehicle(): void

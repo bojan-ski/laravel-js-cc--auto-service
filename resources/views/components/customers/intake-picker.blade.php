@@ -38,8 +38,9 @@
             role="status"
             aria-live="polite"
             data-customer-picker-status
-            data-one="{{ trans_choice('customers.intake.results', 1, ['count' => ':count']) }}"
-            data-other="{{ trans_choice('customers.intake.results', 2, ['count' => ':count']) }}"
+            data-plural-one="{{ $resultTemplates['one'] }}"
+            data-plural-few="{{ $resultTemplates['few'] }}"
+            data-plural-other="{{ $resultTemplates['other'] }}"
             data-none="{{ __('customers.intake.results_none') }}"
         ></p>
 

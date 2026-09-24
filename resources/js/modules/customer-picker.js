@@ -1,3 +1,5 @@
+import { pluralize } from './plural';
+
 const DEBOUNCE_MS = 250;
 const MIN_LENGTH = 2;
 
@@ -53,8 +55,7 @@ function setUp(picker) {
             return;
         }
 
-        const template = count === 0 ? status.dataset.none : (count === 1 ? status.dataset.one : status.dataset.other);
-        status.textContent = template.replace(':count', count);
+        status.textContent = count === 0 ? status.dataset.none : pluralize(status, count);
     }
 
     function close() {

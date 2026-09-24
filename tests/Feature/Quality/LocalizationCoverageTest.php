@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Quality;
 
+use App\Enums\Locale;
 use Illuminate\Support\Facades\Lang;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -29,7 +30,7 @@ class LocalizationCoverageTest extends TestCase
      * and an interpolated string (`"jobs.flash.{$flashKey}"`) — those are the
      * constructed sites, allow-listed below rather than scanned.
      */
-    private const LITERAL_KEY = '/(?:__|trans_choice)\(\s*([\'"])([^\'"{$]+)\1\s*[,)]/';
+    private const LITERAL_KEY = '/(?:__|trans_choice|pluralTemplates)\(\s*([\'"])([^\'"{$]+)\1\s*[,)]/';
 
     /**
      * @var array<string, array{0: string, 1: string}> prefix => [consumer file, constructing fragment]
@@ -43,6 +44,7 @@ class LocalizationCoverageTest extends TestCase
         'jobs.attachments.types.' => ['app/Enums/AttachmentType.php', "__('jobs.attachments.types.'.\$this->value)"],
         'app.roles.' => ['app/Enums/UserRole.php', "__('app.roles.'.\$this->value)"],
         'app.theme.' => ['app/Enums/Theme.php', "__('app.theme.'.\$this->value)"],
+        'app.languages.' => ['app/Enums/Locale.php', "__('app.languages.'.\$this->value)"],
         'brands.tiers.' => ['app/Enums/QualityTier.php', "__('brands.tiers.'.\$this->value)"],
         'parts.numbers.types.' => ['app/Enums/PartNumberType.php', "__('parts.numbers.types.'.\$this->value)"],
         'parts.import.columns.' => ['app/Enums/PartImportColumn.php', "__('parts.import.columns.'.\$this->value)"],
@@ -80,9 +82,10 @@ class LocalizationCoverageTest extends TestCase
     ];
 
     /**
-     * The published paginator's JSON-style keys. This project has no
-     * lang/*.json, so each resolves to itself by design — which is why
-     * resources/views/vendor is excluded from the forward sweep.
+     * The published paginator's JSON-style keys. English has no lang/en.json,
+     * so in English each resolves to itself by design — which is why
+     * resources/views/vendor is excluded from the forward sweep. Every other
+     * locale translates exactly these in lang/{locale}.json.
      *
      * @var list<string>
      */
@@ -204,14 +207,27 @@ class LocalizationCoverageTest extends TestCase
         sort($expected);
 
         $this->assertSame($expected, $vendorKeys, 'The vendor paginator uses different JSON-style keys than this test documents.');
-        $this->assertSame([], glob(lang_path('*.json')) ?: [], 'A lang/*.json file exists; the JSON-style exclusion no longer holds.');
+
+        $jsonFiles = array_map(fn (string $path): string => basename($path), glob(lang_path('*.json')) ?: []);
+        sort($jsonFiles);
+        $translated = array_map(fn (Locale $locale): string => "{$locale->value}.json", array_filter(Locale::cases(), fn (Locale $locale): bool => $locale !== Locale::En));
+        sort($translated);
+
+        $this->assertSame($translated, $jsonFiles, 'lang/*.json exists for exactly the translated locales; English resolves the paginator keys to themselves.');
+
+        foreach ($jsonFiles as $file) {
+            $keys = array_keys(json_decode((string) file_get_contents(lang_path($file)), true, flags: JSON_THROW_ON_ERROR));
+            sort($keys);
+
+            $this->assertSame($expected, $keys, "lang/{$file} must carry exactly the paginator's keys and nothing else.");
+        }
     }
 
     public function test_the_js_modules_carry_no_user_facing_strings(): void
     {
         $modules = glob(resource_path('js/modules/*.js')) ?: [];
 
-        $this->assertCount(8, $modules, 'The module count changed; extend this test to the new module.');
+        $this->assertCount(9, $modules, 'The module count changed; extend this test to the new module.');
 
         foreach ($modules as $module) {
             $source = (string) file_get_contents($module);

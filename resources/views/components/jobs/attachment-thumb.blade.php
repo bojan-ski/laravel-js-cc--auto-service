@@ -2,7 +2,7 @@
 
 @php
     $uploader = $attachment->uploadedBy->shortName();
-    $uploadedOn = $attachment->created_at->format('j M Y');
+    $uploadedOn = $attachment->created_at->translatedFormat('j M Y');
     $alt = __('jobs.attachments.photo_alt', ['reference' => $job->reference, 'name' => $uploader]);
     $openLabel = __('jobs.attachments.open_photo', [
         'reference' => $job->reference,

@@ -19,10 +19,10 @@
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 24px;">
         <x-mail.row :label="__('mail.invoice_issued.number')" :value="$invoice->number" />
-        <x-mail.row :label="__('mail.invoice_issued.issued')" :value="$invoice->issued_at->format('j M Y')" />
+        <x-mail.row :label="__('mail.invoice_issued.issued')" :value="$invoice->issued_at->translatedFormat('j M Y')" />
 
         @if ($invoice->due_at !== null)
-            <x-mail.row :label="__('mail.invoice_issued.due')" :value="$invoice->due_at->format('j M Y')" />
+            <x-mail.row :label="__('mail.invoice_issued.due')" :value="$invoice->due_at->translatedFormat('j M Y')" />
         @endif
     </table>
 

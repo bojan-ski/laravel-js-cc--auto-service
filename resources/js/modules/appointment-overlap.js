@@ -1,3 +1,5 @@
+import { pluralize } from './plural';
+
 const DEBOUNCE_MS = 300;
 
 function buildUrl(form) {
@@ -52,9 +54,7 @@ async function refresh(form, output) {
     const payload = await response.json();
     const count = payload.data?.length ?? 0;
 
-    output.textContent = count > 0
-        ? form.dataset.appointmentOverlapTemplate.replace(':count', count)
-        : '';
+    output.textContent = count > 0 ? pluralize(form, count) : '';
 }
 
 export function registerAppointmentOverlap() {

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\Locale;
 use App\Models\Customer;
 use App\Models\Job;
 use Illuminate\Mail\Mailable;
@@ -15,7 +16,7 @@ class CustomerMailer
             return;
         }
 
-        Mail::to($customer->email)->queue($mailable);
+        Mail::to($customer->email)->locale(Locale::shop()->value)->queue($mailable);
     }
 
     public function noticeFor(Job $job): string

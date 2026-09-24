@@ -60,13 +60,7 @@ trait ValidatesCustomerIntake
         return [
             'customer_id' => __('customers.intake.customer'),
             'vehicle_id' => __('customers.intake.vehicle'),
-            'new_customer_name' => mb_strtolower(__('customers.form.name')),
-            'new_customer_phone' => mb_strtolower(__('customers.form.phone')),
-            'new_customer_email' => mb_strtolower(__('customers.index.headers.email')),
-            'new_vehicle_plate' => mb_strtolower(__('vehicles.form.registration_plate')),
-            'new_vehicle_make' => mb_strtolower(__('vehicles.form.make')),
-            'new_vehicle_model' => mb_strtolower(__('vehicles.form.model')),
-            'new_vehicle_year' => mb_strtolower(__('vehicles.section.headers.year')),
+            ...__('customers.intake.attributes'),
         ];
     }
 

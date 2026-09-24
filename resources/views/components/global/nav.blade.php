@@ -37,7 +37,24 @@
                     </a>
                 @endforeach
 
-                <x-global.theme-switch :options="$themeOptions" id-prefix="nav-desktop" class="mt-1 border-t border-border-strong pt-1" />
+                <x-global.preference-switch
+                    :action="route('preferences.theme.update')"
+                    name="theme"
+                    :label="__('app.theme.label')"
+                    id-prefix="nav-desktop-theme"
+                    :options="$themeOptions"
+                    :columns="1"
+                    class="mt-1 border-t border-border-strong pt-1"
+                />
+
+                <x-global.preference-switch
+                    :action="route('preferences.locale.update')"
+                    name="locale"
+                    :label="__('app.language.label')"
+                    id-prefix="nav-desktop-locale"
+                    :options="$localeOptions"
+                    :columns="1"
+                />
 
                 <form method="POST" action="{{ route('logout') }}" class="border-t border-border-strong pt-1">
                     @csrf
@@ -83,7 +100,22 @@
                         </a>
                     @endforeach
 
-                    <x-global.theme-switch :options="$themeOptions" id-prefix="nav-mobile" />
+                    <x-global.preference-switch
+                        :action="route('preferences.theme.update')"
+                        name="theme"
+                        :label="__('app.theme.label')"
+                        id-prefix="nav-mobile-theme"
+                        :options="$themeOptions"
+                    />
+
+                    <x-global.preference-switch
+                        :action="route('preferences.locale.update')"
+                        name="locale"
+                        :label="__('app.language.label')"
+                        id-prefix="nav-mobile-locale"
+                        :options="$localeOptions"
+                        :columns="2"
+                    />
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="{{ $theme->value }}">
+<html lang="{{ $htmlLang }}" data-theme="{{ $theme->value }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,6 +21,20 @@
         <div class="w-full {{ $width }} rounded-sm border border-border bg-surface p-6">
             {{ $slot }}
         </div>
+
+        @if ($localeOptions !== [])
+            <x-global.preference-switch
+                :action="route('locale.update')"
+                method="POST"
+                name="locale"
+                :label="__('app.language.label')"
+                id-prefix="guest-locale"
+                :options="$localeOptions"
+                :columns="4"
+                tone="surface"
+                class="mt-4 w-full {{ $width }}"
+            />
+        @endif
     </main>
 </body>
 </html>

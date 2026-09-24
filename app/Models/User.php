@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Locale;
 use App\Enums\Theme;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
@@ -38,6 +39,7 @@ class User extends Authenticatable
         return [
             'role' => UserRole::class,
             'theme' => Theme::class,
+            'locale' => Locale::class,
             'password' => 'hashed',
         ];
     }
