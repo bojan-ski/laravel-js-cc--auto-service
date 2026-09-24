@@ -22,7 +22,7 @@ class AppointmentAuthorizationTest extends TestCase
         $matrix = [
             'mechanic' => [
                 'viewAny' => true, 'view' => true, 'create' => false, 'update' => false,
-                'cancel' => false, 'markArrived' => true, 'markNoShow' => true,
+                'cancel' => false, 'markArrived' => false, 'markNoShow' => false,
             ],
             'receptionist' => [
                 'viewAny' => true, 'view' => true, 'create' => true, 'update' => true,
@@ -107,13 +107,13 @@ class AppointmentAuthorizationTest extends TestCase
         $this->assertFalse(User::factory()->admin()->create()->can('delete', $appointment));
     }
 
-    public function test_a_mechanic_may_record_arrival_without_front_office_rights(): void
+    public function test_a_mechanic_may_not_record_arrival_or_a_no_show(): void
     {
         $mechanic = User::factory()->mechanic()->create();
         $appointment = Appointment::factory()->create();
 
-        $this->assertFalse($mechanic->isFrontOffice());
-        $this->assertTrue($mechanic->can('markArrived', $appointment));
-        $this->assertTrue($mechanic->can('markNoShow', $appointment));
+        $this->assertTrue($appointment->canBeMarkedArrived());
+        $this->assertFalse($mechanic->can('markArrived', $appointment));
+        $this->assertFalse($mechanic->can('markNoShow', $appointment));
     }
 }

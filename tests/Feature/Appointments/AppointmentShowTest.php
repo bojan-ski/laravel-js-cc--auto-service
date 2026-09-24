@@ -143,6 +143,83 @@ class AppointmentShowTest extends TestCase
             ->assertDontSee('href="'.route('customers.show', $customer).'"', false);
     }
 
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function frontOfficeProvider(): array
+    {
+        return [
+            'receptionist' => ['receptionist'],
+            'admin' => ['admin'],
+        ];
+    }
+
+    #[DataProvider('frontOfficeProvider')]
+    public function test_front_office_gets_all_four_actions_on_a_booked_appointment(string $role): void
+    {
+        $appointment = Appointment::factory()->create();
+
+        $this->actingAs(User::factory()->{$role}()->create())
+            ->get(route('appointments.show', $appointment))
+            ->assertOk()
+            ->assertSee('href="'.route('jobs.create', ['appointment' => $appointment->getKey()]).'"', false)
+            ->assertSee('action="'.route('appointments.no-show', $appointment).'"', false)
+            ->assertSee('href="'.route('appointments.edit', $appointment).'"', false)
+            ->assertSee('action="'.route('appointments.cancel', $appointment).'"', false);
+    }
+
+    public function test_the_actions_follow_the_heading_and_precede_the_details(): void
+    {
+        $appointment = Appointment::factory()->create();
+
+        $this->actingAs(User::factory()->receptionist()->create())
+            ->get(route('appointments.show', $appointment))
+            ->assertSeeInOrder([
+                '<h1',
+                route('jobs.create', ['appointment' => $appointment->getKey()]),
+                __('appointments.show.details'),
+            ], false);
+    }
+
+    public function test_a_mechanic_gets_no_actions(): void
+    {
+        $appointment = Appointment::factory()->create();
+
+        $this->actingAs(User::factory()->mechanic()->create())
+            ->get(route('appointments.show', $appointment))
+            ->assertOk()
+            ->assertDontSee(route('jobs.create', ['appointment' => $appointment->getKey()]), false)
+            ->assertDontSee(route('appointments.no-show', $appointment), false)
+            ->assertDontSee(route('appointments.edit', $appointment), false)
+            ->assertDontSee(route('appointments.cancel', $appointment), false);
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function terminalProvider(): array
+    {
+        return [
+            'arrived' => ['arrived'],
+            'no-show' => ['noShow'],
+            'cancelled' => ['cancelled'],
+        ];
+    }
+
+    #[DataProvider('terminalProvider')]
+    public function test_a_terminal_appointment_offers_no_actions_even_to_an_admin(string $state): void
+    {
+        $appointment = Appointment::factory()->{$state}()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get(route('appointments.show', $appointment))
+            ->assertOk()
+            ->assertDontSee(route('jobs.create', ['appointment' => $appointment->getKey()]), false)
+            ->assertDontSee(route('appointments.no-show', $appointment), false)
+            ->assertDontSee(route('appointments.edit', $appointment), false)
+            ->assertDontSee(route('appointments.cancel', $appointment), false);
+    }
+
     public function test_a_terminal_booking_shows_its_lifecycle_timestamp(): void
     {
         $appointment = Appointment::factory()->cancelled()->create();

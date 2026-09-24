@@ -52,7 +52,7 @@ class AppointmentPolicy
      */
     public function markArrived(User $user, Appointment $appointment): bool
     {
-        return $appointment->canBeMarkedArrived();
+        return $user->isFrontOffice() && $appointment->canBeMarkedArrived();
     }
 
     /**
@@ -60,6 +60,6 @@ class AppointmentPolicy
      */
     public function markNoShow(User $user, Appointment $appointment): bool
     {
-        return $appointment->canBeMarkedNoShow();
+        return $user->isFrontOffice() && $appointment->canBeMarkedNoShow();
     }
 }

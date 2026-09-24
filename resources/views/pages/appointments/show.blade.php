@@ -8,5 +8,7 @@
 <x-layouts.app :title="$title">
     <x-appointments.show-header :appointment="$appointment" />
 
+    <x-appointments.actions :appointment="$appointment" />
+
     <x-appointments.details :appointment="$appointment" />
 </x-layouts.app>

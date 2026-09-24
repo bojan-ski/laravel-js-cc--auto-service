@@ -16,20 +16,25 @@
                     $missed = ! $arrived && ! $appointment->isBooked();
                 @endphp
 
-                <li @class([
-                    'flex items-baseline gap-2 border-b border-border px-3 py-1.5 text-sm last:border-b-0',
-                    'text-text-muted' => $missed,
-                ])>
-                    <span class="font-medium tabular-nums">{{ $appointment->scheduled_at->isoFormat('HH:mm') }}</span>
-                    <span class="tabular-nums">{{ $appointment->vehicle->registration_plate }}</span>
-                    <span class="min-w-0 truncate text-text-muted">{{ $appointment->vehicle->make }} {{ $appointment->vehicle->model }}</span>
+                <li class="border-b border-border last:border-b-0">
+                    <a
+                        href="{{ route('appointments.show', $appointment) }}"
+                        @class([
+                            'flex items-baseline gap-2 px-3 py-1.5 text-sm hover:bg-surface-muted hover:text-brand-dark',
+                            'text-text-muted' => $missed,
+                        ])
+                    >
+                        <span class="font-medium tabular-nums">{{ $appointment->scheduled_at->isoFormat('HH:mm') }}</span>
+                        <span class="tabular-nums underline underline-offset-2">{{ $appointment->vehicle->registration_plate }}</span>
+                        <span class="min-w-0 truncate text-text-muted">{{ $appointment->vehicle->make }} {{ $appointment->vehicle->model }}</span>
 
-                    @if ($arrived)
-                        <span class="ms-auto font-semibold text-status-arrived" aria-hidden="true">&check;</span>
-                        <span class="sr-only">{{ __('dashboard.today.arrived') }}</span>
-                    @elseif ($missed)
-                        <x-ui.status-badge class="ms-auto" :status="$appointment->status" />
-                    @endif
+                        @if ($arrived)
+                            <span class="ms-auto font-semibold text-status-arrived" aria-hidden="true">&check;</span>
+                            <span class="sr-only">{{ __('dashboard.today.arrived') }}</span>
+                        @elseif ($missed)
+                            <x-ui.status-badge class="ms-auto" :status="$appointment->status" />
+                        @endif
+                    </a>
                 </li>
             @endforeach
         </ul>

@@ -42,7 +42,7 @@ class AppointmentTransitionRouteTest extends TestCase
     }
 
     #[DataProvider('transitionProvider')]
-    public function test_a_transition_redirects_to_the_appointments_day(string $route): void
+    public function test_a_transition_returns_to_the_appointment_page(string $route): void
     {
         $appointment = Appointment::factory()->create([
             'scheduled_at' => now()->addDays(5)->setTime(9, 0),
@@ -50,9 +50,7 @@ class AppointmentTransitionRouteTest extends TestCase
 
         $this->actingAs(User::factory()->receptionist()->create())
             ->patch(route($route, $appointment))
-            ->assertRedirect(route('appointments.index', [
-                'date' => now()->addDays(5)->format('Y-m-d'),
-            ]));
+            ->assertRedirect(route('appointments.show', $appointment));
     }
 
     /**

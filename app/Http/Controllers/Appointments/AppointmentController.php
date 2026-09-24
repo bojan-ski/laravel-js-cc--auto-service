@@ -7,8 +7,10 @@ use App\Http\Requests\Appointments\AppointmentIndexRequest;
 use App\Http\Requests\Appointments\StoreAppointmentRequest;
 use App\Http\Requests\Appointments\UpdateAppointmentRequest;
 use App\Models\Appointment;
+use App\Models\ShopSetting;
 use App\Models\Vehicle;
 use App\Services\AppointmentService;
+use App\Services\ShopSettingService;
 use App\Services\VehicleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -19,6 +21,7 @@ class AppointmentController extends Controller
     public function __construct(
         private AppointmentService $appointments,
         private VehicleService $vehicles,
+        private ShopSettingService $settings,
     ) {}
 
     public function index(AppointmentIndexRequest $request): View
@@ -34,6 +37,7 @@ class AppointmentController extends Controller
             'groups' => $this->appointments->groupByDay($appointments->items(), $days),
             'filters' => $filters,
             'hasAny' => $this->appointments->hasAny(),
+            'hours' => Gate::allows('update', ShopSetting::class) ? $this->settings->current() : null,
         ]);
     }
 
@@ -41,8 +45,12 @@ class AppointmentController extends Controller
     {
         Gate::authorize('create', Appointment::class);
 
+        $hours = $this->settings->current();
+
         return view('pages.appointments.create', [
             'vehicleOptions' => $this->vehicles->pickerOptions(),
+            'hours' => $hours,
+            'earliest' => $hours->earliestAppointmentStart()->format('Y-m-d\TH:i'),
         ]);
     }
 
@@ -73,7 +81,10 @@ class AppointmentController extends Controller
 
         $appointment->load('vehicle', 'customer');
 
-        return view('pages.appointments.edit', ['appointment' => $appointment]);
+        return view('pages.appointments.edit', [
+            'appointment' => $appointment,
+            'hours' => $this->settings->current(),
+        ]);
     }
 
     public function update(UpdateAppointmentRequest $request, Appointment $appointment): RedirectResponse

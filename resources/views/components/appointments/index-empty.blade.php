@@ -7,7 +7,7 @@
     >
         @can('create', App\Models\Appointment::class)
             <x-ui.button :href="route('appointments.create')">
-                {{ __('appointments.index.new_booking') }}
+                {{ __('appointments.index.new_appointment') }}
             </x-ui.button>
         @endcan
     </x-ui.empty-state>

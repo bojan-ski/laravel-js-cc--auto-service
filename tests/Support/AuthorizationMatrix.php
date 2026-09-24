@@ -643,8 +643,8 @@ trait AuthorizationMatrix
     }
 
     /**
-     * Rows 15–17: appointments, including the overlap endpoint a mechanic may
-     * not query and the arrival path a mechanic may drive.
+     * Rows 15–17: appointments. A mechanic may only look: the overlap endpoint,
+     * the no-show action and the arrival path are all front-office.
      *
      * @return array<string, array<string, mixed>>
      */
@@ -671,7 +671,7 @@ trait AuthorizationMatrix
                         'route' => 'appointments.store',
                         'payload' => fn ($t): array => [
                             'vehicle_id' => $t->fixture('vehicle')->getKey(),
-                            'scheduled_at' => now()->addDay()->format('Y-m-d\TH:i'),
+                            'scheduled_at' => now()->addDay()->setTime(10, 0)->format('Y-m-d\TH:i'),
                             'duration_minutes' => 60,
                         ],
                     ],
@@ -681,7 +681,7 @@ trait AuthorizationMatrix
                         'route' => 'appointments.update',
                         'params' => ['bookedAppointment'],
                         'payload' => fn (): array => [
-                            'scheduled_at' => now()->addDays(2)->format('Y-m-d\TH:i'),
+                            'scheduled_at' => now()->addDays(2)->setTime(10, 0)->format('Y-m-d\TH:i'),
                             'duration_minutes' => 90,
                         ],
                     ],
@@ -730,7 +730,7 @@ trait AuthorizationMatrix
                     ],
                 ],
                 'guest' => self::LOGIN,
-                'mechanic' => self::ALLOW,
+                'mechanic' => 403,
                 'receptionist' => self::ALLOW,
                 'admin' => self::ALLOW,
             ],
@@ -1008,7 +1008,7 @@ trait AuthorizationMatrix
     }
 
     /**
-     * Rows 26 and 33: the two sections behind role:admin.
+     * Rows 26, 33 and 39: the three sections behind role:admin.
      *
      * @return array<string, array<string, mixed>>
      */
@@ -1075,6 +1075,22 @@ trait AuthorizationMatrix
                     ],
                     ['method' => 'delete', 'route' => 'admin.brands.destroy', 'params' => ['brand']],
                     ['method' => 'patch', 'route' => 'admin.brands.restore', 'params' => ['trashedBrand']],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => 403,
+                'receptionist' => 403,
+                'admin' => self::ALLOW,
+            ],
+            '39' => [
+                'capability' => 'Set appointment hours',
+                'admin_only' => true,
+                'requests' => [
+                    ['method' => 'get', 'route' => 'admin.appointment-hours.edit'],
+                    [
+                        'method' => 'put',
+                        'route' => 'admin.appointment-hours.update',
+                        'payload' => fn (): array => ['open_at' => '07:30', 'close_at' => '19:00'],
+                    ],
                 ],
                 'guest' => self::LOGIN,
                 'mechanic' => 403,

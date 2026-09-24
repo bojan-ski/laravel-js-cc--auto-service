@@ -37,7 +37,6 @@ class PartController extends Controller
             'parts' => $this->parts->paginateFiltered($filters, $request->user(), $withTrashed),
             'counts' => $this->parts->counts($filters, $withTrashed),
             'filters' => $filters,
-            'withTrashed' => $withTrashed,
             'hasAny' => $this->parts->hasAny($withTrashed),
         ]);
     }

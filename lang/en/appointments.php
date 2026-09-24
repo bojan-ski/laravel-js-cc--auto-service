@@ -11,7 +11,8 @@ return [
     'title' => 'Appointments',
 
     'index' => [
-        'new_booking' => 'New booking',
+        'new_appointment' => 'New appointment',
+        'set_hours' => 'Set hours',
         'view_label' => 'View mode',
         'day' => 'Day',
         'week' => 'Week',
@@ -30,7 +31,6 @@ return [
         'plate' => 'Plate',
         'customer' => 'Customer',
         'status' => 'Status',
-        'actions' => 'Actions',
     ],
 
     'empty' => [
@@ -45,7 +45,7 @@ return [
 
     'show' => [
         'title' => ':plate booked :time',
-        'details' => 'Booking details',
+        'details' => 'Appointment details',
         'customer' => 'Customer',
         'duration' => 'Duration',
         'duration_value' => ':minutes minutes',
@@ -60,23 +60,24 @@ return [
     'actions' => [
         'arrived' => 'Arrived',
         'no_show' => 'No-show',
-        'cancel' => 'Cancel booking',
+        'cancel' => 'Cancel appointment',
         'edit' => 'Reschedule',
         'mark_arrived_for' => 'Arrived: open a job for :plate booked at :time',
         'mark_no_show_for' => 'Mark :plate at :time as a no-show',
-        'cancel_for' => 'Cancel booking for :plate at :time',
+        'cancel_for' => 'Cancel appointment for :plate at :time',
         'edit_for' => 'Reschedule :plate at :time',
-        'confirm_cancel' => 'Cancel the booking for :plate at :time? This cannot be undone.',
+        'confirm_cancel' => 'Cancel the appointment for :plate at :time? This cannot be undone.',
     ],
 
     'form' => [
-        'create_title' => 'New booking',
-        'edit_title' => 'Reschedule booking',
+        'create_title' => 'New appointment',
+        'edit_title' => 'Reschedule appointment',
         'vehicle' => 'Vehicle',
         'vehicle_placeholder' => 'Select a vehicle',
         'vehicle_fixed' => 'Vehicle',
-        'vehicle_fixed_hint' => 'The vehicle cannot be changed. Cancel this booking and create a new one instead.',
+        'vehicle_fixed_hint' => 'The vehicle cannot be changed. Cancel this appointment and create a new one instead.',
         'scheduled_at' => 'Date and time',
+        'scheduled_at_hint' => 'From tomorrow onward, starting and finishing between :open and :close.',
         'duration_minutes' => 'Duration (minutes)',
         'notes' => 'Notes',
         'submit_create' => 'Book',
@@ -88,10 +89,26 @@ return [
         'warning' => '{1}1 other car is already booked in this window.|[2,*]:count other cars are already booked in this window.',
     ],
 
+    'validation' => [
+        'not_before_tomorrow' => 'Appointments can only be booked from tomorrow onward.',
+        'outside_hours' => 'The appointment must start and finish between :open and :close.',
+    ],
+
+    'hours' => [
+        'title' => 'Appointment hours',
+        'intro' => 'New and rescheduled appointments must start and finish inside these hours. Existing appointments are not changed.',
+        'open_at' => 'Opens',
+        'close_at' => 'Closes',
+        'close_after_open' => 'Closing time must be after opening time.',
+        'submit' => 'Save hours',
+        'cancel' => 'Cancel',
+    ],
+
     'flash' => [
-        'created' => 'Booking created for :plate.',
-        'updated' => 'Booking updated for :plate.',
+        'created' => 'Appointment created for :plate.',
+        'updated' => 'Appointment updated for :plate.',
         'no_show' => ':plate marked as a no-show.',
-        'cancelled' => 'Booking cancelled for :plate.',
+        'cancelled' => 'Appointment cancelled for :plate.',
+        'hours_updated' => 'Appointment hours set to :open – :close.',
     ],
 ];

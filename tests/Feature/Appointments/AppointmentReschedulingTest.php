@@ -19,6 +19,7 @@ class AppointmentReschedulingTest extends TestCase
     {
         parent::setUp();
 
+        $this->travelTo(CarbonImmutable::parse('2026-09-09 12:00:00'));
         $this->actingAs(User::factory()->receptionist()->create());
     }
 

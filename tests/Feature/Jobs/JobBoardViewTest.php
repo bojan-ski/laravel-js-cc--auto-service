@@ -52,6 +52,25 @@ class JobBoardViewTest extends TestCase
             ->assertSee('<span class="md:hidden">VW Golf IV &middot; </span>Milan Petrović', false);
     }
 
+    /**
+     * A link cannot wrap a <tr>, so the plate link's ::after is stretched over
+     * the positioned row. Only a browser can prove the hit-testing (checked by
+     * hand); this pins the two classes it depends on.
+     */
+    public function test_the_row_link_covers_the_whole_row(): void
+    {
+        $job = Job::factory()->create();
+
+        $html = $this->board()->assertOk()->getContent();
+
+        preg_match('/<tr\b[^>]*>(?:(?!<\/tr>).)*?href="'.preg_quote(route('jobs.show', $job), '/').'".*?<\/tr>/s', $html, $row);
+
+        $this->assertNotEmpty($row);
+        $this->assertMatchesRegularExpression('/^<tr\b[^>]*class="[^"]*\brelative\b/', $row[0]);
+        $this->assertMatchesRegularExpression('/<a\b[^>]*class="[^"]*after:absolute after:inset-0/', $row[0]);
+        $this->assertSame(1, preg_match_all('/<a\b/', $row[0]), 'The row carries exactly one link.');
+    }
+
     public function test_the_assigned_column_renders_an_accessible_em_dash_on_every_row(): void
     {
         Job::factory()->count(3)->create();

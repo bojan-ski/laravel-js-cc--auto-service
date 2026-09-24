@@ -67,13 +67,16 @@ class AppointmentRouteAuthorizationTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_a_mechanic_may_record_a_no_show(): void
+    public function test_a_mechanic_may_not_record_a_no_show(): void
     {
         $mechanic = User::factory()->mechanic()->create();
+        $appointment = Appointment::factory()->create();
 
         $this->actingAs($mechanic)
-            ->patch(route('appointments.no-show', Appointment::factory()->create()))
-            ->assertRedirect();
+            ->patch(route('appointments.no-show', $appointment))
+            ->assertForbidden();
+
+        $this->assertTrue($appointment->fresh()->isBooked());
     }
 
     /**
@@ -131,7 +134,7 @@ class AppointmentRouteAuthorizationTest extends TestCase
     {
         return [
             'vehicle_id' => Vehicle::factory()->create()->getKey(),
-            'scheduled_at' => now()->addDay()->format('Y-m-d\TH:i'),
+            'scheduled_at' => now()->addDay()->setTime(10, 0)->format('Y-m-d\TH:i'),
             'duration_minutes' => 60,
         ];
     }
@@ -142,7 +145,7 @@ class AppointmentRouteAuthorizationTest extends TestCase
     private function validReschedule(): array
     {
         return [
-            'scheduled_at' => now()->addDays(2)->format('Y-m-d\TH:i'),
+            'scheduled_at' => now()->addDays(2)->setTime(10, 0)->format('Y-m-d\TH:i'),
             'duration_minutes' => 90,
         ];
     }

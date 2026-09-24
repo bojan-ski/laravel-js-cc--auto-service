@@ -34,18 +34,34 @@ class CustomerViewTest extends TestCase
             ->assertSee(__('customers.show.jobs_empty'));
     }
 
-    public function test_each_row_action_names_its_customer_for_assistive_tech(): void
+    /**
+     * The name is the row's one link, so it is also the link's accessible name.
+     * Its ::after is stretched over the positioned row to make the whole row
+     * clickable; only a browser can prove the hit-testing (checked by hand).
+     */
+    public function test_each_row_is_one_link_named_after_its_customer(): void
     {
-        Customer::factory()->create(['name' => 'Milan Petrović']);
-        Customer::factory()->create(['name' => 'Jelena Ilić']);
+        $milan = Customer::factory()->create(['name' => 'Milan Petrović']);
+        $jelena = Customer::factory()->create(['name' => 'Jelena Ilić']);
 
         $html = $this->actingAs(User::factory()->receptionist()->create())
             ->get(route('customers.index'))
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString(__('customers.index.view_customer', ['name' => 'Milan Petrović']), $html);
-        $this->assertStringContainsString(__('customers.index.view_customer', ['name' => 'Jelena Ilić']), $html);
+        foreach ([$milan, $jelena] as $customer) {
+            preg_match('/<tr\b[^>]*>(?:(?!<\/tr>).)*?<\/tr>/s', substr($html, strrpos(substr($html, 0, strpos($html, e($customer->name))), '<tr')), $row);
+
+            $this->assertNotEmpty($row);
+            $this->assertMatchesRegularExpression('/^<tr\b[^>]*class="[^"]*\brelative\b/', $row[0]);
+            $this->assertMatchesRegularExpression(
+                '/<a\b[^>]*href="'.preg_quote(route('customers.show', $customer), '/').'"[^>]*after:absolute after:inset-0[^>]*>'.preg_quote(e($customer->name), '/').'<\/a>/',
+                $row[0],
+            );
+            $this->assertSame(1, preg_match_all('/<a\b/', $row[0]), 'The row carries exactly one link.');
+        }
+
+        $this->assertStringNotContainsString('>'.__('app.actions.view').'<', $html);
     }
 
     public function test_the_table_keeps_its_row_and_cell_roles_when_display_is_overridden(): void

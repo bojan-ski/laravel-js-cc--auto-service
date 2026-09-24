@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AppointmentHoursController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserOffboardController;
@@ -22,4 +23,7 @@ Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function
     Route::put('/brands/{brand}', [BrandController::class, 'update'])->name('brands.update');
     Route::delete('/brands/{brand}', [BrandController::class, 'destroy'])->name('brands.destroy');
     Route::patch('/brands/{brand}/restore', [BrandController::class, 'restore'])->withTrashed()->name('brands.restore');
+
+    Route::get('/appointment-hours', [AppointmentHoursController::class, 'edit'])->name('appointment-hours.edit');
+    Route::put('/appointment-hours', [AppointmentHoursController::class, 'update'])->name('appointment-hours.update');
 });
