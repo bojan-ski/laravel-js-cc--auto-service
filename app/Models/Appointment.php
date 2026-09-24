@@ -46,6 +46,11 @@ class Appointment extends Model
         return $this->status === AppointmentStatus::Arrived;
     }
 
+    public function isMissed(): bool
+    {
+        return in_array($this->status, [AppointmentStatus::NoShow, AppointmentStatus::Cancelled], true);
+    }
+
     public function isTerminal(): bool
     {
         return $this->status->isTerminal();

@@ -55,6 +55,27 @@ class AppointmentModelTest extends TestCase
         $this->assertFalse($appointment->canBeRescheduled());
     }
 
+    /**
+     * @return array<string, array{0: string, 1: bool}>
+     */
+    public static function missedStateProvider(): array
+    {
+        return [
+            'booked' => ['booked', false],
+            'arrived' => ['arrived', false],
+            'no-show' => ['noShow', true],
+            'cancelled' => ['cancelled', true],
+        ];
+    }
+
+    #[DataProvider('missedStateProvider')]
+    public function test_only_a_no_show_or_cancelled_appointment_is_missed(string $state, bool $missed): void
+    {
+        $appointment = Appointment::factory()->{$state}()->create();
+
+        $this->assertSame($missed, $appointment->isMissed());
+    }
+
     public function test_a_new_appointment_carries_the_initial_status(): void
     {
         $this->assertSame(AppointmentStatus::Booked, (new Appointment)->status);

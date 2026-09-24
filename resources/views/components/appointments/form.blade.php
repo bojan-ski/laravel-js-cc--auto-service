@@ -1,14 +1,6 @@
-@props([
-    'appointment' => null,
-    'vehicleOptions' => [],
-    'hours',
-    'earliest' => null,
-])
-
 @php
     $isEdit = $appointment !== null;
     $scheduleHintId = $errors->has('scheduled_at') ? null : 'scheduled_at-hint';
-    $overlapTemplates = \App\Enums\Locale::pluralTemplates('appointments.overlap.warning');
 @endphp
 
 <form
