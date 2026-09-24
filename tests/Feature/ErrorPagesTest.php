@@ -121,11 +121,20 @@ class ErrorPagesTest extends TestCase
             ->assertSee('<main', false);
     }
 
+    /**
+     * The `file` driver writes storage/framework/down, which every parallel test
+     * process shares — while this test held it, every other process's requests
+     * would 503. The `array` driver keeps the down state inside this process.
+     */
     public function test_the_maintenance_page_renders_while_the_application_is_down(): void
     {
+        config(['app.maintenance.driver' => 'array']);
+
         $this->artisan('down');
 
         try {
+            $this->assertFileDoesNotExist(storage_path('framework/down'));
+
             $this->get('/')
                 ->assertStatus(503)
                 ->assertSee(__('errors.maintenance.title'));
