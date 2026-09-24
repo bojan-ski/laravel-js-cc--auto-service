@@ -158,8 +158,19 @@ class JobService
      */
     public function createWalkIn(Vehicle $vehicle, User $openedBy, array $attributes): Job
     {
+        return $this->createWalkInFor(fn (): Vehicle => $vehicle, $openedBy, $attributes);
+    }
+
+    /**
+     * @param  Closure(): Vehicle  $vehicle
+     * @param  array<string, mixed>  $attributes
+     */
+    public function createWalkInFor(Closure $vehicle, User $openedBy, array $attributes): Job
+    {
         return $this->persist(function () use ($vehicle, $openedBy, $attributes): Job {
-            return $this->insert($vehicle->customer_id, $vehicle, null, $openedBy, $attributes);
+            $resolved = $vehicle();
+
+            return $this->insert($resolved->customer_id, $resolved, null, $openedBy, $attributes);
         });
     }
 

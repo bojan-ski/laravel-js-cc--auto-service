@@ -70,17 +70,22 @@ abstract class VehicleRequest extends FormRequest
             return;
         }
 
+        $message = self::deletedConflictMessage($column, $key, $this->input($column));
+
+        if ($message !== null) {
+            $validator->errors()->add($column, $message);
+        }
+    }
+
+    public static function deletedConflictMessage(string $column, string $key, mixed $value): ?string
+    {
         $conflict = Vehicle::onlyTrashed()
-            ->where($column, $this->input($column))
+            ->where($column, $value)
             ->with(['customer' => fn ($query) => $query->withTrashed()])
             ->first();
 
-        if ($conflict === null) {
-            return;
-        }
-
-        $validator->errors()->add($column, __('vehicles.validation.'.$key, [
+        return $conflict === null ? null : __('vehicles.validation.'.$key, [
             'owner' => $conflict->customer->name,
-        ]));
+        ]);
     }
 }

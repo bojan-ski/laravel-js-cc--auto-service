@@ -51,6 +51,12 @@ class Customer extends Model
     }
 
     #[Scope]
+    protected function withPhoneDigits(Builder $query, string $digits): void
+    {
+        $query->whereRaw("REGEXP_REPLACE(phone, '[^0-9]', '') = ?", [$digits]);
+    }
+
+    #[Scope]
     protected function matching(Builder $query, string $term): void
     {
         $escaped = addcslashes($term, '%_\\');

@@ -56,7 +56,6 @@ return [
         'appointment' => 'Appointment',
         'appointment_summary' => ':time · booked by :name',
         'vehicle' => 'Vehicle',
-        'vehicle_placeholder' => 'Select a vehicle',
         'complaint' => 'Complaint',
         'complaint_placeholder' => 'What did the customer say is wrong? Use their words.',
         'mileage_in' => 'Mileage in (km, optional)',

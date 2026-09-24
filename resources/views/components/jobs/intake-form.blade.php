@@ -17,13 +17,7 @@
 
         <x-jobs.appointment-context :appointment="$appointment" />
     @else
-        <x-forms.select
-            name="vehicle_id"
-            :label="__('jobs.form.vehicle')"
-            :options="$vehicleOptions"
-            :placeholder="__('jobs.form.vehicle_placeholder')"
-            required
-        />
+        <x-customers.intake-picker :vehicle-options="$vehicleOptions" />
     @endif
 
     <x-forms.textarea

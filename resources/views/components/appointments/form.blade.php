@@ -38,13 +38,7 @@
             <p class="mt-1 text-sm text-text-muted">{{ __('appointments.form.vehicle_fixed_hint') }}</p>
         </div>
     @else
-        <x-forms.select
-            name="vehicle_id"
-            :label="__('appointments.form.vehicle')"
-            :options="$vehicleOptions"
-            :placeholder="__('appointments.form.vehicle_placeholder')"
-            required
-        />
+        <x-customers.intake-picker :vehicle-options="$vehicleOptions" />
     @endif
 
     <div>

@@ -8,8 +8,8 @@ use App\Http\Requests\Appointments\StoreAppointmentRequest;
 use App\Http\Requests\Appointments\UpdateAppointmentRequest;
 use App\Models\Appointment;
 use App\Models\ShopSetting;
-use App\Models\Vehicle;
 use App\Services\AppointmentService;
+use App\Services\CustomerIntakeService;
 use App\Services\ShopSettingService;
 use App\Services\VehicleService;
 use Illuminate\Http\RedirectResponse;
@@ -22,6 +22,7 @@ class AppointmentController extends Controller
         private AppointmentService $appointments,
         private VehicleService $vehicles,
         private ShopSettingService $settings,
+        private CustomerIntakeService $intake,
     ) {}
 
     public function index(AppointmentIndexRequest $request): View
@@ -58,11 +59,11 @@ class AppointmentController extends Controller
     {
         Gate::authorize('create', Appointment::class);
 
-        $vehicle = Vehicle::findOrFail($request->integer('vehicle_id'));
-        $appointment = $this->appointments->create($vehicle, $request->user(), $request->validated());
+        $appointment = $this->intake->book($request->intake(), $request->user(), $request->appointmentAttributes());
+        $appointment->load('vehicle');
 
         return $this->redirectToDay($appointment)
-            ->with('success', __('appointments.flash.created', ['plate' => $vehicle->registration_plate]))
+            ->with('success', __('appointments.flash.created', ['plate' => $appointment->vehicle->registration_plate]))
             ->with($this->overlapWarning($appointment));
     }
 
