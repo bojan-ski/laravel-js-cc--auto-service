@@ -8,13 +8,11 @@ return [
         'search_placeholder' => 'Name or phone',
         'new' => 'New customer',
         'count' => ':count customer|:count customers',
-        'view_customer' => 'View :name',
 
         'headers' => [
             'name' => 'Name',
             'phone' => 'Phone',
             'email' => 'Email',
-            'actions' => 'Actions',
         ],
     ],
 

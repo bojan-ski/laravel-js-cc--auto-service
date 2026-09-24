@@ -1,11 +1,11 @@
-@props(['part', 'withTrashed'])
+@props(['part'])
 
 <tr role="row" @class([
-    'grid grid-cols-[1fr_auto] items-center gap-x-3 border-b border-border p-3 last:border-b-0 md:table-row md:p-0',
+    'relative grid grid-cols-[1fr_auto] items-center gap-x-3 border-b border-border p-3 last:border-b-0 hover:bg-surface-muted md:table-row md:p-0',
     'bg-surface-muted text-text-muted' => $part->trashed(),
 ])>
     <td role="cell" class="col-start-1 row-start-1 md:table-cell md:px-3 md:py-2">
-        <a href="{{ route('parts.show', $part) }}" class="block hover:text-brand-dark">
+        <a href="{{ route('parts.show', $part) }}" class="block after:absolute after:inset-0 hover:text-brand-dark">
             <span class="block font-medium tabular-nums underline underline-offset-2">{{ $part->sku }}</span>
             <span class="sr-only">{{ __('parts.view_part', ['sku' => $part->sku]) }}</span>
         </a>
@@ -46,20 +46,4 @@
     <td role="cell" @class(['hidden lg:table-cell lg:px-3 lg:py-2', 'text-text-muted' => $part->location === null])>
         <x-ui.value :value="$part->location" />
     </td>
-
-    @if ($withTrashed)
-        <td role="cell" class="hidden md:table-cell md:px-3 md:py-2">
-            @if ($part->trashed())
-                @can('restore', $part)
-                    <x-ui.action-form
-                        :action="route('parts.restore', $part)"
-                        :confirm="__('parts.restore.confirm', ['sku' => $part->sku])"
-                        :aria-label="__('parts.restore.action', ['sku' => $part->sku])"
-                    >
-                        {{ __('parts.restore.label') }}
-                    </x-ui.action-form>
-                @endcan
-            @endif
-        </td>
-    @endif
 </tr>

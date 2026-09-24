@@ -6,7 +6,7 @@
     <x-parts.search-form :filters="$filters" />
 
     @if ($parts->total() > 0)
-        <x-parts.table :parts="$parts" :with-trashed="$withTrashed" />
+        <x-parts.table :parts="$parts" />
     @else
         <x-parts.index-empty :filters="$filters" :has-any="$hasAny" />
     @endif

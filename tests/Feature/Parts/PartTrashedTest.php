@@ -92,7 +92,6 @@ class PartTrashedTest extends TestCase
             ->assertOk();
 
         $this->assertSame(['OF-01'], $response->viewData('parts')->pluck('sku')->all());
-        $this->assertFalse($response->viewData('withTrashed'));
     }
 
     public function test_the_trashed_filter_is_honoured_for_an_admin(): void
@@ -108,7 +107,6 @@ class PartTrashedTest extends TestCase
             ['OF-01', 'WB-24'],
             $response->viewData('parts')->pluck('sku')->all(),
         );
-        $this->assertTrue($response->viewData('withTrashed'));
     }
 
     public function test_the_trashed_filter_combines_with_the_low_stock_filter(): void
@@ -221,7 +219,36 @@ class PartTrashedTest extends TestCase
         $this->assertSame(['WB-24'], $response->viewData('parts')->pluck('sku')->all());
     }
 
-    public function test_a_deleted_row_offers_restore_and_not_edit(): void
+    /**
+     * Restore lives on the part page, not the list: a deleted row carries only
+     * its link, and the page it leads to offers the restore.
+     */
+    public function test_a_deleted_row_links_to_the_part_page_which_offers_restore(): void
+    {
+        $part = Part::factory()->deleted()->create(['sku' => 'WB-24']);
+        $admin = User::factory()->admin()->create();
+
+        $list = $this->actingAs($admin)
+            ->get(route('parts.index', ['trashed' => 'with']))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('href="'.route('parts.show', $part).'"', $list);
+        $this->assertStringNotContainsString(route('parts.restore', $part), $list);
+        $this->assertStringNotContainsString(route('parts.edit', $part), $list);
+
+        $this->actingAs($admin)
+            ->get(route('parts.show', $part))
+            ->assertOk()
+            ->assertSee('action="'.route('parts.restore', $part).'"', false);
+    }
+
+    /**
+     * A link cannot wrap a <tr>, so the SKU link's ::after is stretched over the
+     * positioned row. Only a browser can prove the hit-testing (checked by hand);
+     * this pins the two classes it depends on.
+     */
+    public function test_the_row_link_covers_the_whole_row(): void
     {
         $part = Part::factory()->deleted()->create(['sku' => 'WB-24']);
 
@@ -230,7 +257,11 @@ class PartTrashedTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString(route('parts.restore', $part), $body);
-        $this->assertStringNotContainsString(route('parts.edit', $part), $body);
+        preg_match('/<tr\b[^>]*>(?:(?!<\/tr>).)*?href="'.preg_quote(route('parts.show', $part), '/').'".*?<\/tr>/s', $body, $row);
+
+        $this->assertNotEmpty($row);
+        $this->assertMatchesRegularExpression('/^<tr\b[^>]*class="[^"]*\brelative\b/', $row[0]);
+        $this->assertMatchesRegularExpression('/<a\b[^>]*class="[^"]*after:absolute after:inset-0/', $row[0]);
+        $this->assertSame(1, preg_match_all('/<a\b/', $row[0]), 'The row carries exactly one link.');
     }
 }

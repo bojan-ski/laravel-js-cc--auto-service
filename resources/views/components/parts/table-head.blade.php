@@ -1,5 +1,3 @@
-@props(['withTrashed'])
-
 @php
     $cell = 'px-3 py-2 text-xs font-medium uppercase tracking-wider';
 @endphp
@@ -20,9 +18,5 @@
         @endcan
 
         <th role="columnheader" scope="col" class="{{ $cell }} hidden lg:table-cell">{{ __('parts.headers.shelf') }}</th>
-
-        @if ($withTrashed)
-            <th role="columnheader" scope="col" class="{{ $cell }} hidden md:table-cell">{{ __('parts.headers.actions') }}</th>
-        @endif
     </tr>
 </thead>

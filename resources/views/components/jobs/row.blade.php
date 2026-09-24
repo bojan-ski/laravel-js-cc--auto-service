@@ -6,9 +6,9 @@
     $overflow = $assigned->count() - $shown->count();
 @endphp
 
-<tr role="row" class="grid grid-cols-[1fr_auto] items-center gap-x-3 border-b border-border p-3 last:border-b-0 md:table-row md:p-0">
+<tr role="row" class="relative grid grid-cols-[1fr_auto] items-center gap-x-3 border-b border-border p-3 last:border-b-0 hover:bg-surface-muted md:table-row md:p-0">
     <td role="cell" class="col-start-1 row-start-1 md:table-cell md:px-3 md:py-2">
-        <a href="{{ route('jobs.show', $job) }}" class="block hover:text-brand-dark">
+        <a href="{{ route('jobs.show', $job) }}" class="block after:absolute after:inset-0 hover:text-brand-dark">
             <span class="block font-medium tabular-nums underline underline-offset-2">
                 {{ $job->vehicle->registration_plate }}
             </span>

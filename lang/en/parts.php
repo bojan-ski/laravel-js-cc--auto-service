@@ -28,7 +28,6 @@ return [
         'price' => 'Price',
         'cost' => 'Cost',
         'shelf' => 'Shelf',
-        'actions' => 'Actions',
     ],
 
     'stock' => [
