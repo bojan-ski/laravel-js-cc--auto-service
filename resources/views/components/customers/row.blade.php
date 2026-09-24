@@ -13,6 +13,20 @@
     </td>
 
     <td role="cell" @class([
+        'text-sm md:table-cell md:px-3 md:py-2',
+        'text-text-muted' => $customer->vehicles->isEmpty(),
+    ])>
+        @forelse ($customer->vehicles as $vehicle)
+            <span class="block">
+                <span class="font-medium tabular-nums">{{ $vehicle->registration_plate }}</span>
+                <span class="text-text-muted">&middot; {{ $vehicle->make }} {{ $vehicle->model }}</span>
+            </span>
+        @empty
+            <x-ui.value :value="null" />
+        @endforelse
+    </td>
+
+    <td role="cell" @class([
         'hidden xl:table-cell xl:px-3 xl:py-2',
         'text-text-muted' => $customer->email === null,
     ])>

@@ -6,7 +6,6 @@ return [
         'empty' => 'No vehicles recorded yet.',
         'add' => 'Add vehicle',
         'add_for' => 'Add vehicle for :name',
-        'view_vehicle' => 'View :plate',
 
         'headers' => [
             'plate' => 'Plate',

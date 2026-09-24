@@ -26,6 +26,7 @@ class CustomerService
     public function paginateFiltered(array $filters): LengthAwarePaginator
     {
         return Customer::query()
+            ->with(['vehicles' => fn ($query) => $query->select(['id', 'customer_id', 'registration_plate', 'make', 'model'])])
             ->when($filters['search'], fn ($query, string $term) => $query->matching($term))
             ->orderBy('name')
             ->paginate(25)

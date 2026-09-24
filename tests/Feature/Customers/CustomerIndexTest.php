@@ -4,7 +4,10 @@ namespace Tests\Feature\Customers;
 
 use App\Models\Customer;
 use App\Models\User;
+use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class CustomerIndexTest extends TestCase
@@ -187,5 +190,108 @@ class CustomerIndexTest extends TestCase
             ->get(route('customers.index', ['search' => 'Petrović']))
             ->assertOk()
             ->assertViewHas('customers', fn ($customers) => $customers->total() === 0);
+    }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function vehicleTermProvider(): array
+    {
+        return [
+            'plate as stored' => ['BG-315'],
+            'plate without dashes' => ['BG315'],
+            'plate lowercase with a space' => ['bg 315'],
+            'make' => ['Škoda'],
+            'model' => ['Octavia'],
+            'make and model' => ['Škoda Octavia'],
+            'vin' => ['TMBJJ7NE'],
+        ];
+    }
+
+    #[DataProvider('vehicleTermProvider')]
+    public function test_search_finds_a_customer_by_their_vehicle(string $term): void
+    {
+        $milan = Customer::factory()->create(['name' => 'Milan Petrović', 'phone' => '063 111 222']);
+        Vehicle::factory()->for($milan)->create([
+            'registration_plate' => 'BG-315-DM',
+            'make' => 'Škoda',
+            'model' => 'Octavia II',
+            'vin' => 'TMBJJ7NE8K0123456',
+        ]);
+
+        $jelena = Customer::factory()->create(['name' => 'Jelena Ilić', 'phone' => '064 333 444']);
+        Vehicle::factory()->for($jelena)->create([
+            'registration_plate' => 'NS-887-AA',
+            'make' => 'Opel',
+            'model' => 'Astra H',
+            'vin' => 'W0LZZZ07000209458',
+        ]);
+
+        $this->actingAsStaff()
+            ->get(route('customers.index', ['search' => $term]))
+            ->assertOk()
+            ->assertViewHas('customers', fn ($customers) => $customers->total() === 1
+                && $customers->first()->is($milan)
+            );
+    }
+
+    public function test_a_soft_deleted_vehicle_does_not_match_its_owner(): void
+    {
+        $customer = Customer::factory()->create(['name' => 'Milan Petrović']);
+        Vehicle::factory()->for($customer)->create(['registration_plate' => 'BG-315-DM'])->delete();
+
+        $this->actingAsStaff()
+            ->get(route('customers.index', ['search' => 'BG315']))
+            ->assertOk()
+            ->assertViewHas('customers', fn ($customers) => $customers->total() === 0);
+    }
+
+    public function test_a_punctuation_only_term_does_not_match_every_plate(): void
+    {
+        foreach (['BG-315-DM', 'NS-887-AA'] as $plate) {
+            Vehicle::factory()
+                ->for(Customer::factory()->create(['phone' => '063 111 222']))
+                ->create(['registration_plate' => $plate, 'make' => 'Opel', 'model' => 'Astra', 'vin' => null]);
+        }
+
+        $this->actingAsStaff()
+            ->get(route('customers.index', ['search' => '---']))
+            ->assertOk()
+            ->assertViewHas('customers', fn ($customers) => $customers->total() === 0);
+    }
+
+    public function test_each_row_lists_the_customers_active_vehicles(): void
+    {
+        $customer = Customer::factory()->create(['name' => 'Milan Petrović']);
+        Vehicle::factory()->for($customer)->create(['registration_plate' => 'BG-315-DM', 'make' => 'Škoda', 'model' => 'Octavia II']);
+        Vehicle::factory()->for($customer)->create(['registration_plate' => 'BG-440-FC', 'make' => 'Ford', 'model' => 'Focus']);
+        Vehicle::factory()->for($customer)->create(['registration_plate' => 'SM-045-VK'])->delete();
+
+        $this->actingAsStaff()
+            ->get(route('customers.index'))
+            ->assertOk()
+            ->assertSee(__('customers.index.headers.vehicles'))
+            ->assertSeeInOrder(['BG-315-DM', 'Škoda Octavia II', 'BG-440-FC', 'Ford Focus'])
+            ->assertDontSee('SM-045-VK');
+    }
+
+    public function test_the_vehicles_column_costs_the_same_queries_however_many_vehicles_there_are(): void
+    {
+        $this->assertSame($this->indexQueriesWith(1), $this->indexQueriesWith(8));
+    }
+
+    private function indexQueriesWith(int $customers): int
+    {
+        Customer::factory()->count($customers)->has(Vehicle::factory()->count(2))->create();
+
+        $user = User::factory()->receptionist()->create();
+
+        DB::enableQueryLog();
+        $this->actingAs($user)->get(route('customers.index'))->assertOk();
+        $count = count(DB::getQueryLog());
+        DB::disableQueryLog();
+        DB::flushQueryLog();
+
+        return $count;
     }
 }

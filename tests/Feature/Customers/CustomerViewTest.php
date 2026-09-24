@@ -61,7 +61,7 @@ class CustomerViewTest extends TestCase
             $this->assertSame(1, preg_match_all('/<a\b/', $row[0]), 'The row carries exactly one link.');
         }
 
-        $this->assertStringNotContainsString('>'.__('app.actions.view').'<', $html);
+        $this->assertDoesNotMatchRegularExpression('/>\s*View\s*</', $html);
     }
 
     public function test_the_table_keeps_its_row_and_cell_roles_when_display_is_overridden(): void

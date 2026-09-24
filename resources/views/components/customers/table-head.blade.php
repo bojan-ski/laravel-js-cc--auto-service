@@ -6,6 +6,7 @@
     <tr role="row" class="border-b border-border bg-surface-muted">
         <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('customers.index.headers.name') }}</th>
         <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('customers.index.headers.phone') }}</th>
+        <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('customers.index.headers.vehicles') }}</th>
         <th role="columnheader" scope="col" class="{{ $cell }} hidden xl:table-cell">{{ __('customers.index.headers.email') }}</th>
     </tr>
 </thead>
