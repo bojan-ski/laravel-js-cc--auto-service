@@ -92,6 +92,44 @@ class JobPartLineViewTest extends TestCase
         $this->assertStringNotContainsString('aria-current="page"', $this->anchor($onPart, $labor));
     }
 
+    public function test_the_add_switch_sits_inside_the_form_it_controls(): void
+    {
+        $job = Job::factory()->inProgress()->create();
+        $this->stockedPart();
+
+        $part = e(route('jobs.show', ['job' => $job, 'add' => 'part']).'#line-item-form');
+
+        foreach ([[], ['add' => 'part']] as $query) {
+            $html = $this->page($job, $query)->getContent();
+
+            preg_match('/<form id="line-item-form".*?<\/form>/s', $html, $form);
+
+            $this->assertNotEmpty($form, 'The add form did not render.');
+            $this->assertStringContainsString($part, $form[0]);
+            $this->assertSame(1, substr_count($html, $part), 'The switch must render once, inside the form.');
+        }
+    }
+
+    public function test_the_edit_form_offers_no_add_switch(): void
+    {
+        $item = $this->partLine();
+
+        $this->page($item->job, ['edit' => $item->getKey()])
+            ->assertSee(self::UPDATE_METHOD_FIELD, false)
+            ->assertDontSee(__('jobs.items.add.labor_link_label'))
+            ->assertDontSee(__('jobs.items.add.part_link_label'));
+    }
+
+    public function test_an_empty_catalogue_still_offers_the_way_back_to_labor(): void
+    {
+        $job = Job::factory()->inProgress()->create();
+
+        $this->page($job, ['add' => 'part'])
+            ->assertSee(__('jobs.items.add.no_parts'))
+            ->assertSee('id="line-item-form"', false)
+            ->assertSee(e(route('jobs.show', ['job' => $job, 'add' => 'labor']).'#line-item-form'), false);
+    }
+
     private function anchor(string $html, string $href): string
     {
         preg_match('/<a\b[^>]*'.preg_quote(e($href), '/').'[^>]*>/', $html, $match);

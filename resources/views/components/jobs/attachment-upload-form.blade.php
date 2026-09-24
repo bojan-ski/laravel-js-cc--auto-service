@@ -13,11 +13,10 @@
 >
     @csrf
 
-    <label for="attachment-file" class="block text-sm font-medium">
-        {{ __('jobs.attachments.upload.label') }}
-    </label>
-
-    <div class="mt-1 flex flex-wrap items-start gap-2">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <label for="attachment-file" class="w-full text-sm font-medium @md:w-auto">
+            {{ __('jobs.attachments.upload.label') }}
+        </label>
         <input
             id="attachment-file"
             name="file"
@@ -25,7 +24,7 @@
             accept="image/jpeg,image/png,image/webp,application/pdf"
             aria-describedby="{{ $describedBy }}"
             @if ($hasError) aria-invalid="true" @endif
-            class="block w-full flex-1 rounded-sm border bg-surface px-3 py-2 text-sm text-text file:mr-3 file:rounded-sm file:border-0 file:bg-surface-muted file:px-3 file:py-1 file:text-sm file:font-medium file:text-text hover:file:bg-border sm:w-auto
+            class="block min-w-48 flex-1 rounded-sm border bg-surface px-3 py-2 text-sm text-text file:mr-3 file:rounded-sm file:border-0 file:bg-surface-muted file:px-3 file:py-1 file:text-sm file:font-medium file:text-text hover:file:bg-border
                 {{ $hasError ? 'border-status-cancelled' : 'border-border focus:border-accent' }}"
         >
 
@@ -34,7 +33,7 @@
         </x-ui.button>
     </div>
 
-    <p id="attachment-file-hint" class="mt-1 text-sm text-text-muted">
+    <p id="attachment-file-hint" class="mt-1 text-xs text-text-muted">
         {{ __('jobs.attachments.upload.hint') }}
     </p>
 

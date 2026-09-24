@@ -16,6 +16,11 @@
         href="{{ route('attachments.show', ['attachment' => $attachment, 'variant' => 'full']) }}"
         data-lightbox-trigger
         data-lightbox-alt="{{ $alt }}"
+        @can('delete', $attachment)
+            data-lightbox-delete-action="{{ route('attachments.destroy', $attachment) }}"
+            data-lightbox-delete-confirm="{{ __('jobs.attachments.delete.confirm', ['filename' => $attachment->original_filename]) }}"
+            data-lightbox-delete-label="{{ __('jobs.attachments.delete.action_for', ['filename' => $attachment->original_filename]) }}"
+        @endcan
         aria-label="{{ $openLabel }}"
         class="block aspect-4/3 shrink-0 overflow-hidden focus:outline-2 focus:outline-offset-2 focus:outline-accent"
     >
@@ -26,30 +31,14 @@
         >
     </a>
 
-    <figcaption class="flex flex-1 flex-col justify-between px-2 py-1.5">
-        <span class="block text-xs text-text-muted">
-            {{ __('jobs.attachments.uploaded_by', [
-                'name' => $uploader,
-                'date' => $uploadedOn,
-            ]) }}
+    <figcaption class="flex-1 px-2 py-1.5 text-xs text-text-muted">
+        {{ __('jobs.attachments.uploaded_by', [
+            'name' => $uploader,
+            'date' => $uploadedOn,
+        ]) }}
 
-            @if ($attachment->uploadedBy->trashed())
-                ({{ __('app.deleted') }})
-            @endif
-        </span>
-
-        @can('delete', $attachment)
-            <span class="mt-1.5 flex justify-end">
-                <x-ui.action-form
-                    :action="route('attachments.destroy', $attachment)"
-                    method="DELETE"
-                    variant="danger"
-                    :confirm="__('jobs.attachments.delete.confirm', ['filename' => $attachment->original_filename])"
-                    :aria-label="__('jobs.attachments.delete.action_for', ['filename' => $attachment->original_filename])"
-                >
-                    {{ __('jobs.attachments.delete.action') }}
-                </x-ui.action-form>
-            </span>
-        @endcan
+        @if ($attachment->uploadedBy->trashed())
+            ({{ __('app.deleted') }})
+        @endif
     </figcaption>
 </figure>
