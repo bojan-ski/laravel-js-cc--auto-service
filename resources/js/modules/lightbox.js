@@ -1,6 +1,25 @@
+function showDeleteFor(form, trigger) {
+    if (!form) {
+        return;
+    }
+
+    const action = trigger.dataset.lightboxDeleteAction;
+
+    form.hidden = !action;
+
+    if (!action) {
+        return;
+    }
+
+    form.action = action;
+    form.dataset.confirm = trigger.dataset.lightboxDeleteConfirm ?? '';
+    form.querySelector('button')?.setAttribute('aria-label', trigger.dataset.lightboxDeleteLabel ?? '');
+}
+
 export function registerLightbox() {
     document.querySelectorAll('[data-lightbox-dialog]').forEach((dialog) => {
         const image = dialog.querySelector('[data-lightbox-image]');
+        const deleteForm = dialog.querySelector('[data-lightbox-delete]');
         const section = dialog.closest('section');
 
         if (!image || !section || typeof dialog.showModal !== 'function') {
@@ -13,8 +32,13 @@ export function registerLightbox() {
 
                 image.src = trigger.href;
                 image.alt = trigger.dataset.lightboxAlt ?? '';
+                showDeleteFor(deleteForm, trigger);
 
-                dialog.showModal();
+                image.decode().catch(() => {}).then(() => {
+                    if (image.src === trigger.href && !dialog.open) {
+                        dialog.showModal();
+                    }
+                });
             });
         });
 
@@ -29,6 +53,10 @@ export function registerLightbox() {
         dialog.addEventListener('close', () => {
             image.src = '';
             image.alt = '';
+
+            if (deleteForm) {
+                deleteForm.hidden = true;
+            }
         });
     });
 }

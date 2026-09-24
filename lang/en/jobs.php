@@ -123,7 +123,7 @@ return [
             'description_placeholder_part' => 'Optional note about this part',
             'quantity' => 'Hours',
             'who' => 'Performed by',
-            'who_placeholder' => 'Select who performed the work',
+            'who_placeholder' => 'Select a person',
             'who_unassigned' => 'Unassigned',
             'rate' => 'Hourly rate',
             'submit' => 'Add line',
@@ -136,7 +136,8 @@ return [
             'part_title' => 'Add part',
             'part' => 'Part',
             'quantity_units' => 'Quantity',
-            'price' => 'Price (leave blank for the catalogue price)',
+            'price' => 'Unit price',
+            'price_placeholder' => 'Catalogue price',
             'submit_part' => 'Add part',
         ],
 
@@ -197,7 +198,7 @@ return [
 
         'lightbox' => [
             'label' => 'Photo viewer',
-            'close' => 'Close photo viewer',
+            'close' => 'Close',
         ],
 
         'flash' => [

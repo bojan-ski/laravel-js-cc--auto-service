@@ -1,13 +1,17 @@
-<form id="line-item-form" method="POST" action="{{ $action() }}" class="mt-4 border-t border-border pt-4">
+<form id="line-item-form" method="POST" action="{{ $action() }}" class="mt-4 border border-border bg-surface-muted p-3">
     @csrf
 
     @if ($isEdit())
         @method('PUT')
     @endif
 
-    <h3 class="text-xs font-semibold uppercase tracking-wider text-text-muted">{{ $heading() }}</h3>
+    <div class="flex flex-wrap items-center justify-between gap-2">
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-text-soft">{{ $heading() }}</h3>
 
-    <div class="mt-2 grid gap-3 sm:grid-cols-2">
+        {{ $switch ?? '' }}
+    </div>
+
+    <div class="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_7rem_10rem_14rem_auto]">
         <x-forms.field
             name="description"
             :label="__('jobs.items.add.description')"
@@ -26,17 +30,6 @@
             required
         />
 
-        @if ($userOptions !== [])
-            <x-forms.select
-                name="user_id"
-                :label="__('jobs.items.add.who')"
-                :options="$userOptions"
-                :selected="$item?->user_id"
-                :placeholder="$assigneePlaceholder()"
-                :required="! $isPart()"
-            />
-        @endif
-
         @if ($showPricing)
             <x-forms.field
                 name="unit_price"
@@ -47,15 +40,27 @@
                 :value="$item?->unit_price ?? $defaultRate"
             />
         @endif
-    </div>
 
-    <div class="mt-3 flex flex-wrap gap-2">
-        <x-ui.button>{{ $submitLabel() }}</x-ui.button>
-
-        @if ($isEdit())
-            <x-ui.button variant="secondary" :href="route('jobs.show', $job)">
-                {{ __('jobs.items.edit.cancel') }}
-            </x-ui.button>
+        @if ($userOptions !== [])
+            <x-forms.select
+                class="lg:h-10.5"
+                name="user_id"
+                :label="__('jobs.items.add.who')"
+                :options="$userOptions"
+                :selected="$item?->user_id"
+                :placeholder="$assigneePlaceholder()"
+                :required="! $isPart()"
+            />
         @endif
+
+        <div class="flex flex-wrap gap-2 lg:pt-6">
+            <x-ui.button class="lg:h-10.5">{{ $submitLabel() }}</x-ui.button>
+
+            @if ($isEdit())
+                <x-ui.button variant="secondary" class="lg:h-10.5" :href="route('jobs.show', $job)">
+                    {{ __('jobs.items.edit.cancel') }}
+                </x-ui.button>
+            @endif
+        </div>
     </div>
 </form>

@@ -17,12 +17,12 @@
 <section class="border border-border bg-surface p-4">
     <h2 class="sr-only">{{ __('jobs.show.details') }}</h2>
 
-    <dl class="grid gap-x-4 gap-y-2 sm:grid-cols-[8rem_1fr]">
+    <dl class="grid gap-x-4 gap-y-2 sm:grid-cols-[8rem_minmax(0,1fr)] md:grid-cols-[8rem_minmax(0,1fr)_8rem_minmax(0,1fr)] xl:grid-cols-[8rem_minmax(0,1fr)]">
         <dt class="text-xs font-medium uppercase tracking-wider text-text-muted sm:pt-0.5">
             {{ __('jobs.show.complaint') }}
         </dt>
 
-        <dd class="whitespace-pre-line">{{ $job->complaint }}</dd>
+        <dd class="whitespace-pre-line wrap-break-word md:col-span-3 xl:col-span-1">{{ $job->complaint }}</dd>
 
         <dt class="text-xs font-medium uppercase tracking-wider text-text-muted sm:pt-0.5">
             {{ __('jobs.show.mileage_in') }}

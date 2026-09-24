@@ -81,25 +81,76 @@ class JobAttachmentsViewTest extends TestCase
         $response->assertDontSee(route('attachments.show', ['attachment' => $document, 'variant' => 'full']), false);
     }
 
-    public function test_the_uploader_sees_a_delete_control_and_a_colleague_does_not(): void
+    /**
+     * A photo's delete lives in the viewer, which reads its target from the
+     * trigger — so the gate is whether the trigger carries the action.
+     */
+    public function test_the_uploader_can_delete_a_photo_from_the_viewer_and_a_colleague_cannot(): void
     {
         $job = Job::factory()->inProgress()->create();
         $uploader = User::factory()->mechanic()->create();
         $photo = JobAttachment::factory()->photo()->forJob($job)->uploadedBy($uploader)->create();
 
-        $deleteForm = 'action="'.route('attachments.destroy', $photo).'"';
+        $deleteTarget = 'data-lightbox-delete-action="'.route('attachments.destroy', $photo).'"';
 
         $this->actingAs($uploader)
             ->get(route('jobs.show', $job))
-            ->assertSee($deleteForm, false);
+            ->assertSee($deleteTarget, false);
 
         $this->actingAs(User::factory()->mechanic()->create())
             ->get(route('jobs.show', $job))
-            ->assertDontSee($deleteForm, false);
+            ->assertDontSee($deleteTarget, false);
 
         $this->actingAs(User::factory()->receptionist()->create())
             ->get(route('jobs.show', $job))
-            ->assertSee($deleteForm, false);
+            ->assertSee($deleteTarget, false);
+    }
+
+    public function test_a_photo_tile_renders_no_delete_form_of_its_own(): void
+    {
+        $job = Job::factory()->inProgress()->create();
+        $photo = JobAttachment::factory()->photo()->forJob($job)->create();
+
+        $html = $this->actingAs(User::factory()->receptionist()->create())
+            ->get(route('jobs.show', $job))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/<form[^>]*action="'.preg_quote(route('attachments.destroy', $photo), '/').'"/',
+            $html,
+        );
+    }
+
+    public function test_the_trigger_carries_the_viewers_confirm_message_and_accessible_name(): void
+    {
+        $job = Job::factory()->inProgress()->create();
+        $photo = JobAttachment::factory()->photo()->forJob($job)->create();
+
+        $this->actingAs(User::factory()->receptionist()->create())
+            ->get(route('jobs.show', $job))
+            ->assertSee('data-lightbox-delete-confirm="'.e(__('jobs.attachments.delete.confirm', ['filename' => $photo->original_filename])).'"', false)
+            ->assertSee('data-lightbox-delete-label="'.e(__('jobs.attachments.delete.action_for', ['filename' => $photo->original_filename])).'"', false);
+    }
+
+    public function test_the_viewer_holds_one_hidden_delete_form_spoofed_as_delete(): void
+    {
+        $job = Job::factory()->inProgress()->create();
+        JobAttachment::factory()->photo()->forJob($job)->count(2)->create();
+
+        $html = $this->actingAs(User::factory()->receptionist()->create())
+            ->get(route('jobs.show', $job))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(1, preg_match_all('/<form[^>]*data-lightbox-delete[^-][^>]*>/', $html, $forms));
+        $this->assertStringContainsString(' hidden', $forms[0][0]);
+        $this->assertStringContainsString('data-confirm=""', $forms[0][0]);
+
+        $dialog = substr($html, strpos($html, 'data-lightbox-dialog'));
+
+        $this->assertMatchesRegularExpression('/data-lightbox-delete[^-].*?name="_method" value="DELETE"/s', $dialog);
+        $this->assertStringContainsString(__('jobs.attachments.delete.action'), $dialog);
     }
 
     /**

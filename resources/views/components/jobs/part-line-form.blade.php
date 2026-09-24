@@ -1,10 +1,15 @@
-<form id="line-item-form" method="POST" action="{{ route('jobs.parts.store', $job) }}" class="mt-4 border-t border-border pt-4">
+<form id="line-item-form" method="POST" action="{{ route('jobs.parts.store', $job) }}" class="mt-4 border border-border bg-surface-muted p-3">
     @csrf
 
-    <h3 class="text-xs font-semibold uppercase tracking-wider text-text-muted">{{ __('jobs.items.add.part_title') }}</h3>
+    <div class="flex flex-wrap items-center justify-between gap-2">
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-text-soft">{{ __('jobs.items.add.part_title') }}</h3>
 
-    <div class="mt-2 grid gap-3 sm:grid-cols-2">
+        {{ $switch ?? '' }}
+    </div>
+
+    <div class="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_7rem_10rem_14rem_auto]">
         <x-forms.select
+            class="lg:h-10.5"
             name="part_id"
             :label="__('jobs.items.add.part')"
             :options="$partOptions"
@@ -22,15 +27,6 @@
             required
         />
 
-        @if ($userOptions !== [])
-            <x-forms.select
-                name="user_id"
-                :label="__('jobs.items.add.who')"
-                :options="$userOptions"
-                :placeholder="__('jobs.items.add.who_unassigned')"
-            />
-        @endif
-
         @if ($showPricing)
             <x-forms.field
                 name="unit_price"
@@ -38,11 +34,22 @@
                 step="0.01"
                 min="0"
                 :label="__('jobs.items.add.price')"
+                :placeholder="__('jobs.items.add.price_placeholder')"
             />
         @endif
-    </div>
 
-    <div class="mt-3">
-        <x-ui.button>{{ __('jobs.items.add.submit_part') }}</x-ui.button>
+        @if ($userOptions !== [])
+            <x-forms.select
+                class="lg:h-10.5"
+                name="user_id"
+                :label="__('jobs.items.add.who')"
+                :options="$userOptions"
+                :placeholder="__('jobs.items.add.who_unassigned')"
+            />
+        @endif
+
+        <div class="lg:pt-6">
+            <x-ui.button class="lg:h-10.5">{{ __('jobs.items.add.submit_part') }}</x-ui.button>
+        </div>
     </div>
 </form>

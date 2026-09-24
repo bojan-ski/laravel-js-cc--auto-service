@@ -13,7 +13,7 @@
         <ul
             role="list"
             aria-label="{{ __('jobs.attachments.photos_label') }}"
-            class="mt-3 grid grid-cols-1 gap-3 @sm:grid-cols-2 @lg:grid-cols-3 @3xl:grid-cols-4"
+            class="mt-3 grid grid-cols-1 gap-3 @sm:grid-cols-2 @lg:grid-cols-3 @3xl:grid-cols-4 @4xl:grid-cols-5"
         >
             @foreach ($photos as $photo)
                 <li>
@@ -44,7 +44,16 @@
             <div class="border border-border-strong bg-surface p-2">
                 <img data-lightbox-image src="" alt="" class="max-h-[80vh] max-w-full object-contain">
 
-                <div class="mt-2 text-right">
+                <div class="mt-2 flex justify-end gap-2">
+                    <form method="POST" action="" data-lightbox-delete data-confirm="" hidden class="mr-auto">
+                        @csrf
+                        @method('DELETE')
+
+                        <x-ui.button type="submit" variant="danger">
+                            {{ __('jobs.attachments.delete.action') }}
+                        </x-ui.button>
+                    </form>
+
                     <x-ui.button type="button" variant="secondary" data-lightbox-close>
                         {{ __('jobs.attachments.lightbox.close') }}
                     </x-ui.button>
