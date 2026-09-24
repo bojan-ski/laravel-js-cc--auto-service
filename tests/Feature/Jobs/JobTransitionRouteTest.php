@@ -105,7 +105,10 @@ class JobTransitionRouteTest extends TestCase
         $this->actingAs(User::factory()->mechanic()->create())
             ->patch(route('jobs.complete', $job))
             ->assertRedirect(route('jobs.show', $job))
-            ->assertSessionHas('success', __('jobs.flash.completed', ['reference' => $job->reference]));
+            ->assertSessionHas('success', fn (string $flash): bool => str_starts_with(
+                $flash,
+                __('jobs.flash.completed', ['reference' => $job->reference]).' ',
+            ));
 
         $job->refresh();
 

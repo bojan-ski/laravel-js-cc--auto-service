@@ -1,21 +1,34 @@
-<div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.5; color: #1C1917;">
-    <p>{{ __('mail.invoice_issued.greeting', ['name' => $customer->name]) }}</p>
+@php
+    $body = __('mail.invoice_issued.body', [
+        'make' => $vehicle->make,
+        'model' => $vehicle->model,
+        'plate' => $vehicle->registration_plate,
+    ]);
+@endphp
 
-    <p>{{ __('mail.invoice_issued.body', ['make' => $vehicle->make, 'model' => $vehicle->model, 'plate' => $vehicle->registration_plate]) }}</p>
+<x-mail.layout
+    :title="__('mail.invoice_issued.subject', ['number' => $invoice->number, 'plate' => $vehicle->registration_plate])"
+    :heading="__('mail.invoice_issued.heading', ['number' => $invoice->number])"
+    :preheader="$body"
+>
+    <p style="margin: 0 0 12px;">{{ __('mail.invoice_issued.greeting', ['name' => $customer->name]) }}</p>
 
-    <p>
-        {{ __('mail.invoice_issued.number', ['number' => $invoice->number]) }}<br>
-        {{ __('mail.invoice_issued.issued', ['date' => $invoice->issued_at->format('j M Y')]) }}
+    <p style="margin: 0;">{{ $body }}</p>
+
+    <x-mail.vehicle :vehicle="$vehicle" />
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 24px;">
+        <x-mail.row :label="__('mail.invoice_issued.number')" :value="$invoice->number" />
+        <x-mail.row :label="__('mail.invoice_issued.issued')" :value="$invoice->issued_at->format('j M Y')" />
+
         @if ($invoice->due_at !== null)
-            <br>{{ __('mail.invoice_issued.due', ['date' => $invoice->due_at->format('j M Y')]) }}
+            <x-mail.row :label="__('mail.invoice_issued.due')" :value="$invoice->due_at->format('j M Y')" />
         @endif
-    </p>
+    </table>
 
-    <p>
-        {{ __('mail.invoice_issued.subtotal', ['amount' => $money['subtotal']]) }}<br>
-        {{ __('mail.invoice_issued.vat', ['rate' => $money['rate'], 'amount' => $money['tax']]) }}<br>
-        <strong>{{ __('mail.invoice_issued.total', ['amount' => $money['total']]) }}</strong>
-    </p>
-
-    <x-mail.shop-footer />
-</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 16px;">
+        <x-mail.row :label="__('mail.invoice_issued.subtotal')" :value="$money['subtotal']" />
+        <x-mail.row :label="__('mail.invoice_issued.vat', ['rate' => $money['rate']])" :value="$money['tax']" />
+        <x-mail.row :label="__('mail.invoice_issued.total')" :value="$money['total']" total />
+    </table>
+</x-mail.layout>

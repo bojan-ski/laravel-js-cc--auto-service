@@ -64,25 +64,27 @@ class JobLockBannerTest extends TestCase
     /**
      * The number is a link into the invoice, not plain text inside the
      * sentence — an `<a>` cannot live inside a `{{ }}`-interpolated string, so
-     * the banner renders it as its own line beside a View invoice control.
+     * the banner renders it as its own line. It is the page's only link to the
+     * invoice; a second View invoice control duplicated it.
      */
     #[DataProvider('frontOfficeRoles')]
-    public function test_the_banner_number_links_to_the_invoice(string $role): void
+    public function test_the_banner_number_is_the_one_link_to_the_invoice(string $role): void
     {
         $job = $this->invoicedJob();
         $invoice = Invoice::query()->sole();
+        $href = 'href="'.route('invoices.show', $invoice).'"';
 
         $html = $this->actingAs(User::factory()->{$role}()->create())
             ->get(route('jobs.show', $job))
             ->assertOk()
-            ->assertSee(__('jobs.show.lock.view_invoice'))
             ->getContent();
 
         $this->assertMatchesRegularExpression(
-            '/<a[^>]*href="'.preg_quote(route('invoices.show', $invoice), '/').'"[^>]*>\s*'.preg_quote($invoice->number, '/').'\s*<\/a>/',
+            '/<a[^>]*'.preg_quote($href, '/').'[^>]*>\s*'.preg_quote($invoice->number, '/').'\s*<\/a>/',
             $html,
             'The invoice number itself must be the link text.',
         );
+        $this->assertSame(1, substr_count($html, $href), 'The job page links to its invoice exactly once.');
     }
 
     public function test_the_deleted_lang_key_has_no_survivors(): void

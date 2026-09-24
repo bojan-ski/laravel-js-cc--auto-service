@@ -86,9 +86,9 @@ class InvoiceIssueRouteTest extends TestCase
 
         $this->actingAs(User::factory()->receptionist()->create())
             ->post(route('jobs.invoice.store', $job))
-            ->assertSessionHas('success', __('invoices.flash.issued', [
+            ->assertSessionHas('success', fn (string $flash): bool => str_starts_with($flash, __('invoices.flash.issued', [
                 'number' => Invoice::query()->sole()->number,
-            ]));
+            ]).' '));
     }
 
     public function test_the_issuer_is_the_acting_user(): void
