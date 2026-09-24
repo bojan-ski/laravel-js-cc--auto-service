@@ -36,7 +36,7 @@ class JobPolicy
      */
     public function start(User $user, Job $job): bool
     {
-        return $job->canStart();
+        return ($user->isMechanic() || $user->isAdmin()) && $job->canStart();
     }
 
     /**
@@ -52,7 +52,7 @@ class JobPolicy
      */
     public function resume(User $user, Job $job): bool
     {
-        return $job->canResume();
+        return ($user->isMechanic() || $user->isAdmin()) && $job->canResume();
     }
 
     /**
