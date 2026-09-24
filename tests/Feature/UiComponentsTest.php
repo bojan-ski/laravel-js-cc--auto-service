@@ -15,7 +15,7 @@ class UiComponentsTest extends TestCase
 
     /**
      * The unprefixed background utilities on the rendered element. A variant
-     * hover state such as hover:bg-brand-dark is deliberately excluded — it
+     * hover state such as hover:bg-brand-deep is deliberately excluded — it
      * sets the same property in a different state, so only these compete.
      *
      * @return array<int, string>

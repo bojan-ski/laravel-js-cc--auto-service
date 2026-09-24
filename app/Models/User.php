@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Theme;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -21,6 +22,13 @@ class User extends Authenticatable
     use HasFactory, Notifiable, SoftDeletes;
 
     /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'theme' => Theme::System->value,
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -29,6 +37,7 @@ class User extends Authenticatable
     {
         return [
             'role' => UserRole::class,
+            'theme' => Theme::class,
             'password' => 'hashed',
         ];
     }

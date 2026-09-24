@@ -2,6 +2,7 @@
 
 namespace App\View\Components\Global;
 
+use App\Enums\Theme;
 use App\Models\Brand;
 use App\Models\Invoice;
 use App\Models\User;
@@ -23,11 +24,29 @@ class Nav extends Component
      */
     public array $adminLinks;
 
+    /**
+     * @var array<int, array{value: string, label: string, current: bool}>
+     */
+    public array $themeOptions;
+
     public function __construct()
     {
         $this->user = auth()->user();
         $this->items = $this->buildItems();
         $this->adminLinks = $this->buildAdminLinks();
+        $this->themeOptions = $this->buildThemeOptions();
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string, current: bool}>
+     */
+    private function buildThemeOptions(): array
+    {
+        return array_map(fn (Theme $theme): array => [
+            'value' => $theme->value,
+            'label' => $theme->label(),
+            'current' => $theme === $this->user->theme,
+        ], Theme::cases());
     }
 
     /**

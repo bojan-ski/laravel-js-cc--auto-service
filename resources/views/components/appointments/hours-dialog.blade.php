@@ -3,7 +3,7 @@
 <dialog
     id="appointment-hours"
     aria-labelledby="appointment-hours-title"
-    class="m-auto w-[calc(100%-2rem)] max-w-md border border-border-strong bg-surface p-0 text-text shadow-lg backdrop:bg-surface-dark/60"
+    class="m-auto w-[calc(100%-2rem)] max-w-md border border-border-strong bg-surface p-0 text-text shadow-lg backdrop:bg-surface-dark/60 dark:backdrop:bg-background/80"
     data-dialog
     @if ($errors->hasAny(['open_at', 'close_at'])) data-dialog-open-on-load @endif
 >

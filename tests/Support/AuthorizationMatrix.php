@@ -1187,6 +1187,20 @@ trait AuthorizationMatrix
                 'receptionist' => self::ALLOW,
                 'admin' => self::ALLOW,
             ],
+            '40' => [
+                'capability' => 'Change own theme',
+                'requests' => [
+                    [
+                        'method' => 'patch',
+                        'route' => 'preferences.theme.update',
+                        'payload' => fn (): array => ['theme' => 'dark'],
+                    ],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => self::ALLOW,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
         ];
     }
 }

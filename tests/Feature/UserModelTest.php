@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Theme;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -38,6 +39,44 @@ class UserModelTest extends TestCase
         $user = User::factory()->receptionist()->create();
 
         $this->assertSame(UserRole::Receptionist, $user->fresh()->role);
+    }
+
+    public function test_the_users_table_has_an_indexed_theme_column(): void
+    {
+        $this->assertTrue(Schema::hasColumn('users', 'theme'));
+
+        $indexed = collect(Schema::getIndexes('users'))
+            ->contains(fn (array $index) => $index['columns'] === ['theme']);
+
+        $this->assertTrue($indexed);
+    }
+
+    public function test_a_new_user_follows_the_system_theme_before_and_after_saving(): void
+    {
+        $user = new User;
+
+        $this->assertSame(Theme::System, $user->theme);
+
+        $saved = User::factory()->create();
+
+        $this->assertSame(Theme::System, $saved->fresh()->theme);
+    }
+
+    public function test_theme_casts_to_the_theme_enum(): void
+    {
+        $user = User::factory()->create();
+        $user->theme = Theme::Dark;
+        $user->save();
+
+        $this->assertSame(Theme::Dark, $user->fresh()->theme);
+    }
+
+    public function test_theme_is_not_mass_assignable(): void
+    {
+        $user = User::factory()->create();
+        $user->fill(['theme' => Theme::Dark->value]);
+
+        $this->assertSame(Theme::System, $user->theme);
     }
 
     public function test_role_is_not_mass_assignable(): void

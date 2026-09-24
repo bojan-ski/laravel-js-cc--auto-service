@@ -19,6 +19,7 @@
     /* Brand */
     --color-brand: #EA580C;
     --color-brand-dark: #C2410C;
+    --color-brand-deep: #C2410C;
     --color-brand-soft: #FFEDD5;
 
     /* Accents */
@@ -52,6 +53,76 @@
 
     /* Inventory warning */
     --color-status-low-stock: #B91C1C;
+}
+
+@custom-variant dark {
+    @media screen {
+        &:where([data-theme='dark'], [data-theme='dark'] *) {
+            @slot;
+        }
+    }
+
+    @media screen and (prefers-color-scheme: dark) {
+        &:where([data-theme='system'], [data-theme='system'] *) {
+            @slot;
+        }
+    }
+}
+
+:root {
+    @variant dark {
+        color-scheme: dark;
+
+        /* Backgrounds */
+        --color-background: #0C0A09;
+        --color-surface: #1C1917;
+        --color-surface-muted: #292524;
+        --color-surface-dark: #44403C;
+
+        /* Text */
+        --color-text: #F5F5F4;
+        --color-text-soft: #D6D3D1;
+        --color-text-muted: #A8A29E;
+        --color-text-inverse: #FAFAF9;
+
+        /* Brand */
+        --color-brand: #EA580C;
+        --color-brand-dark: #FB923C;
+        --color-brand-deep: #C2410C;
+        --color-brand-soft: #431407;
+
+        /* Accents */
+        --color-accent: #38BDF8;
+        --color-accent-soft: #0C4A6E;
+
+        /* Danger — destructive actions */
+        --color-danger: #DC2626;
+        --color-danger-dark: #B91C1C;
+
+        /* Borders */
+        --color-border: #44403C;
+        --color-border-strong: #78716C;
+
+        /* Status — job lifecycle */
+        --color-status-received: #D6D3D1;
+        --color-status-in-progress: #7DD3FC;
+        --color-status-awaiting-parts: #FDE047;
+        --color-status-completed: #86EFAC;
+        --color-status-cancelled: #FCA5A5;
+
+        /* Status — appointment lifecycle */
+        --color-status-booked: #7DD3FC;
+        --color-status-arrived: #86EFAC;
+        --color-status-no-show: #FCA5A5;
+
+        /* Status — invoice lifecycle */
+        --color-status-unpaid: #FDE047;
+        --color-status-paid: #86EFAC;
+        --color-status-void: #D6D3D1;
+
+        /* Inventory warning */
+        --color-status-low-stock: #FCA5A5;
+    }
 }
 
 @layer base {

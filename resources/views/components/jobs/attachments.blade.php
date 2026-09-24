@@ -39,7 +39,7 @@
         <dialog
             data-lightbox-dialog
             aria-label="{{ __('jobs.attachments.lightbox.label') }}"
-            class="m-auto max-w-[90vw] bg-transparent p-0 backdrop:bg-surface-dark/80"
+            class="m-auto max-w-[90vw] bg-transparent p-0 backdrop:bg-surface-dark/80 dark:backdrop:bg-background/90"
         >
             <div class="border border-border-strong bg-surface p-2">
                 <img data-lightbox-image src="" alt="" class="max-h-[80vh] max-w-full object-contain">
