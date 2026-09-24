@@ -13,7 +13,7 @@
             @foreach ($appointments as $appointment)
                 @php
                     $arrived = $appointment->isArrived();
-                    $missed = ! $arrived && ! $appointment->isBooked();
+                    $missed = $appointment->isMissed();
                 @endphp
 
                 <li class="border-b border-border last:border-b-0">
