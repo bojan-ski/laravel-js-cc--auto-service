@@ -44,7 +44,7 @@ class JobAuthorizationTest extends TestCase
             ],
             'receptionist' => [
                 'viewAny' => true, 'view' => true, 'create' => true,
-                'start' => true, 'pause' => true, 'resume' => true, 'complete' => true,
+                'start' => false, 'pause' => true, 'resume' => false, 'complete' => true,
                 'cancel' => true, 'reopen' => true,
             ],
             'admin' => [

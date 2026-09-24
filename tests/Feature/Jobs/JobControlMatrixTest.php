@@ -23,7 +23,7 @@ class JobControlMatrixTest extends TestCase
         $expected = [
             'received' => [
                 'mechanic' => ['start'],
-                'receptionist' => ['start', 'cancel'],
+                'receptionist' => ['cancel'],
                 'admin' => ['start', 'cancel'],
             ],
             'inProgress' => [
@@ -33,7 +33,7 @@ class JobControlMatrixTest extends TestCase
             ],
             'awaitingParts' => [
                 'mechanic' => ['resume'],
-                'receptionist' => ['resume', 'cancel'],
+                'receptionist' => ['cancel'],
                 'admin' => ['resume', 'cancel'],
             ],
             'completed' => [

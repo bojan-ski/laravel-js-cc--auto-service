@@ -385,16 +385,25 @@ trait AuthorizationMatrix
                 'admin' => self::ALLOW,
             ],
             '4' => [
-                'capability' => 'Change job status',
+                'capability' => 'Pause for parts or complete a job',
                 'requests' => [
-                    ['method' => 'patch', 'route' => 'jobs.start', 'params' => ['receivedJob']],
                     ['method' => 'patch', 'route' => 'jobs.pause', 'params' => ['pausableJob']],
-                    ['method' => 'patch', 'route' => 'jobs.resume', 'params' => ['awaitingPartsJob']],
                     ['method' => 'patch', 'route' => 'jobs.complete', 'params' => ['workingJob']],
                 ],
                 'guest' => self::LOGIN,
                 'mechanic' => self::ALLOW,
                 'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
+            '4b' => [
+                'capability' => 'Start or resume work',
+                'requests' => [
+                    ['method' => 'patch', 'route' => 'jobs.start', 'params' => ['receivedJob']],
+                    ['method' => 'patch', 'route' => 'jobs.resume', 'params' => ['awaitingPartsJob']],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => self::ALLOW,
+                'receptionist' => 403,
                 'admin' => self::ALLOW,
             ],
             '4a' => [

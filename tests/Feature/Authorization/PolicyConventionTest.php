@@ -115,10 +115,10 @@ class PolicyConventionTest extends TestCase
      */
     public function test_the_matrix_holds_every_capability_and_the_twelve_admin_only_rows(): void
     {
-        // 39 capabilities in the Authorization Summary, five of which split
-        // into a lettered second row (4a, 10a, 10b, 16a, 20a) because they are
-        // separate routes carrying different verdicts.
-        $this->assertCount(44, self::matrix());
+        // One row per Authorization Summary capability, plus lettered rows
+        // (4a, 4b, 10a, 10b, 16a, 20a) where a capability spans separate
+        // routes carrying different verdicts.
+        $this->assertCount(45, self::matrix());
 
         // Cast: PHP stores a numeric row key as an integer, so '13' comes back
         // as 13 while the lettered keys stay strings.
