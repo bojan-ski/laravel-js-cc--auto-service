@@ -18,6 +18,17 @@ return [
         'sign_out' => 'Sign out',
     ],
 
+    'language' => [
+        'label' => 'Language',
+    ],
+
+    'languages' => [
+        'en' => 'English',
+        'sr' => 'Srpski',
+        'ro' => 'Română',
+        'de' => 'Deutsch',
+    ],
+
     'theme' => [
         'label' => 'Theme',
         'light' => 'Light',

@@ -8,6 +8,7 @@
 @php
     $isEdit = $appointment !== null;
     $scheduleHintId = $errors->has('scheduled_at') ? null : 'scheduled_at-hint';
+    $overlapTemplates = \App\Enums\Locale::pluralTemplates('appointments.overlap.warning');
 @endphp
 
 <form
@@ -16,7 +17,9 @@
     class="mt-4 max-w-2xl space-y-4 border border-border bg-surface p-4"
     data-appointment-overlap
     data-appointment-overlap-url="{{ route('appointments.overlaps') }}"
-    data-appointment-overlap-template="{{ __('appointments.overlap.warning', ['count' => ':count']) }}"
+    data-plural-one="{{ $overlapTemplates['one'] }}"
+    data-plural-few="{{ $overlapTemplates['few'] }}"
+    data-plural-other="{{ $overlapTemplates['other'] }}"
     @if ($isEdit) data-appointment-overlap-exclude="{{ $appointment->getKey() }}" @endif
 >
     @csrf

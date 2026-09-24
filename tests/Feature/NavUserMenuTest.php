@@ -270,10 +270,12 @@ class NavUserMenuTest extends TestCase
     }
 
     /**
-     * The saved option must be told apart without relying on colour: hovering
-     * any other option gives it the same tint and text colour, so the current
-     * one also carries a check mark and heavier text. The mark is decorative —
-     * `aria-pressed` already reports the state to assistive technology.
+     * The saved option must be told apart without relying on colour alone:
+     * hovering any other option gives it the same tint and text colour, so the
+     * current one keeps a visible border and heavier text that hover never
+     * applies. (A check mark was tried and removed on the user's ruling — the
+     * border is the chosen cue.) `aria-pressed` reports the state to
+     * assistive technology.
      */
     #[DataProvider('themeProvider')]
     public function test_the_saved_theme_carries_a_non_colour_marker(Theme $saved): void
@@ -291,42 +293,121 @@ class NavUserMenuTest extends TestCase
 
             $this->assertCount(count(Theme::cases()), $buttons);
 
-            foreach ($buttons as [$tag, $value, $content]) {
+            foreach ($buttons as [$tag, $value]) {
                 $isSaved = $value === $saved->value;
 
-                $this->assertSame(
-                    $isSaved ? 1 : 0,
-                    substr_count($content, '<span aria-hidden="true">&#10003;</span>'),
-                    "The check mark belongs on the saved option only ({$value}).",
-                );
+                $this->assertSame($isSaved, str_contains($tag, 'border-text-inverse/60'), "Only the saved option carries the visible border ({$value}).");
+                $this->assertSame(! $isSaved, str_contains($tag, 'border-transparent'), "Every other option's border is transparent ({$value}).");
                 $this->assertSame($isSaved, str_contains($tag, 'font-semibold'));
+                $this->assertStringNotContainsString('hover:border', $tag, 'Hover must never add the border that marks the saved option.');
             }
         }
     }
 
     /**
-     * Each switch is a labelled group, and the two copies must not share an
-     * id — a duplicate id would label both groups from whichever came first.
+     * Each switch is a labelled group, and no two of the four copies (theme
+     * and language, desktop and mobile) may share an id — a duplicate would
+     * label both groups from whichever came first.
      */
-    public function test_each_theme_switch_is_a_group_labelled_by_its_own_heading(): void
+    public function test_each_preference_switch_is_a_group_labelled_by_its_own_heading(): void
     {
-        $forms = $this->headerThemeForms(
-            $this->actingAs(User::factory()->create())->get('/')->assertOk()->getContent()
-        );
+        $html = $this->actingAs(User::factory()->create())->get('/')->assertOk()->getContent();
 
         $labelIds = [];
 
-        foreach ($forms as $form) {
-            $this->assertMatchesRegularExpression('/role="group" aria-labelledby="([^"]+)"/', $form);
-            preg_match('/aria-labelledby="([^"]+)"/', $form, $labelledBy);
-            $this->assertMatchesRegularExpression(
-                '/id="'.preg_quote($labelledBy[1], '/').'"[^>]*>\s*'.preg_quote(__('app.theme.label'), '/').'\s*</',
-                $form,
-            );
-            $labelIds[] = $labelledBy[1];
+        foreach ([[$this->headerThemeForms($html), 'app.theme.label'], [$this->headerLocaleForms($html), 'app.language.label']] as [$forms, $labelKey]) {
+            $this->assertCount(2, $forms);
+
+            foreach ($forms as $form) {
+                $this->assertMatchesRegularExpression('/role="group" aria-labelledby="([^"]+)"/', $form);
+                preg_match('/aria-labelledby="([^"]+)"/', $form, $labelledBy);
+                $this->assertMatchesRegularExpression(
+                    '/id="'.preg_quote($labelledBy[1], '/').'"[^>]*>\s*'.preg_quote(__($labelKey), '/').'\s*</',
+                    $form,
+                );
+                $labelIds[] = $labelledBy[1];
+            }
         }
 
-        $this->assertCount(2, array_unique($labelIds));
+        $this->assertCount(4, array_unique($labelIds));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function headerLocaleForms(string $html): array
+    {
+        preg_match('/<header\b.*?<\/header>/s', $html, $header);
+
+        $this->assertNotEmpty($header, 'No header rendered.');
+
+        preg_match_all(
+            '/<form\b[^>]*action="'.preg_quote(route('preferences.locale.update'), '/').'"[^>]*>.*?<\/form>/s',
+            $header[0],
+            $forms
+        );
+
+        return $forms[0];
+    }
+
+    public function test_both_user_menus_offer_every_language_by_its_own_name(): void
+    {
+        $forms = $this->headerLocaleForms(
+            $this->actingAs(User::factory()->create())->get('/')->assertOk()->getContent()
+        );
+
+        $this->assertCount(2, $forms, 'Expected a desktop and a mobile language switch.');
+
+        foreach ($forms as $form) {
+            $this->assertStringContainsString('name="_method" value="PATCH"', $form);
+
+            foreach (['en' => 'English', 'sr' => 'Srpski', 'ro' => 'Română', 'de' => 'Deutsch'] as $value => $name) {
+                $this->assertMatchesRegularExpression(
+                    '/<button\b[^>]*name="locale"[^>]*value="'.$value.'"[^>]*>\s*(<span aria-hidden="true">[^<]*<\/span>\s*)?'.preg_quote($name, '/').'\s*<\/button>/u',
+                    $form,
+                );
+            }
+        }
+    }
+
+    /**
+     * Each language is named in itself, so each name is in a language other
+     * than the page's; without its own `lang` a screen reader pronounces
+     * "Deutsch" with Serbian rules (WCAG 3.1.2). Theme options are words in
+     * the page's own language and must not claim another one.
+     */
+    public function test_each_language_name_declares_its_own_language(): void
+    {
+        $html = $this->actingAs(User::factory()->create())->get('/')->assertOk()->getContent();
+
+        foreach ($this->headerLocaleForms($html) as $form) {
+            preg_match_all('/<button\b[^>]*value="([a-z]+)"[^>]*\blang="([^"]+)"/', $form, $buttons, PREG_SET_ORDER);
+
+            $this->assertSame(['en' => 'en', 'sr' => 'sr-Latn', 'ro' => 'ro', 'de' => 'de'], array_column($buttons, 2, 1));
+        }
+
+        foreach ($this->headerThemeForms($html) as $form) {
+            $this->assertDoesNotMatchRegularExpression('/<button\b[^>]*\blang=/', $form);
+        }
+    }
+
+    /**
+     * A user who never chose is shown the language actually in use (here the
+     * shop default) as the pressed one, so the menu never claims no language.
+     */
+    public function test_the_language_in_use_is_marked_pressed(): void
+    {
+        config(['shop.locale' => 'ro']);
+
+        $forms = $this->headerLocaleForms(
+            $this->actingAs(User::factory()->create())->get('/')->assertOk()->getContent()
+        );
+
+        foreach ($forms as $form) {
+            preg_match_all('/<button\b[^>]*value="([a-z]+)"[^>]*aria-pressed="(true|false)"/', $form, $buttons, PREG_SET_ORDER);
+
+            $this->assertSame(['en' => 'false', 'sr' => 'false', 'ro' => 'true', 'de' => 'false'], array_column($buttons, 2, 1));
+        }
     }
 
     /**

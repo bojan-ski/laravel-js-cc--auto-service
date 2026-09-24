@@ -2,6 +2,7 @@
 
 namespace App\View\Components\Customers;
 
+use App\Enums\Locale;
 use App\Http\Resources\CustomerLookupResource;
 use App\Services\CustomerIntakeService;
 use Illuminate\Contracts\View\View;
@@ -15,6 +16,11 @@ class IntakePicker extends Component
     public ?array $picked;
 
     /**
+     * @var array{one: string, few: string, other: string}
+     */
+    public array $resultTemplates;
+
+    /**
      * @param  array<int, string>  $vehicleOptions
      */
     public function __construct(
@@ -25,6 +31,7 @@ class IntakePicker extends Component
         $customer = $intake->picked(filled($customerId) ? (int) $customerId : null);
 
         $this->picked = $customer === null ? null : CustomerLookupResource::make($customer)->resolve(request());
+        $this->resultTemplates = Locale::pluralTemplates('customers.intake.results');
     }
 
     public function render(): View

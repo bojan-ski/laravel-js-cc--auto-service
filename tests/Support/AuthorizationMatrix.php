@@ -1187,6 +1187,34 @@ trait AuthorizationMatrix
                 'receptionist' => self::ALLOW,
                 'admin' => self::ALLOW,
             ],
+            '41' => [
+                'capability' => 'Change own language',
+                'requests' => [
+                    [
+                        'method' => 'patch',
+                        'route' => 'preferences.locale.update',
+                        'payload' => fn (): array => ['locale' => 'de'],
+                    ],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => self::ALLOW,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
+            '42' => [
+                'capability' => 'Choose a language on the login page',
+                'requests' => [
+                    [
+                        'method' => 'post',
+                        'route' => 'locale.update',
+                        'payload' => fn (): array => ['locale' => 'de'],
+                    ],
+                ],
+                'guest' => self::ALLOW,
+                'mechanic' => self::AWAY,
+                'receptionist' => self::AWAY,
+                'admin' => self::AWAY,
+            ],
             '40' => [
                 'capability' => 'Change own theme',
                 'requests' => [

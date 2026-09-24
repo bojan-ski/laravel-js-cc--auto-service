@@ -2,6 +2,7 @@
 
 namespace App\View\Components\Global;
 
+use App\Enums\Locale;
 use App\Enums\Theme;
 use App\Models\Brand;
 use App\Models\Invoice;
@@ -29,12 +30,18 @@ class Nav extends Component
      */
     public array $themeOptions;
 
+    /**
+     * @var array<int, array{value: string, label: string, current: bool, lang: string}>
+     */
+    public array $localeOptions;
+
     public function __construct()
     {
         $this->user = auth()->user();
         $this->items = $this->buildItems();
         $this->adminLinks = $this->buildAdminLinks();
         $this->themeOptions = $this->buildThemeOptions();
+        $this->localeOptions = Locale::options();
     }
 
     /**

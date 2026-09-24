@@ -16,6 +16,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Shop Language
+    |--------------------------------------------------------------------------
+    |
+    | The language of every email sent to a customer, and the default for any
+    | staff member who has not chosen one. It is read from the same variable as
+    | app.locale but kept apart from it, because app.locale changes with every
+    | request to match the signed-in user.
+    |
+    */
+
+    'locale' => env('APP_LOCALE', 'en'),
+
+    /*
+    |--------------------------------------------------------------------------
     | VAT Rate
     |--------------------------------------------------------------------------
     |
