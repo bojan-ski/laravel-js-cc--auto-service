@@ -58,6 +58,33 @@ return [
         'notes' => 'Notes (optional)',
     ],
 
+    'validation' => [
+        'phone_taken' => 'This phone number already belongs to :name.',
+    ],
+
+    'intake' => [
+        'legend' => 'Customer and vehicle',
+        'customer' => 'customer',
+        'vehicle' => 'vehicle',
+        'search_label' => 'Find a customer',
+        'search_hint' => 'Name, phone or plate. Leave it empty to add a new customer below.',
+        'results' => ':count customer found|:count customers found',
+        'results_none' => 'No customer matches. Fill in the new customer below.',
+        'picked' => 'Customer',
+        'change' => 'Change customer',
+        'new_customer' => 'New customer',
+        'existing_vehicle' => 'Existing vehicle',
+        'existing_vehicle_placeholder' => 'Select a vehicle, or add a new customer below',
+        'vehicle_legend' => 'Vehicle',
+        'new_vehicle_option' => 'New vehicle',
+        'new_vehicle' => 'New vehicle',
+        'locked_hint' => 'Enter the customer\'s name and phone first.',
+        'required_customer' => 'Enter the new customer\'s :attribute, or find an existing customer.',
+        'required_vehicle' => 'Enter the vehicle\'s :attribute, or choose an existing vehicle.',
+        'vehicle_not_theirs' => 'That vehicle does not belong to the selected customer.',
+        'plate_taken' => ':plate already belongs to :owner.',
+    ],
+
     'delete' => [
         'action' => 'Delete :name',
         'confirm' => 'Delete :name? They will no longer appear in the customer list. Nothing is purged.',

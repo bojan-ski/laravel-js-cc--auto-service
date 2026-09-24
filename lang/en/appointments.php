@@ -72,8 +72,6 @@ return [
     'form' => [
         'create_title' => 'New appointment',
         'edit_title' => 'Reschedule appointment',
-        'vehicle' => 'Vehicle',
-        'vehicle_placeholder' => 'Select a vehicle',
         'vehicle_fixed' => 'Vehicle',
         'vehicle_fixed_hint' => 'The vehicle cannot be changed. Cancel this appointment and create a new one instead.',
         'scheduled_at' => 'Date and time',

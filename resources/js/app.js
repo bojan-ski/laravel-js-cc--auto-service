@@ -1,5 +1,6 @@
 import { registerAppointmentOverlap } from './modules/appointment-overlap';
 import { registerConfirmForms } from './modules/confirm';
+import { registerCustomerPicker } from './modules/customer-picker';
 import { registerDialogs } from './modules/dialog';
 import { registerDropdowns } from './modules/dropdown';
 import { registerFlashMessages } from './modules/flash';
@@ -8,6 +9,7 @@ import { registerPrintButtons } from './modules/print';
 
 registerAppointmentOverlap();
 registerConfirmForms();
+registerCustomerPicker();
 registerDialogs();
 registerDropdowns();
 registerFlashMessages();

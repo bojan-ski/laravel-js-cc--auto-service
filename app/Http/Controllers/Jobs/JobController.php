@@ -11,7 +11,7 @@ use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobAttachment;
 use App\Models\JobItem;
-use App\Models\Vehicle;
+use App\Services\CustomerIntakeService;
 use App\Services\JobService;
 use App\Services\PartService;
 use App\Services\UserService;
@@ -29,6 +29,7 @@ class JobController extends Controller
         private VehicleService $vehicles,
         private UserService $users,
         private PartService $parts,
+        private CustomerIntakeService $intake,
     ) {}
 
     public function index(JobIndexRequest $request): View
@@ -131,8 +132,7 @@ class JobController extends Controller
     {
         Gate::authorize('create', Job::class);
 
-        $vehicle = Vehicle::findOrFail($request->integer('vehicle_id'));
-        $job = $this->jobs->createWalkIn($vehicle, $request->user(), $request->validated());
+        $job = $this->intake->openWalkIn($request->intake(), $request->user(), $request->jobAttributes());
 
         return redirect()
             ->route('jobs.show', $job)
@@ -143,7 +143,7 @@ class JobController extends Controller
     {
         Gate::authorize('markArrived', $appointment);
 
-        $job = $this->jobs->createFromAppointment($appointment, $request->user(), $request->validated());
+        $job = $this->jobs->createFromAppointment($appointment, $request->user(), $request->jobAttributes());
 
         return redirect()
             ->route('jobs.show', $job)

@@ -210,7 +210,7 @@ class LocalizationCoverageTest extends TestCase
     {
         $modules = glob(resource_path('js/modules/*.js')) ?: [];
 
-        $this->assertCount(7, $modules, 'The module count changed; extend this test to the new module.');
+        $this->assertCount(8, $modules, 'The module count changed; extend this test to the new module.');
 
         foreach ($modules as $module) {
             $source = (string) file_get_contents($module);

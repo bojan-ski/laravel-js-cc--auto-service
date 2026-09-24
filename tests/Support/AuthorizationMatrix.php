@@ -566,6 +566,7 @@ trait AuthorizationMatrix
                 'capability' => 'Create / edit customers and vehicles',
                 'requests' => [
                     ['method' => 'get', 'route' => 'customers.create'],
+                    ['method' => 'get', 'route' => 'customers.lookup', 'query' => fn (): array => ['q' => 'Ma']],
                     [
                         'method' => 'post',
                         'route' => 'customers.store',

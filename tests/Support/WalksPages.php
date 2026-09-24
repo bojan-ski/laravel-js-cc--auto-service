@@ -125,6 +125,10 @@ trait WalksPages
             ]),
 
             'customers.index' => self::plain('customers.index', self::ALL_STAFF),
+            'customers.lookup' => self::plain('customers.lookup', self::FRONT_OFFICE, [
+                'query' => fn (): array => ['q' => 'Ma'],
+                'html' => false,
+            ]),
             'customers.index:search' => self::page('customers.index', self::ALL_STAFF, query: fn (QaFixture $shop): array => ['search' => $shop->customer->name]),
             'customers.index:search-none' => self::page('customers.index', self::ALL_STAFF, query: fn (): array => ['search' => 'zz-nobody']),
             'customers.show' => self::page('customers.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->customer], trashed: 404),

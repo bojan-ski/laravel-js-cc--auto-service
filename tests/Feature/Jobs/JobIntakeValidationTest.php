@@ -45,7 +45,7 @@ class JobIntakeValidationTest extends TestCase
     public function test_submitting_neither_a_vehicle_nor_an_appointment_is_rejected(): void
     {
         $this->submit(['complaint' => 'Neither'])
-            ->assertSessionHasErrors('vehicle_id')
+            ->assertSessionHasErrors(['new_customer_name', 'new_customer_phone', 'new_vehicle_plate', 'new_vehicle_make', 'new_vehicle_model'])
             ->assertSessionDoesntHaveErrors('appointment_id');
 
         $this->assertSame(0, Job::query()->count());
