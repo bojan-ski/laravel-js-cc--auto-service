@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Theme;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class NavUserMenuTest extends TestCase
@@ -196,5 +198,145 @@ class NavUserMenuTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->get('/')
             ->assertSee('name="_token"', false);
+    }
+
+    /**
+     * Scoped to the <header> and matched per form, because the menu renders
+     * twice and a switch added to only one menu is invisible at half the
+     * viewports.
+     *
+     * @return list<string>
+     */
+    private function headerThemeForms(string $html): array
+    {
+        preg_match('/<header\b.*?<\/header>/s', $html, $header);
+
+        $this->assertNotEmpty($header, 'No header rendered.');
+
+        preg_match_all(
+            '/<form\b[^>]*action="'.preg_quote(route('preferences.theme.update'), '/').'"[^>]*>.*?<\/form>/s',
+            $header[0],
+            $forms
+        );
+
+        return $forms[0];
+    }
+
+    public function test_both_user_menus_offer_every_theme_through_a_patch_form(): void
+    {
+        $forms = $this->headerThemeForms(
+            $this->actingAs(User::factory()->create())->get('/')->assertOk()->getContent()
+        );
+
+        $this->assertCount(2, $forms, 'Expected a desktop and a mobile theme switch.');
+
+        foreach ($forms as $form) {
+            $this->assertStringContainsString('name="_method" value="PATCH"', $form);
+            $this->assertStringContainsString('name="_token"', $form);
+
+            foreach (Theme::cases() as $theme) {
+                $this->assertMatchesRegularExpression(
+                    '/<button\b[^>]*name="theme"[^>]*value="'.$theme->value.'"[^>]*>\s*(<span aria-hidden="true">[^<]*<\/span>\s*)?'.preg_quote($theme->label(), '/').'\s*<\/button>/',
+                    $form,
+                );
+            }
+        }
+    }
+
+    #[DataProvider('themeProvider')]
+    public function test_only_the_saved_theme_is_marked_pressed(Theme $saved): void
+    {
+        $user = User::factory()->create();
+        $user->theme = $saved;
+        $user->save();
+
+        $forms = $this->headerThemeForms($this->actingAs($user)->get('/')->assertOk()->getContent());
+
+        $this->assertCount(2, $forms);
+
+        foreach ($forms as $form) {
+            preg_match_all('/<button\b[^>]*value="([a-z]+)"[^>]*aria-pressed="(true|false)"/', $form, $buttons, PREG_SET_ORDER);
+
+            $pressed = array_column($buttons, 2, 1);
+
+            $this->assertSame(
+                array_combine(
+                    array_map(fn (Theme $theme): string => $theme->value, Theme::cases()),
+                    array_map(fn (Theme $theme): string => $theme === $saved ? 'true' : 'false', Theme::cases()),
+                ),
+                $pressed,
+            );
+        }
+    }
+
+    /**
+     * The saved option must be told apart without relying on colour: hovering
+     * any other option gives it the same tint and text colour, so the current
+     * one also carries a check mark and heavier text. The mark is decorative —
+     * `aria-pressed` already reports the state to assistive technology.
+     */
+    #[DataProvider('themeProvider')]
+    public function test_the_saved_theme_carries_a_non_colour_marker(Theme $saved): void
+    {
+        $user = User::factory()->create();
+        $user->theme = $saved;
+        $user->save();
+
+        $forms = $this->headerThemeForms($this->actingAs($user)->get('/')->assertOk()->getContent());
+
+        $this->assertCount(2, $forms);
+
+        foreach ($forms as $form) {
+            preg_match_all('/<button\b[^>]*value="([a-z]+)"[^>]*>(.*?)<\/button>/s', $form, $buttons, PREG_SET_ORDER);
+
+            $this->assertCount(count(Theme::cases()), $buttons);
+
+            foreach ($buttons as [$tag, $value, $content]) {
+                $isSaved = $value === $saved->value;
+
+                $this->assertSame(
+                    $isSaved ? 1 : 0,
+                    substr_count($content, '<span aria-hidden="true">&#10003;</span>'),
+                    "The check mark belongs on the saved option only ({$value}).",
+                );
+                $this->assertSame($isSaved, str_contains($tag, 'font-semibold'));
+            }
+        }
+    }
+
+    /**
+     * Each switch is a labelled group, and the two copies must not share an
+     * id — a duplicate id would label both groups from whichever came first.
+     */
+    public function test_each_theme_switch_is_a_group_labelled_by_its_own_heading(): void
+    {
+        $forms = $this->headerThemeForms(
+            $this->actingAs(User::factory()->create())->get('/')->assertOk()->getContent()
+        );
+
+        $labelIds = [];
+
+        foreach ($forms as $form) {
+            $this->assertMatchesRegularExpression('/role="group" aria-labelledby="([^"]+)"/', $form);
+            preg_match('/aria-labelledby="([^"]+)"/', $form, $labelledBy);
+            $this->assertMatchesRegularExpression(
+                '/id="'.preg_quote($labelledBy[1], '/').'"[^>]*>\s*'.preg_quote(__('app.theme.label'), '/').'\s*</',
+                $form,
+            );
+            $labelIds[] = $labelledBy[1];
+        }
+
+        $this->assertCount(2, array_unique($labelIds));
+    }
+
+    /**
+     * @return array<string, array{0: Theme}>
+     */
+    public static function themeProvider(): array
+    {
+        return array_combine(
+            array_map(fn (Theme $theme): string => $theme->value, Theme::cases()),
+            array_map(fn (Theme $theme): array => [$theme], Theme::cases()),
+        );
     }
 }

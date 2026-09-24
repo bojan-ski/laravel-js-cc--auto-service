@@ -18,6 +18,13 @@ return [
         'sign_out' => 'Sign out',
     ],
 
+    'theme' => [
+        'label' => 'Theme',
+        'light' => 'Light',
+        'dark' => 'Dark',
+        'system' => 'System',
+    ],
+
     'value_none' => '—',
     'value_none_spoken' => 'Not provided',
     'deleted' => 'deleted',

@@ -37,7 +37,9 @@
                     </a>
                 @endforeach
 
-                <form method="POST" action="{{ route('logout') }}">
+                <x-global.theme-switch :options="$themeOptions" id-prefix="nav-desktop" class="mt-1 border-t border-border-strong pt-1" />
+
+                <form method="POST" action="{{ route('logout') }}" class="border-t border-border-strong pt-1">
                     @csrf
 
                     <button
@@ -80,6 +82,8 @@
                             {{ $adminLink['label'] }}
                         </a>
                     @endforeach
+
+                    <x-global.theme-switch :options="$themeOptions" id-prefix="nav-mobile" />
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

@@ -42,6 +42,7 @@ class LocalizationCoverageTest extends TestCase
         'jobs.items.types.' => ['app/Enums/JobItemType.php', "__('jobs.items.types.'.\$this->value)"],
         'jobs.attachments.types.' => ['app/Enums/AttachmentType.php', "__('jobs.attachments.types.'.\$this->value)"],
         'app.roles.' => ['app/Enums/UserRole.php', "__('app.roles.'.\$this->value)"],
+        'app.theme.' => ['app/Enums/Theme.php', "__('app.theme.'.\$this->value)"],
         'brands.tiers.' => ['app/Enums/QualityTier.php', "__('brands.tiers.'.\$this->value)"],
         'parts.numbers.types.' => ['app/Enums/PartNumberType.php', "__('parts.numbers.types.'.\$this->value)"],
         'parts.import.columns.' => ['app/Enums/PartImportColumn.php', "__('parts.import.columns.'.\$this->value)"],
