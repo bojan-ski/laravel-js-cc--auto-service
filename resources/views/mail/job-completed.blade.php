@@ -1,15 +1,23 @@
-<div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.5; color: #1C1917;">
-    <p>{{ __('mail.job_completed.greeting', ['name' => $customer->name]) }}</p>
+@php
+    $body = __('mail.job_completed.body', [
+        'make' => $vehicle->make,
+        'model' => $vehicle->model,
+        'plate' => $vehicle->registration_plate,
+    ]);
+@endphp
 
-    <p>
-        {{ __('mail.job_completed.body', [
-            'make' => $vehicle->make,
-            'model' => $vehicle->model,
-            'plate' => $vehicle->registration_plate,
-        ]) }}
-    </p>
+<x-mail.layout
+    :title="__('mail.job_completed.subject', ['plate' => $vehicle->registration_plate])"
+    :heading="__('mail.job_completed.heading')"
+    :preheader="$body"
+>
+    <p style="margin: 0 0 12px;">{{ __('mail.job_completed.greeting', ['name' => $customer->name]) }}</p>
 
-    <p>{{ __('mail.job_completed.reference', ['reference' => $job->reference]) }}</p>
+    <p style="margin: 0;">{{ $body }}</p>
 
-    <x-mail.shop-footer />
-</div>
+    <x-mail.vehicle :vehicle="$vehicle" />
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 16px;">
+        <x-mail.row :label="__('mail.job_completed.reference')" :value="$job->reference" />
+    </table>
+</x-mail.layout>

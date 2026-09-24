@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Jobs;
 
 use App\Http\Controllers\Controller;
 use App\Models\Job;
+use App\Services\CustomerMailer;
 use App\Services\JobService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ class JobTransitionController extends Controller
 {
     public function __construct(
         private JobService $jobs,
+        private CustomerMailer $mailer,
     ) {}
 
     public function start(Job $job): RedirectResponse
@@ -48,7 +50,7 @@ class JobTransitionController extends Controller
 
         $this->jobs->complete($job);
 
-        return $this->redirectToJob($job, 'completed');
+        return $this->redirectToJob($job, 'completed', $this->mailer->noticeFor($job));
     }
 
     public function cancel(Request $request, Job $job): RedirectResponse
@@ -69,10 +71,12 @@ class JobTransitionController extends Controller
         return $this->redirectToJob($job, 'reopened');
     }
 
-    private function redirectToJob(Job $job, string $flashKey): RedirectResponse
+    private function redirectToJob(Job $job, string $flashKey, ?string $notice = null): RedirectResponse
     {
+        $message = __("jobs.flash.{$flashKey}", ['reference' => $job->reference]);
+
         return redirect()
             ->route('jobs.show', $job)
-            ->with('success', __("jobs.flash.{$flashKey}", ['reference' => $job->reference]));
+            ->with('success', $notice === null ? $message : "{$message} {$notice}");
     }
 }

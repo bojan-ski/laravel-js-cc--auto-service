@@ -13,10 +13,12 @@ use App\Services\InvoiceService;
 use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Lang;
+use Tests\Support\AssertsMailRows;
 use Tests\TestCase;
 
 class InvoiceIssuedMailContentTest extends TestCase
 {
+    use AssertsMailRows;
     use LazilyRefreshDatabase;
 
     private Customer $customer;
@@ -65,13 +67,26 @@ class InvoiceIssuedMailContentTest extends TestCase
         $this->assertSame('2120.00', $invoice->tax_amount);
         $this->assertSame('12720.00', $invoice->total);
 
-        foreach (['assertSeeInHtml', 'assertSeeInText'] as $assertion) {
-            $mailable->{$assertion}('Subtotal: 10,600.00', false);
-            $mailable->{$assertion}('VAT 20%: 2,120.00', false);
-            $mailable->{$assertion}('Total: 12,720.00', false);
-            $mailable->{$assertion}('Invoice: '.$invoice->number, false);
-            $mailable->{$assertion}('Issued: '.$invoice->issued_at->format('j M Y'), false);
-        }
+        $mailable->assertSeeInText('Subtotal: 10,600.00', false);
+        $mailable->assertSeeInText('VAT 20%: 2,120.00', false);
+        $mailable->assertSeeInText('Total: 12,720.00', false);
+        $mailable->assertSeeInText('Invoice: '.$invoice->number, false);
+        $mailable->assertSeeInText('Issued: '.$invoice->issued_at->format('j M Y'), false);
+
+        $this->assertHtmlRow($mailable, 'Subtotal', '10,600.00');
+        $this->assertHtmlRow($mailable, 'VAT 20%', '2,120.00');
+        $this->assertHtmlRow($mailable, 'Total', '12,720.00');
+        $this->assertHtmlRow($mailable, 'Invoice', $invoice->number);
+        $this->assertHtmlRow($mailable, 'Issued', $invoice->issued_at->format('j M Y'));
+    }
+
+    public function test_the_html_body_names_the_invoice_and_the_vehicle(): void
+    {
+        $invoice = $this->issue();
+        $mailable = new InvoiceIssuedMail($invoice, $this->customer, $this->vehicle);
+
+        $mailable->assertSeeInHtml('>Invoice '.$invoice->number.'</h1>', false);
+        $mailable->assertSeeInOrderInHtml([__('mail.vehicle'), 'BG123-ZZ', 'VW Golf IV'], false);
     }
 
     public function test_a_non_default_rate_is_printed_as_stored_without_trailing_zeros(): void
@@ -81,16 +96,16 @@ class InvoiceIssuedMailContentTest extends TestCase
         $mailable = $this->mailable(unitPrice: '100.00');
 
         $mailable->assertSeeInText('VAT 17.5%: 17.50', false);
-        $mailable->assertSeeInHtml('VAT 17.5%: 17.50', false);
+        $this->assertHtmlRow($mailable, 'VAT 17.5%', '17.50');
     }
 
     public function test_the_due_date_is_rendered_when_it_is_set(): void
     {
         $mailable = $this->mailable(now()->addDays(15));
+        $due = now()->addDays(15)->format('j M Y');
 
-        $mailable->assertSeeInText(__('mail.invoice_issued.due', [
-            'date' => now()->addDays(15)->format('j M Y'),
-        ]), false);
+        $mailable->assertSeeInText('Due: '.$due, false);
+        $this->assertHtmlRow($mailable, 'Due', $due);
     }
 
     public function test_the_due_line_is_omitted_entirely_when_there_is_no_due_date(): void
@@ -98,7 +113,7 @@ class InvoiceIssuedMailContentTest extends TestCase
         $mailable = $this->mailable();
 
         $mailable->assertDontSeeInText('Due:', false);
-        $mailable->assertDontSeeInHtml('Due:', false);
+        $this->assertNoHtmlRowLabelled($mailable, 'Due');
     }
 
     public function test_the_message_carries_no_attachment(): void
@@ -131,10 +146,10 @@ class InvoiceIssuedMailContentTest extends TestCase
 
         $mailable = new InvoiceIssuedMail($invoice->fresh(), $this->customer, $this->vehicle);
 
-        foreach (['assertSeeInHtml', 'assertSeeInText'] as $assertion) {
-            $mailable->{$assertion}('Total: 999.99', false);
-            $mailable->{$assertion}('Subtotal: 1.00', false);
-        }
+        $mailable->assertSeeInText('Total: 999.99', false);
+        $mailable->assertSeeInText('Subtotal: 1.00', false);
+        $this->assertHtmlRow($mailable, 'Total', '999.99');
+        $this->assertHtmlRow($mailable, 'Subtotal', '1.00');
 
         $mailable->assertDontSeeInText('12,720.00', false);
         $mailable->assertDontSeeInHtml('12,720.00', false);
@@ -162,31 +177,47 @@ class InvoiceIssuedMailContentTest extends TestCase
     public function test_every_sentence_resolves_through_the_translator(): void
     {
         Lang::addLines([
+            'mail.vehicle' => 'ZZ-VEHICLE',
+            'mail.pair' => 'ZZ-PAIR :label=:value',
             'mail.invoice_issued.subject' => 'ZZ-SUBJECT :number :plate',
+            'mail.invoice_issued.heading' => 'ZZ-HEADING :number',
             'mail.invoice_issued.greeting' => 'ZZ-GREETING :name',
             'mail.invoice_issued.body' => 'ZZ-BODY :make :model :plate',
-            'mail.invoice_issued.number' => 'ZZ-NUMBER :number',
-            'mail.invoice_issued.issued' => 'ZZ-ISSUED :date',
-            'mail.invoice_issued.due' => 'ZZ-DUE :date',
-            'mail.invoice_issued.subtotal' => 'ZZ-SUBTOTAL :amount',
-            'mail.invoice_issued.vat' => 'ZZ-VAT :rate :amount',
-            'mail.invoice_issued.total' => 'ZZ-TOTAL :amount',
+            'mail.invoice_issued.number' => 'ZZ-NUMBER',
+            'mail.invoice_issued.issued' => 'ZZ-ISSUED',
+            'mail.invoice_issued.due' => 'ZZ-DUE',
+            'mail.invoice_issued.subtotal' => 'ZZ-SUBTOTAL',
+            'mail.invoice_issued.vat' => 'ZZ-VAT :rate',
+            'mail.invoice_issued.total' => 'ZZ-TOTAL',
         ], 'en');
 
         $invoice = $this->issue(now()->addDays(15));
         $mailable = new InvoiceIssuedMail($invoice, $this->customer, $this->vehicle);
+        $issued = $invoice->issued_at->format('j M Y');
+        $due = $invoice->due_at->format('j M Y');
 
         $mailable->assertHasSubject('ZZ-SUBJECT '.$invoice->number.' BG123-ZZ');
 
         foreach (['assertSeeInHtml', 'assertSeeInText'] as $assertion) {
             $mailable->{$assertion}('ZZ-GREETING Milan Petrovic', false);
             $mailable->{$assertion}('ZZ-BODY VW Golf IV BG123-ZZ', false);
-            $mailable->{$assertion}('ZZ-NUMBER '.$invoice->number, false);
-            $mailable->{$assertion}('ZZ-ISSUED ', false);
-            $mailable->{$assertion}('ZZ-DUE ', false);
-            $mailable->{$assertion}('ZZ-SUBTOTAL 10,600.00', false);
-            $mailable->{$assertion}('ZZ-VAT 20 2,120.00', false);
-            $mailable->{$assertion}('ZZ-TOTAL 12,720.00', false);
         }
+
+        $mailable->assertSeeInHtml('ZZ-HEADING '.$invoice->number, false);
+        $mailable->assertSeeInHtml('ZZ-VEHICLE', false);
+
+        $this->assertHtmlRow($mailable, 'ZZ-NUMBER', $invoice->number);
+        $this->assertHtmlRow($mailable, 'ZZ-ISSUED', $issued);
+        $this->assertHtmlRow($mailable, 'ZZ-DUE', $due);
+        $this->assertHtmlRow($mailable, 'ZZ-SUBTOTAL', '10,600.00');
+        $this->assertHtmlRow($mailable, 'ZZ-VAT 20', '2,120.00');
+        $this->assertHtmlRow($mailable, 'ZZ-TOTAL', '12,720.00');
+
+        $mailable->assertSeeInText('ZZ-PAIR ZZ-NUMBER='.$invoice->number, false);
+        $mailable->assertSeeInText('ZZ-PAIR ZZ-ISSUED='.$issued, false);
+        $mailable->assertSeeInText('ZZ-PAIR ZZ-DUE='.$due, false);
+        $mailable->assertSeeInText('ZZ-PAIR ZZ-SUBTOTAL=10,600.00', false);
+        $mailable->assertSeeInText('ZZ-PAIR ZZ-VAT 20=2,120.00', false);
+        $mailable->assertSeeInText('ZZ-PAIR ZZ-TOTAL=12,720.00', false);
     }
 }

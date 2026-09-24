@@ -11,10 +11,12 @@ use App\Models\Vehicle;
 use App\Services\InvoiceService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Lang;
+use Tests\Support\AssertsMailRows;
 use Tests\TestCase;
 
 class JobCompletedMailContentTest extends TestCase
 {
+    use AssertsMailRows;
     use LazilyRefreshDatabase;
 
     private function mailable(): JobCompletedMail
@@ -50,8 +52,12 @@ class JobCompletedMailContentTest extends TestCase
         foreach (['assertSeeInHtml', 'assertSeeInText'] as $assertion) {
             $mailable->{$assertion}('Milan Petrovic', false);
             $mailable->{$assertion}('VW Golf IV (BG123-ZZ) is ready for collection.', false);
-            $mailable->{$assertion}($job->reference, false);
         }
+
+        $mailable->assertSeeInText('Job reference: '.$job->reference, false);
+        $this->assertHtmlRow($mailable, 'Job reference', $job->reference);
+        $mailable->assertSeeInHtml('>Your vehicle is ready</h1>', false);
+        $mailable->assertSeeInOrderInHtml([__('mail.vehicle'), 'BG123-ZZ', 'VW Golf IV'], false);
     }
 
     /**
@@ -143,10 +149,13 @@ class JobCompletedMailContentTest extends TestCase
     public function test_every_sentence_resolves_through_the_translator(): void
     {
         Lang::addLines([
+            'mail.vehicle' => 'ZZ-VEHICLE',
+            'mail.pair' => 'ZZ-PAIR :label=:value',
             'mail.job_completed.subject' => 'ZZ-SUBJECT :plate',
+            'mail.job_completed.heading' => 'ZZ-HEADING',
             'mail.job_completed.greeting' => 'ZZ-GREETING :name',
             'mail.job_completed.body' => 'ZZ-BODY :make :model :plate',
-            'mail.job_completed.reference' => 'ZZ-REFERENCE :reference',
+            'mail.job_completed.reference' => 'ZZ-REFERENCE',
         ], 'en');
 
         $mailable = $this->mailable();
@@ -156,7 +165,11 @@ class JobCompletedMailContentTest extends TestCase
         foreach (['assertSeeInHtml', 'assertSeeInText'] as $assertion) {
             $mailable->{$assertion}('ZZ-GREETING Milan Petrovic', false);
             $mailable->{$assertion}('ZZ-BODY VW Golf IV BG123-ZZ', false);
-            $mailable->{$assertion}('ZZ-REFERENCE JOB-', false);
         }
+
+        $mailable->assertSeeInHtml('ZZ-HEADING', false);
+        $mailable->assertSeeInHtml('ZZ-VEHICLE', false);
+        $this->assertHtmlRow($mailable, 'ZZ-REFERENCE', $mailable->job->reference);
+        $mailable->assertSeeInText('ZZ-PAIR ZZ-REFERENCE='.$mailable->job->reference, false);
     }
 }
