@@ -70,22 +70,13 @@ class Invoice extends Model
     }
 
     #[Scope]
-    protected function joinedForList(Builder $query): void
-    {
-        $query
-            ->join('jobs', 'jobs.id', '=', 'invoices.job_id')
-            ->join('customers', 'customers.id', '=', 'jobs.customer_id')
-            ->select('invoices.*');
-    }
-
-    #[Scope]
     protected function matching(Builder $query, string $term): void
     {
         $escaped = addcslashes($term, '%_\\');
 
         $query->where(function (Builder $query) use ($escaped): void {
             $query->where('invoices.number', 'like', "%{$escaped}%")
-                ->orWhere('customers.name', 'like', "%{$escaped}%");
+                ->orWhere('invoices.buyer_name', 'like', "%{$escaped}%");
         });
     }
 
@@ -102,6 +93,11 @@ class Invoice extends Model
     public function isVoid(): bool
     {
         return $this->status === InvoiceStatus::Void;
+    }
+
+    public function hasCompanyBuyer(): bool
+    {
+        return $this->buyer_tax_id !== null;
     }
 
     public function canBeMarkedPaid(): bool

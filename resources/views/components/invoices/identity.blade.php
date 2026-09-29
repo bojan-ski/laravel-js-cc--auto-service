@@ -1,9 +1,5 @@
 @props(['invoice'])
 
-@php
-    $customer = $invoice->job->customer;
-@endphp
-
 <div class="hidden print:block">
     <div class="flex items-start justify-between gap-6">
         <div>
@@ -32,10 +28,15 @@
     <div class="mt-6">
         <p class="text-xs font-medium uppercase tracking-wider">{{ __('invoices.identity.bill_to') }}</p>
 
-        <p class="font-medium">{{ $customer->name }}</p>
+        <p class="font-medium">{{ $invoice->buyer_name }}</p>
 
-        @if (filled($customer->address))
-            <p>{{ $customer->address }}</p>
+        @if (filled($invoice->buyer_address))
+            <p>{{ $invoice->buyer_address }}</p>
+        @endif
+
+        @if ($invoice->hasCompanyBuyer())
+            <p>{{ __('invoices.buyer.tax_id') }} <span class="tabular-nums">{{ $invoice->buyer_tax_id }}</span></p>
+            <p>{{ __('invoices.buyer.registration_number') }} <span class="tabular-nums">{{ $invoice->buyer_registration_number }}</span></p>
         @endif
     </div>
 </div>

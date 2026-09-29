@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'phone', 'email', 'address', 'notes'])]
+#[Fillable(['name', 'phone', 'email', 'address', 'tax_id', 'registration_number', 'notes'])]
 class Customer extends Model
 {
     /** @use HasFactory<CustomerFactory> */
@@ -48,6 +48,11 @@ class Customer extends Model
     public function jobs(): HasMany
     {
         return $this->hasMany(Job::class)->latest();
+    }
+
+    public function isCompany(): bool
+    {
+        return $this->tax_id !== null;
     }
 
     #[Scope]

@@ -47,6 +47,66 @@ class InvoiceIssueViewTest extends TestCase
             ->assertSee($this->job->customer->name);
     }
 
+    public function test_bill_to_previews_a_company_customer_with_the_hint(): void
+    {
+        $this->job->customer->update([
+            'address' => 'Autoput za Zagreb 18',
+            'tax_id' => '101234569',
+            'registration_number' => '01234567',
+        ]);
+
+        $html = $this->confirmation()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<h2[^>]*>'.preg_quote(e(__('invoices.issue.bill_to')), '/').'<\/h2>\s*<p class="mt-1 text-base text-text"><a href="'
+            .preg_quote(route('customers.show', $this->job->customer), '/').'"[^>]*>\s*'.preg_quote(e($this->job->customer->name), '/').'\s*<\/a>\s*<\/p>\s*'
+            .'<p>Autoput za Zagreb 18<\/p>/',
+            $html,
+        );
+
+        foreach (['tax_id' => '101234569', 'registration_number' => '01234567'] as $key => $value) {
+            $this->assertMatchesRegularExpression(
+                '/<dt>'.preg_quote(e(__('invoices.buyer.'.$key)), '/').'<\/dt>\s*<dd class="tabular-nums">'.$value.'<\/dd>/',
+                $html,
+            );
+        }
+
+        $this->assertStringContainsString(e(__('invoices.issue.bill_to_hint')), $html);
+    }
+
+    public function test_bill_to_shows_no_company_rows_for_a_private_customer(): void
+    {
+        $this->job->customer->update(['tax_id' => null, 'registration_number' => null]);
+
+        $this->confirmation()
+            ->assertSee(__('invoices.issue.bill_to'))
+            ->assertSee(__('invoices.issue.bill_to_hint'))
+            ->assertDontSee(__('invoices.buyer.tax_id'))
+            ->assertDontSee(__('invoices.buyer.registration_number'));
+    }
+
+    public function test_bill_to_is_the_pages_only_subheading(): void
+    {
+        preg_match_all('/<h([1-6])\b[^>]*>(.*?)<\/h\1>/s', $this->confirmation()->getContent(), $headings, PREG_SET_ORDER);
+
+        $this->assertSame(['1', '2'], array_column($headings, 1));
+        $this->assertStringStartsWith(__('invoices.issue.heading'), trim(strip_tags($headings[0][2])));
+        $this->assertSame(
+            __('invoices.issue.bill_to'),
+            trim(strip_tags($headings[1][2])),
+        );
+    }
+
+    public function test_the_vehicle_line_no_longer_names_the_customer(): void
+    {
+        $html = $this->confirmation()->getContent();
+
+        $this->assertSame(1, preg_match('/<p class="text-text-muted">(.*?)<\/p>/s', $html, $vehicleLine));
+        $this->assertStringContainsString($this->job->vehicle->registration_plate, $vehicleLine[1]);
+        $this->assertStringNotContainsString(e($this->job->customer->name), $vehicleLine[1]);
+        $this->assertSame(1, substr_count($html, e($this->job->customer->name)), 'The buyer is named once on the page.');
+    }
+
     public function test_the_totals_are_shown_with_the_vat_rate(): void
     {
         $this->confirmation()

@@ -34,6 +34,8 @@ return [
         'phone' => 'Phone',
         'email' => 'Email',
         'address' => 'Address',
+        'tax_id' => 'Tax ID (PIB)',
+        'registration_number' => 'Registration no. (MB)',
         'notes' => 'Notes',
         'jobs' => 'Job history',
         'jobs_empty' => 'No jobs recorded yet.',
@@ -55,11 +57,20 @@ return [
         'phone' => 'Phone',
         'email' => 'Email (optional)',
         'address' => 'Address (optional)',
+        'company' => 'Company',
+        'company_hint' => 'For a company, enter both its PIB and MB. Leave both empty for a private customer.',
+        'tax_id' => 'Tax ID (PIB)',
+        'registration_number' => 'Registration no. (MB)',
         'notes' => 'Notes (optional)',
     ],
 
     'validation' => [
         'phone_taken' => 'This phone number already belongs to :name.',
+        'tax_id_digits' => 'A PIB has exactly 9 digits.',
+        'tax_id_checksum' => 'This PIB\'s check digit is wrong. Check the number for a typo.',
+        'registration_number_digits' => 'An MB has exactly 8 digits.',
+        'registration_number_required' => 'A company needs its MB as well as its PIB.',
+        'registration_number_without_tax_id' => 'An MB is recorded only for a company. Enter the PIB too, or leave the MB empty.',
     ],
 
     'intake' => [

@@ -160,6 +160,23 @@ class InvoicePrintMarkupTest extends TestCase
         $this->assertSame(2, preg_match_all('/<p\b/', $billTo), 'Only the Bill-to label and the name may render — no empty address line.');
     }
 
+    public function test_a_company_buyer_without_an_address_prints_its_pib_and_mb_and_no_empty_line(): void
+    {
+        $customer = Customer::factory()->company()->create(['name' => 'Firma Bez Adrese d.o.o.', 'address' => null]);
+        $vehicle = Vehicle::factory()->for($customer)->create();
+        $job = Job::factory()->for($customer)->for($vehicle)->completed()->create();
+        JobItem::factory()->forJob($job)->create(['quantity' => 1, 'unit_price' => 2000]);
+        $invoice = app(InvoiceService::class)->issue($job, User::factory()->receptionist()->create());
+
+        $billTo = $this->billToBlock($this->page($invoice));
+
+        $this->assertStringContainsString('Firma Bez Adrese d.o.o.', $billTo);
+        $this->assertStringContainsString($customer->tax_id, $billTo);
+        $this->assertStringContainsString($customer->registration_number, $billTo);
+        $this->assertDoesNotMatchRegularExpression('/<p>\s*<\/p>/', $billTo);
+        $this->assertSame(4, preg_match_all('/<p\b/', $billTo), 'Label, name, PIB and MB — and no address line.');
+    }
+
     /**
      * One template serves screen and print, so the printed figures are the
      * screen figures by construction rather than by discipline.

@@ -82,11 +82,16 @@ class InvoiceService
             $this->refuseUnlessIssuable($locked);
 
             $totals = $this->totalsFor($locked);
+            $customer = Customer::withTrashed()->findOrFail($locked->customer_id);
 
             $invoice = new Invoice;
             $invoice->job_id = $locked->getKey();
             $invoice->number = $this->numbers->generate(now());
             $invoice->status = InvoiceStatus::Unpaid;
+            $invoice->buyer_name = $customer->name;
+            $invoice->buyer_address = $customer->address;
+            $invoice->buyer_tax_id = $customer->tax_id;
+            $invoice->buyer_registration_number = $customer->registration_number;
             $invoice->subtotal = $totals['subtotal'];
             $invoice->tax_rate = $totals['rate'];
             $invoice->tax_amount = $totals['tax'];
@@ -104,7 +109,7 @@ class InvoiceService
 
             $job->setRawAttributes($locked->getAttributes(), true);
 
-            $this->announceIssue($invoice, $locked);
+            $this->announceIssue($invoice, $locked, $customer);
 
             return $invoice;
         });
@@ -207,13 +212,11 @@ class InvoiceService
     private function listQuery(string $search): Builder
     {
         return Invoice::query()
-            ->joinedForList()
             ->when($search, fn (Builder $query, string $term) => $query->matching($term));
     }
 
-    private function announceIssue(Invoice $invoice, Job $job): void
+    private function announceIssue(Invoice $invoice, Job $job, Customer $customer): void
     {
-        $customer = Customer::withTrashed()->findOrFail($job->customer_id);
         $vehicle = Vehicle::withTrashed()->findOrFail($job->vehicle_id);
 
         $this->mailer->send($customer, new InvoiceIssuedMail($invoice, $customer, $vehicle));

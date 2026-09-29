@@ -34,6 +34,8 @@ return [
         'phone' => 'Telefon',
         'email' => 'E-Mail',
         'address' => 'Adresse',
+        'tax_id' => 'Steuernr. (PIB)',
+        'registration_number' => 'Registernr. (MB)',
         'notes' => 'Notizen',
         'jobs' => 'Auftragshistorie',
         'jobs_empty' => 'Noch keine Aufträge erfasst.',
@@ -55,11 +57,20 @@ return [
         'phone' => 'Telefon',
         'email' => 'E-Mail (optional)',
         'address' => 'Adresse (optional)',
+        'company' => 'Firma',
+        'company_hint' => 'Bei einer Firma PIB und MB angeben. Bei einer Privatperson beide Felder leer lassen.',
+        'tax_id' => 'Steuernr. (PIB)',
+        'registration_number' => 'Registernr. (MB)',
         'notes' => 'Notizen (optional)',
     ],
 
     'validation' => [
         'phone_taken' => 'Diese Telefonnummer gehört bereits zu :name.',
+        'tax_id_digits' => 'Eine PIB hat genau 9 Ziffern.',
+        'tax_id_checksum' => 'Die Prüfziffer dieser PIB ist falsch. Bitte die Nummer auf Tippfehler prüfen.',
+        'registration_number_digits' => 'Eine MB hat genau 8 Ziffern.',
+        'registration_number_required' => 'Eine Firma braucht neben der PIB auch die MB.',
+        'registration_number_without_tax_id' => 'Eine MB wird nur für eine Firma erfasst. Bitte auch die PIB angeben oder die MB leer lassen.',
     ],
 
     'intake' => [

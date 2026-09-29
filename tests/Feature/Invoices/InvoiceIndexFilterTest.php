@@ -136,8 +136,8 @@ class InvoiceIndexFilterTest extends TestCase
     }
 
     /**
-     * The customer reaches the invoice through a join, and joins never apply
-     * SoftDeletingScope — so a deleted customer stays searchable by name.
+     * Search reads the invoice's own buyer_name snapshot, which no customer
+     * change reaches — so deleting the customer cannot hide the invoice.
      */
     public function test_search_finds_an_invoice_whose_customer_is_soft_deleted(): void
     {

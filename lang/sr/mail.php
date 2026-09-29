@@ -29,6 +29,8 @@ return [
         'subtotal' => 'Osnovica',
         'vat' => 'PDV :rate%',
         'total' => 'Ukupno',
+        'tax_id' => 'PIB',
+        'registration_number' => 'Matični broj (MB)',
     ],
 
 ];

@@ -8,9 +8,29 @@
 
         <span aria-hidden="true">&middot;</span>
         {{ $job->vehicle->make }} {{ $job->vehicle->model }}
-        <span aria-hidden="true">&middot;</span>
-        <x-vehicles.owner :customer="$job->customer" />
     </p>
+
+    <div class="text-sm text-text-muted">
+        <h2 class="text-xs font-medium uppercase tracking-wider">{{ __('invoices.issue.bill_to') }}</h2>
+
+        <p class="mt-1 text-base text-text"><x-vehicles.owner :customer="$job->customer" /></p>
+
+        @if (filled($job->customer->address))
+            <p>{{ $job->customer->address }}</p>
+        @endif
+
+        @if ($job->customer->isCompany())
+            <dl class="mt-1 grid grid-cols-[auto_1fr] gap-x-3">
+                <dt>{{ __('invoices.buyer.tax_id') }}</dt>
+                <dd class="tabular-nums">{{ $job->customer->tax_id }}</dd>
+
+                <dt>{{ __('invoices.buyer.registration_number') }}</dt>
+                <dd class="tabular-nums">{{ $job->customer->registration_number }}</dd>
+            </dl>
+        @endif
+
+        <p class="mt-2">{{ __('invoices.issue.bill_to_hint') }}</p>
+    </div>
 
     <x-invoices.totals :totals="$totals" />
 
