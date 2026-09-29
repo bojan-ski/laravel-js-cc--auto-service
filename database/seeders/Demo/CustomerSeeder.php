@@ -47,7 +47,7 @@ class CustomerSeeder extends DemoSeeder
         ['name' => 'Vesna Kostić', 'phone' => '+381 62 700 1133', 'email' => null, 'address' => 'Karađorđeva 5, Smederevo', 'notes' => null, 'vehicles' => [
             ['SM-045-VK', 'Zastava', 'Yugo Koral', 1998, '1.1', 98400, 'No VIN plate; chassis number on the title only.'],
         ]],
-        ['name' => 'Kurirska služba Brzi d.o.o.', 'phone' => '+381 11 404 2020', 'email' => 'servis@brzi-kurir.example.com', 'address' => 'Autoput za Zagreb 18, Novi Beograd', 'notes' => 'Fleet account. Fleet manager: Petar Lazić, ext. 12.', 'vehicles' => [
+        ['name' => 'Kurirska služba Brzi d.o.o.', 'phone' => '+381 11 404 2020', 'email' => 'servis@brzi-kurir.example.com', 'address' => 'Autoput za Zagreb 18, Novi Beograd', 'tax_id' => '108765434', 'registration_number' => '21034587', 'notes' => 'Fleet account. Fleet manager: Petar Lazić, ext. 12.', 'vehicles' => [
             ['BG-2101-BK', 'Fiat', 'Doblò', 2018, '1.6 MultiJet', 241000, 'Fleet van 1'],
             ['BG-2102-BK', 'Fiat', 'Doblò', 2018, '1.6 MultiJet', 228700, 'Fleet van 2'],
             ['BG-2103-BK', 'Renault', 'Kangoo', 2019, '1.5 dCi', 187300, 'Fleet van 3'],
@@ -132,6 +132,8 @@ class CustomerSeeder extends DemoSeeder
                 'phone' => $data['phone'],
                 'email' => $data['email'],
                 'address' => $data['address'],
+                'tax_id' => $data['tax_id'] ?? null,
+                'registration_number' => $data['registration_number'] ?? null,
                 'notes' => $data['notes'],
             ]);
 

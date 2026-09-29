@@ -21,7 +21,7 @@
     </td>
 
     <td role="cell" class="col-start-1 row-start-2 text-sm md:table-cell md:px-3 md:py-2 md:text-base">
-        <x-vehicles.owner :customer="$invoice->job->customer" />
+        <x-invoices.buyer :invoice="$invoice" />
     </td>
 
     <td role="cell" class="hidden tabular-nums xl:table-cell xl:px-3 xl:py-2">

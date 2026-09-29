@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\InvoiceStatus;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\User;
@@ -37,6 +38,10 @@ class InvoiceFactory extends Factory
                 return substr($generated, 0, -$digits).str_pad((string) $sequence, $digits, '0', STR_PAD_LEFT);
             },
             'job_id' => Job::factory()->locked(),
+            'buyer_name' => fn (array $attributes): string => $this->buyer($attributes)->name,
+            'buyer_address' => fn (array $attributes): ?string => $this->buyer($attributes)->address,
+            'buyer_tax_id' => fn (array $attributes): ?string => $this->buyer($attributes)->tax_id,
+            'buyer_registration_number' => fn (array $attributes): ?string => $this->buyer($attributes)->registration_number,
             'status' => InvoiceStatus::Unpaid,
             'subtotal' => $subtotal,
             'tax_rate' => $rate,
@@ -81,5 +86,15 @@ class InvoiceFactory extends Factory
     public function forJob(Job $job): static
     {
         return $this->state(fn () => ['job_id' => $job->getKey()]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function buyer(array $attributes): Customer
+    {
+        $customerId = Job::query()->whereKey($attributes['job_id'])->value('customer_id');
+
+        return Customer::withTrashed()->findOrFail($customerId);
     }
 }

@@ -48,6 +48,8 @@ return [
         'title' => 'Emite factura · :reference',
         'heading' => 'Emite factura',
         'due_at' => 'Scadență (opțional)',
+        'bill_to' => 'Facturat către',
+        'bill_to_hint' => 'Aceste date sunt copiate pe factură în momentul emiterii. Modificările ulterioare ale clientului nu o vor schimba, așa că mai întâi corectați clientul dacă ceva este greșit.',
         'warning_title' => 'Emiterea blochează această lucrare.',
         'warning_body' => 'Pozițiile nu mai pot fi modificate, iar doar un administrator poate storna factura pentru a redeschide lucrarea.',
         'submit' => 'Emite factura',
@@ -114,6 +116,11 @@ return [
         'heading' => 'Factura :number',
         'issued' => 'Emisă la :date',
         'bill_to' => 'Facturat către',
+    ],
+
+    'buyer' => [
+        'tax_id' => 'Cod fiscal (PIB)',
+        'registration_number' => 'Nr. de înregistrare (MB)',
     ],
 
     'flash' => [

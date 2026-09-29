@@ -14,6 +14,7 @@ use App\Models\Part;
 use App\Models\PartNumber;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\TaxIdChecksum;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\Demo\DemoSeeder;
 use Database\Seeders\DemoDataSeeder;
@@ -153,6 +154,26 @@ class DemoDataSeederTest extends TestCase
         }
 
         $this->assertTrue(Job::query()->has('invoices', '>=', 2)->exists(), 'No job was re-invoiced after a void.');
+    }
+
+    public function test_the_fleet_customer_is_a_company_and_its_invoices_carry_its_pib(): void
+    {
+        $this->seed(DemoDataSeeder::class);
+
+        $fleet = Customer::query()->where('name', 'Kurirska služba Brzi d.o.o.')->sole();
+
+        $this->assertTrue($fleet->isCompany());
+        $this->assertTrue(TaxIdChecksum::isValid($fleet->tax_id));
+        $this->assertSame(1, Customer::query()->whereNotNull('tax_id')->count(), 'Every other demo customer is private.');
+
+        $companyInvoices = Invoice::query()->whereNotNull('buyer_tax_id')->get();
+
+        $this->assertNotEmpty($companyInvoices);
+        foreach ($companyInvoices as $invoice) {
+            $this->assertSame($fleet->name, $invoice->buyer_name);
+            $this->assertSame($fleet->tax_id, $invoice->buyer_tax_id);
+            $this->assertSame($fleet->registration_number, $invoice->buyer_registration_number);
+        }
     }
 
     public function test_stock_matches_the_ledger_and_the_catalogue_shows_low_and_negative_stock(): void

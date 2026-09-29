@@ -228,7 +228,8 @@ final class QaFixture
 
     private function buildCustomersAndVehicles(): void
     {
-        $regular = Customer::factory()->count(26)->create();
+        $regular = collect([Customer::factory()->company()->create()])
+            ->merge(Customer::factory()->count(25)->create());
         $this->minimalCustomer = Customer::factory()->minimal()->create(['name' => 'Walk-in Customer']);
         $this->customersToTrash = Customer::factory()->count(3)->create();
 

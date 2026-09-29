@@ -48,6 +48,8 @@ return [
         'title' => 'Issue invoice · :reference',
         'heading' => 'Issue invoice',
         'due_at' => 'Due date (optional)',
+        'bill_to' => 'Bill to',
+        'bill_to_hint' => 'These details are copied onto the invoice when it is issued. Later edits to the customer will not change it, so correct the customer first if anything is wrong.',
         'warning_title' => 'Issuing locks this job.',
         'warning_body' => 'Line items become read-only and only an admin can void the invoice to reopen it.',
         'submit' => 'Issue invoice',
@@ -114,6 +116,11 @@ return [
         'heading' => 'Invoice :number',
         'issued' => 'Issued :date',
         'bill_to' => 'Bill to',
+    ],
+
+    'buyer' => [
+        'tax_id' => 'Tax ID (PIB)',
+        'registration_number' => 'Registration no. (MB)',
     ],
 
     'flash' => [

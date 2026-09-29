@@ -34,6 +34,8 @@ return [
         'phone' => 'Telefon',
         'email' => 'E-mail',
         'address' => 'Adresă',
+        'tax_id' => 'Cod fiscal (PIB)',
+        'registration_number' => 'Nr. de înregistrare (MB)',
         'notes' => 'Observații',
         'jobs' => 'Istoric lucrări',
         'jobs_empty' => 'Nicio lucrare înregistrată încă.',
@@ -55,11 +57,20 @@ return [
         'phone' => 'Telefon',
         'email' => 'E-mail (opțional)',
         'address' => 'Adresă (opțional)',
+        'company' => 'Companie',
+        'company_hint' => 'Pentru o companie, introduceți atât PIB, cât și MB. Lăsați ambele goale pentru o persoană fizică.',
+        'tax_id' => 'Cod fiscal (PIB)',
+        'registration_number' => 'Nr. de înregistrare (MB)',
         'notes' => 'Observații (opțional)',
     ],
 
     'validation' => [
         'phone_taken' => 'Acest număr de telefon aparține deja clientului :name.',
+        'tax_id_digits' => 'Un PIB are exact 9 cifre.',
+        'tax_id_checksum' => 'Cifra de control a acestui PIB este greșită. Verificați numărul pentru o greșeală de tastare.',
+        'registration_number_digits' => 'Un MB are exact 8 cifre.',
+        'registration_number_required' => 'O companie are nevoie și de MB, pe lângă PIB.',
+        'registration_number_without_tax_id' => 'MB se înregistrează doar pentru o companie. Introduceți și PIB-ul sau lăsați MB gol.',
     ],
 
     'intake' => [

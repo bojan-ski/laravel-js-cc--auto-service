@@ -5,8 +5,15 @@
         'phone' => $customer->phone,
         'email' => $customer->email,
         'address' => $customer->address,
-        'notes' => $customer->notes,
     ];
+
+    if ($customer->isCompany()) {
+        $rows['tax_id'] = $customer->tax_id;
+        $rows['registration_number'] = $customer->registration_number;
+    }
+
+    $rows['notes'] = $customer->notes;
+    $numeric = ['phone', 'tax_id', 'registration_number'];
 @endphp
 
 <section class="mt-4 border border-border bg-surface p-4">
@@ -20,7 +27,7 @@
 
             <dd @class([
                 'whitespace-pre-line',
-                'tabular-nums' => $key === 'phone',
+                'tabular-nums' => in_array($key, $numeric, true),
                 'text-text-muted' => $value === null,
             ])><x-ui.value :value="$value" /></dd>
         @endforeach

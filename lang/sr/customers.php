@@ -34,6 +34,8 @@ return [
         'phone' => 'Telefon',
         'email' => 'Email',
         'address' => 'Adresa',
+        'tax_id' => 'PIB',
+        'registration_number' => 'Matični broj (MB)',
         'notes' => 'Napomene',
         'jobs' => 'Istorija radnih naloga',
         'jobs_empty' => 'Još nema evidentiranih radnih naloga.',
@@ -55,11 +57,20 @@ return [
         'phone' => 'Telefon',
         'email' => 'Email (opciono)',
         'address' => 'Adresa (opciono)',
+        'company' => 'Pravno lice',
+        'company_hint' => 'Za pravno lice unesite i PIB i matični broj. Za fizičko lice ostavite oba polja prazna.',
+        'tax_id' => 'PIB',
+        'registration_number' => 'Matični broj (MB)',
         'notes' => 'Napomene (opciono)',
     ],
 
     'validation' => [
         'phone_taken' => 'Ovaj broj telefona već pripada klijentu :name.',
+        'tax_id_digits' => 'PIB ima tačno 9 cifara.',
+        'tax_id_checksum' => 'Kontrolna cifra ovog PIB-a nije ispravna. Proverite da li je broj tačno unet.',
+        'registration_number_digits' => 'Matični broj ima tačno 8 cifara.',
+        'registration_number_required' => 'Za pravno lice je potreban i matični broj, ne samo PIB.',
+        'registration_number_without_tax_id' => 'Matični broj se unosi samo za pravno lice. Unesite i PIB ili ostavite matični broj prazan.',
     ],
 
     'intake' => [

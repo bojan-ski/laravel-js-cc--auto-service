@@ -23,7 +23,17 @@
 
         <dt class="{{ $label }}">{{ __('invoices.show.customer') }}</dt>
 
-        <dd><x-vehicles.owner :customer="$job->customer" /></dd>
+        <dd><x-invoices.buyer :invoice="$invoice" /></dd>
+
+        @if ($invoice->hasCompanyBuyer())
+            <dt class="{{ $label }}">{{ __('invoices.buyer.tax_id') }}</dt>
+
+            <dd class="tabular-nums">{{ $invoice->buyer_tax_id }}</dd>
+
+            <dt class="{{ $label }}">{{ __('invoices.buyer.registration_number') }}</dt>
+
+            <dd class="tabular-nums">{{ $invoice->buyer_registration_number }}</dd>
+        @endif
 
         <dt class="{{ $label }}">{{ __('invoices.show.vehicle') }}</dt>
 

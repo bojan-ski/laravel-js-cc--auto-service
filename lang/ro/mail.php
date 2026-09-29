@@ -29,6 +29,8 @@ return [
         'subtotal' => 'Subtotal',
         'vat' => 'TVA :rate%',
         'total' => 'Total',
+        'tax_id' => 'Cod fiscal (PIB)',
+        'registration_number' => 'Nr. de înregistrare (MB)',
     ],
 
 ];

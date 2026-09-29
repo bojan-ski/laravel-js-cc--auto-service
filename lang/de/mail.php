@@ -29,6 +29,8 @@ return [
         'subtotal' => 'Zwischensumme',
         'vat' => 'MwSt. :rate %',
         'total' => 'Gesamt',
+        'tax_id' => 'Steuernr. (PIB)',
+        'registration_number' => 'Registernr. (MB)',
     ],
 
 ];

@@ -48,6 +48,8 @@ return [
         'title' => 'Rechnung ausstellen · :reference',
         'heading' => 'Rechnung ausstellen',
         'due_at' => 'Fälligkeitsdatum (optional)',
+        'bill_to' => 'Rechnungsempfänger',
+        'bill_to_hint' => 'Diese Angaben werden beim Ausstellen auf die Rechnung übernommen. Spätere Änderungen am Kunden ändern sie nicht, also zuerst den Kunden korrigieren, falls etwas nicht stimmt.',
         'warning_title' => 'Das Ausstellen sperrt diesen Auftrag.',
         'warning_body' => 'Die Positionen sind dann schreibgeschützt, und nur ein Administrator kann die Rechnung stornieren, um den Auftrag wieder zu öffnen.',
         'submit' => 'Rechnung ausstellen',
@@ -114,6 +116,11 @@ return [
         'heading' => 'Rechnung :number',
         'issued' => 'Ausgestellt am :date',
         'bill_to' => 'Rechnungsempfänger',
+    ],
+
+    'buyer' => [
+        'tax_id' => 'Steuernr. (PIB)',
+        'registration_number' => 'Registernr. (MB)',
     ],
 
     'flash' => [

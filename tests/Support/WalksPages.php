@@ -98,6 +98,7 @@ trait WalksPages
 
             'invoices.index' => self::plain('invoices.index', self::FRONT_OFFICE),
             'invoices.index:search' => self::page('invoices.index', self::FRONT_OFFICE, query: fn (QaFixture $shop): array => ['search' => $shop->unpaidInvoice->number]),
+            'invoices.index:search-buyer' => self::page('invoices.index', self::FRONT_OFFICE, query: fn (QaFixture $shop): array => ['search' => $shop->unpaidInvoice->buyer_name]),
             'invoices.index:search-none' => self::page('invoices.index', self::FRONT_OFFICE, query: fn (): array => ['search' => 'INV-0000-9999']),
             'invoices.show:unpaid' => self::page('invoices.show', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->unpaidInvoice]),
             'invoices.show:paid' => self::page('invoices.show', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->paidInvoice]),

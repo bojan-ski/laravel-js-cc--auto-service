@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Customer;
+use App\Services\TaxIdChecksum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,6 +25,18 @@ class CustomerFactory extends Factory
             'address' => fake()->streetAddress(),
             'notes' => fake()->sentence(),
         ];
+    }
+
+    public function company(): static
+    {
+        return $this->state(function (): array {
+            $prefix = fake()->numerify('########');
+
+            return [
+                'tax_id' => $prefix.TaxIdChecksum::checkDigit($prefix),
+                'registration_number' => fake()->numerify('########'),
+            ];
+        });
     }
 
     public function minimal(): static

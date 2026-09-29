@@ -19,10 +19,32 @@ class InvoiceSchemaTest extends TestCase
     public function test_the_table_has_exactly_the_specified_columns(): void
     {
         $this->assertEqualsCanonicalizing([
-            'id', 'job_id', 'number', 'status', 'subtotal', 'tax_rate', 'tax_amount',
+            'id', 'job_id', 'number', 'status',
+            'buyer_name', 'buyer_address', 'buyer_tax_id', 'buyer_registration_number',
+            'subtotal', 'tax_rate', 'tax_amount',
             'total', 'issued_at', 'due_at', 'paid_at', 'voided_at', 'voided_by',
             'issued_by', 'created_at', 'updated_at',
         ], Schema::getColumnListing('invoices'));
+    }
+
+    public function test_the_buyer_snapshot_columns_follow_the_status_in_order(): void
+    {
+        $listing = Schema::getColumnListing('invoices');
+        $status = array_search('status', $listing, true);
+
+        $this->assertSame(
+            ['buyer_name', 'buyer_address', 'buyer_tax_id', 'buyer_registration_number'],
+            array_slice($listing, $status + 1, 4),
+        );
+
+        $types = collect(Schema::getColumns('invoices'))->mapWithKeys(
+            fn (array $column): array => [$column['name'] => $column['type']]
+        );
+
+        $this->assertSame('varchar(255)', $types['buyer_name']);
+        $this->assertSame('varchar(255)', $types['buyer_address']);
+        $this->assertSame('varchar(9)', $types['buyer_tax_id']);
+        $this->assertSame('varchar(8)', $types['buyer_registration_number']);
     }
 
     public function test_invoices_are_never_soft_deleted(): void
@@ -36,11 +58,11 @@ class InvoiceSchemaTest extends TestCase
             fn (array $column): array => [$column['name'] => $column['nullable']]
         );
 
-        foreach (['due_at', 'paid_at', 'voided_at', 'voided_by'] as $column) {
+        foreach (['buyer_address', 'buyer_tax_id', 'buyer_registration_number', 'due_at', 'paid_at', 'voided_at', 'voided_by'] as $column) {
             $this->assertTrue($nullable[$column], "{$column} should be nullable");
         }
 
-        foreach (['job_id', 'number', 'status', 'subtotal', 'tax_rate', 'tax_amount', 'total', 'issued_at', 'issued_by'] as $column) {
+        foreach (['job_id', 'number', 'status', 'buyer_name', 'subtotal', 'tax_rate', 'tax_amount', 'total', 'issued_at', 'issued_by'] as $column) {
             $this->assertFalse($nullable[$column], "{$column} should not be nullable");
         }
     }

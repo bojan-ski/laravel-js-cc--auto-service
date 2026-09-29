@@ -48,6 +48,8 @@ return [
         'title' => 'Izdavanje računa · :reference',
         'heading' => 'Izdaj račun',
         'due_at' => 'Rok plaćanja (opciono)',
+        'bill_to' => 'Kupac',
+        'bill_to_hint' => 'Ovi podaci se prepisuju na račun u trenutku izdavanja. Kasnije izmene klijenta ga neće promeniti, zato prvo ispravite klijenta ako nešto nije u redu.',
         'warning_title' => 'Izdavanjem računa ovaj radni nalog se zaključava.',
         'warning_body' => 'Stavke postaju samo za čitanje i samo administrator može stornirati račun da bi ponovo otvorio nalog.',
         'submit' => 'Izdaj račun',
@@ -114,6 +116,11 @@ return [
         'heading' => 'Račun :number',
         'issued' => 'Izdat :date',
         'bill_to' => 'Kupac',
+    ],
+
+    'buyer' => [
+        'tax_id' => 'PIB',
+        'registration_number' => 'Matični broj (MB)',
     ],
 
     'flash' => [
