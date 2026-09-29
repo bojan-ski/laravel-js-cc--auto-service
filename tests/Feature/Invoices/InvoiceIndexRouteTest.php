@@ -58,7 +58,7 @@ class InvoiceIndexRouteTest extends TestCase
 
         $this->actingAs($mechanic)->get(route('invoices.index'))->assertForbidden();
         $this->actingAs($mechanic)->get(route('invoices.show', $invoice))->assertForbidden();
-        $this->actingAs($mechanic)->patch(route('invoices.paid', $invoice))->assertForbidden();
+        $this->actingAs($mechanic)->patch(route('invoices.paid', $invoice), ['payment_method' => 'cash'])->assertForbidden();
     }
 
     #[DataProvider('frontOfficeRoles')]

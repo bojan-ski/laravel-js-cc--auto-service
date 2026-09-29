@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\AppointmentStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobStatus;
+use App\Enums\PaymentMethod;
 use App\Enums\UserRole;
 use App\Models\Appointment;
 use App\Models\Customer;
@@ -154,6 +155,38 @@ class DemoDataSeederTest extends TestCase
         }
 
         $this->assertTrue(Job::query()->has('invoices', '>=', 2)->exists(), 'No job was re-invoiced after a void.');
+    }
+
+    public function test_every_paid_invoice_records_a_method_and_all_three_occur(): void
+    {
+        $this->seed(DemoDataSeeder::class);
+
+        $paid = Invoice::query()->whereNotNull('paid_at')->get();
+
+        $this->assertNotEmpty($paid);
+        $this->assertSame(0, $paid->whereNull('payment_method')->count(), 'Every paid invoice must record how it was paid.');
+        $this->assertEqualsCanonicalizing(
+            PaymentMethod::cases(),
+            $paid->pluck('payment_method')->unique()->values()->all(),
+        );
+
+        $this->assertSame(
+            0,
+            Invoice::query()->whereNull('paid_at')->whereNotNull('payment_method')->count(),
+            'An invoice that was never paid must have no method.',
+        );
+    }
+
+    public function test_fleet_invoices_are_bank_transfers_and_no_other_invoice_is(): void
+    {
+        $this->seed(DemoDataSeeder::class);
+
+        $paid = Invoice::query()->whereNotNull('paid_at')->get();
+        [$fleet, $private] = $paid->partition(fn (Invoice $invoice): bool => $invoice->hasCompanyBuyer());
+
+        $this->assertNotEmpty($fleet);
+        $this->assertTrue($fleet->every(fn (Invoice $invoice): bool => $invoice->payment_method === PaymentMethod::BankTransfer));
+        $this->assertTrue($private->every(fn (Invoice $invoice): bool => $invoice->payment_method !== PaymentMethod::BankTransfer));
     }
 
     public function test_the_fleet_customer_is_a_company_and_its_invoices_carry_its_pib(): void

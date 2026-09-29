@@ -4,6 +4,7 @@
     $job = $invoice->job;
     $label = 'text-xs font-medium uppercase tracking-wider text-text-muted sm:pt-0.5';
     $due = $invoice->due_at?->isoFormat('D MMM YYYY');
+    $method = $invoice->payment_method?->label();
 @endphp
 
 <section class="mt-4 border border-border bg-surface p-4">
@@ -63,6 +64,18 @@
         <dd @class(['tabular-nums', 'text-text-muted' => $due === null])>
             <x-ui.value :value="$due" />
         </dd>
+
+        @if ($invoice->wasPaid())
+            <dt class="{{ $label }}">{{ __('invoices.show.paid_on') }}</dt>
+
+            <dd class="tabular-nums">{{ $invoice->paid_at->isoFormat('D MMM YYYY') }}</dd>
+
+            <dt class="{{ $label }}">{{ __('invoices.show.payment_method') }}</dt>
+
+            <dd @class(['text-text-muted' => $method === null])>
+                <x-ui.value :value="$method" />
+            </dd>
+        @endif
 
         @if ($invoice->isVoid())
             <dt class="{{ $label }}">{{ __('invoices.void.voided') }}</dt>

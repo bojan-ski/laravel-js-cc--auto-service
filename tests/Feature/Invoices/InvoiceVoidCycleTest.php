@@ -4,6 +4,7 @@ namespace Tests\Feature\Invoices;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\JobStatus;
+use App\Enums\PaymentMethod;
 use App\Exceptions\JobLockedException;
 use App\Exceptions\JobNotAcceptingLineItems;
 use App\Models\Invoice;
@@ -85,6 +86,24 @@ class InvoiceVoidCycleTest extends TestCase
 
         $this->assertSame(InvoiceStatus::Void, $first->fresh()->status);
         $this->assertSame(InvoiceStatus::Unpaid, $second->fresh()->status);
+    }
+
+    public function test_a_reissued_invoice_starts_without_the_voided_ones_payment_method(): void
+    {
+        $first = $this->invoices()->markPaid(
+            $this->invoices()->issue($this->job, $this->receptionist),
+            PaymentMethod::Card,
+        );
+
+        $this->invoices()->void($first, $this->admin);
+        app(JobService::class)->reopen($this->job->fresh());
+        app(JobService::class)->complete($this->job->fresh());
+
+        $second = $this->invoices()->issue($this->job->fresh(), $this->receptionist);
+
+        $this->assertNull($second->fresh()->payment_method);
+        $this->assertNull($second->fresh()->paid_at);
+        $this->assertSame(PaymentMethod::Card, $first->fresh()->payment_method, 'The void invoice keeps its own record.');
     }
 
     /**

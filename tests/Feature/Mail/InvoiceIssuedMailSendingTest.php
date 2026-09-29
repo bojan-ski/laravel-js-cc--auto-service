@@ -3,6 +3,7 @@
 namespace Tests\Feature\Mail;
 
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentMethod;
 use App\Mail\InvoiceIssuedMail;
 use App\Mail\JobCompletedMail;
 use App\Models\Customer;
@@ -95,7 +96,7 @@ class InvoiceIssuedMailSendingTest extends TestCase
 
         Mail::fake();
 
-        $this->service()->markPaid($invoice);
+        $this->service()->markPaid($invoice, PaymentMethod::Cash);
 
         Mail::assertNothingOutgoing();
     }

@@ -41,8 +41,14 @@ class InvoiceBuyerBackfillTest extends TestCase
         return require $paths[0];
     }
 
+    /**
+     * Later migrations that alter the same tables are rolled back first, as
+     * `migrate:rollback` would, so this spec's down() runs against the table
+     * shape it was written for.
+     */
     private function rollBackThisSpec(): void
     {
+        $this->migration('alter_invoices_table_add_payment_method')->down();
         $this->migration('alter_invoices_table_add_buyer_snapshot')->down();
         $this->migration('alter_customers_table_add_tax_id_and_registration_number')->down();
     }
@@ -51,6 +57,7 @@ class InvoiceBuyerBackfillTest extends TestCase
     {
         $this->migration('alter_customers_table_add_tax_id_and_registration_number')->up();
         $this->migration('alter_invoices_table_add_buyer_snapshot')->up();
+        $this->migration('alter_invoices_table_add_payment_method')->up();
     }
 
     private function insertInvoice(Job $job, string $status, User $issuer, ?User $voider = null): int

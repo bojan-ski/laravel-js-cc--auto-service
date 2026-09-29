@@ -268,8 +268,9 @@ class OwnershipTest extends TestCase
         $this->assertNotNull($job->fresh()->locked_at, 'Issuing did not lock the job.');
 
         $this->actingAs($receptionist)
-            ->patch(route('invoices.paid', $invoice))
-            ->assertRedirect();
+            ->patch(route('invoices.paid', $invoice), ['payment_method' => 'cash'])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
 
         $this->assertTrue($invoice->fresh()->isPaid());
 

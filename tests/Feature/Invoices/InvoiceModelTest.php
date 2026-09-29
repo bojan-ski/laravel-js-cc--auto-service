@@ -3,6 +3,7 @@
 namespace Tests\Feature\Invoices;
 
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentMethod;
 use App\Exceptions\InvalidInvoiceTransition;
 use App\Models\Invoice;
 use App\Models\User;
@@ -120,7 +121,7 @@ class InvoiceModelTest extends TestCase
     {
         $columns = [
             'job_id', 'number', 'status', 'subtotal', 'tax_rate', 'tax_amount',
-            'total', 'issued_at', 'due_at', 'paid_at', 'voided_at', 'voided_by', 'issued_by',
+            'total', 'issued_at', 'due_at', 'paid_at', 'payment_method', 'voided_at', 'voided_by', 'issued_by',
         ];
 
         foreach ($columns as $column) {
@@ -163,6 +164,27 @@ class InvoiceModelTest extends TestCase
         $this->assertTrue(Invoice::factory()->unpaid()->create()->canBeMarkedPaid());
         $this->assertFalse(Invoice::factory()->paid()->create()->canBeMarkedPaid());
         $this->assertFalse(Invoice::factory()->void()->create()->canBeMarkedPaid());
+    }
+
+    /**
+     * A void invoice keeps the paid date it had before voiding, so wasPaid()
+     * must read the date rather than the status; isPaid() is false for both
+     * void cases and could not tell them apart.
+     */
+    public function test_was_paid_follows_the_paid_date_not_the_status(): void
+    {
+        $this->assertFalse(Invoice::factory()->unpaid()->create()->wasPaid());
+        $this->assertTrue(Invoice::factory()->paid()->create()->wasPaid());
+        $this->assertFalse(Invoice::factory()->void()->create()->wasPaid());
+        $this->assertTrue(Invoice::factory()->void()->create(['paid_at' => now()->subDay()])->wasPaid());
+    }
+
+    public function test_the_payment_method_is_cast_to_its_enum(): void
+    {
+        $invoice = Invoice::factory()->paid()->create(['payment_method' => PaymentMethod::BankTransfer]);
+
+        $this->assertSame(PaymentMethod::BankTransfer, $invoice->fresh()->payment_method);
+        $this->assertNull(Invoice::factory()->unpaid()->create()->fresh()->payment_method);
     }
 
     #[DataProvider('taxRates')]

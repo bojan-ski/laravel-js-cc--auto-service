@@ -7,6 +7,12 @@ return [
         'void' => 'Storniert',
     ],
 
+    'payment_methods' => [
+        'cash' => 'Bar',
+        'card' => 'Karte',
+        'bank_transfer' => 'Überweisung',
+    ],
+
     'title' => 'Rechnungen',
     'count' => '{0}Keine Rechnungen|{1}Eine Rechnung|[2,*]:count Rechnungen',
 
@@ -72,6 +78,9 @@ return [
         'issued' => 'Ausgestellt',
         'issued_by' => 'Ausgestellt von',
         'due' => 'Fällig',
+        'paid_on' => 'Bezahlt am',
+        'payment_method' => 'Zahlungsart',
+        'payment_method_placeholder' => 'Auswählen…',
         'line_items' => 'Positionen',
         'actions' => 'Rechnungsaktionen',
         'print' => 'Drucken',
@@ -123,10 +132,14 @@ return [
         'registration_number' => 'Registernr. (MB)',
     ],
 
+    'validation' => [
+        'payment_method_required' => 'Wählen Sie, wie die Rechnung bezahlt wurde.',
+    ],
+
     'flash' => [
         'issued' => 'Rechnung :number ausgestellt. Dieser Auftrag ist jetzt gesperrt.',
         'not_issuable' => 'Für diesen Auftrag konnte keine Rechnung ausgestellt werden. Möglicherweise hat jemand anderes bereits eine ausgestellt.',
-        'paid' => 'Rechnung :number ist als bezahlt markiert.',
+        'paid' => 'Rechnung :number ist als bezahlt markiert. Zahlungsart: :method.',
         'not_payable' => 'Diese Rechnung konnte nicht als bezahlt markiert werden. Ihr Status hat sich möglicherweise seit dem Laden der Seite geändert.',
         'voided' => 'Rechnung :number ist storniert. Auftrag :reference ist entsperrt.',
         'not_voidable' => 'Diese Rechnung konnte nicht storniert werden. Ihr Status hat sich möglicherweise seit dem Laden der Seite geändert.',

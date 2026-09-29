@@ -7,6 +7,12 @@ return [
         'void' => 'Void',
     ],
 
+    'payment_methods' => [
+        'cash' => 'Cash',
+        'card' => 'Card',
+        'bank_transfer' => 'Bank transfer',
+    ],
+
     'title' => 'Invoices',
     'count' => '{0}No invoices|{1}One invoice|[2,*]:count invoices',
 
@@ -72,6 +78,9 @@ return [
         'issued' => 'Issued',
         'issued_by' => 'Issued by',
         'due' => 'Due',
+        'paid_on' => 'Paid on',
+        'payment_method' => 'Payment method',
+        'payment_method_placeholder' => 'Choose…',
         'line_items' => 'Line items',
         'actions' => 'Invoice actions',
         'print' => 'Print',
@@ -123,10 +132,14 @@ return [
         'registration_number' => 'Registration no. (MB)',
     ],
 
+    'validation' => [
+        'payment_method_required' => 'Choose how the invoice was paid.',
+    ],
+
     'flash' => [
         'issued' => 'Invoice :number issued. This job is now locked.',
         'not_issuable' => 'This job could not be invoiced. It may already have been invoiced by someone else.',
-        'paid' => 'Invoice :number is marked paid.',
+        'paid' => 'Invoice :number is marked paid. Payment method: :method.',
         'not_payable' => 'This invoice could not be marked paid. Its status may have changed since the page was loaded.',
         'voided' => 'Invoice :number is void. Job :reference is unlocked.',
         'not_voidable' => 'This invoice could not be voided. Its status may have changed since the page was loaded.',

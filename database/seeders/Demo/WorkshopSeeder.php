@@ -3,6 +3,7 @@
 namespace Database\Seeders\Demo;
 
 use App\Enums\JobItemType;
+use App\Enums\PaymentMethod;
 use App\Enums\StockMovementReason;
 use App\Models\Customer;
 use App\Models\Job;
@@ -458,9 +459,14 @@ class WorkshopSeeder extends DemoSeeder
 
         $paidAfter = $spec['paid_after'] ?? 0;
         $paidAt = $paidAfter === 0 ? $cursor->addMinutes(15) : $cursor->addDays($paidAfter)->setTime(10, 0);
+        $method = match (true) {
+            isset($spec['due']) => PaymentMethod::BankTransfer,
+            $paidAfter === 0 => PaymentMethod::Cash,
+            default => PaymentMethod::Card,
+        };
 
-        $this->at($paidAt, function () use (&$invoice): void {
-            $this->invoices->markPaid($invoice);
+        $this->at($paidAt, function () use (&$invoice, $method): void {
+            $this->invoices->markPaid($invoice, $method);
         });
     }
 
