@@ -21,10 +21,23 @@ class InvoiceSchemaTest extends TestCase
         $this->assertEqualsCanonicalizing([
             'id', 'job_id', 'number', 'status',
             'buyer_name', 'buyer_address', 'buyer_tax_id', 'buyer_registration_number',
-            'subtotal', 'tax_rate', 'tax_amount',
+            'subtotal', 'discount_total', 'tax_rate', 'tax_amount',
             'total', 'issued_at', 'due_at', 'paid_at', 'payment_method', 'voided_at', 'voided_by',
             'issued_by', 'created_at', 'updated_at',
         ], Schema::getColumnListing('invoices'));
+    }
+
+    public function test_the_discount_total_follows_the_subtotal_as_a_zero_default_decimal(): void
+    {
+        $listing = Schema::getColumnListing('invoices');
+
+        $this->assertSame('discount_total', $listing[array_search('subtotal', $listing, true) + 1]);
+
+        $column = collect(Schema::getColumns('invoices'))->firstWhere('name', 'discount_total');
+
+        $this->assertSame('decimal(10,2)', $column['type']);
+        $this->assertFalse($column['nullable']);
+        $this->assertSame('0.00', $column['default']);
     }
 
     public function test_the_payment_method_follows_the_paid_date_as_a_short_string(): void

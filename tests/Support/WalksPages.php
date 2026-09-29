@@ -98,6 +98,9 @@ trait WalksPages
             'jobs.show:edit-own-line' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob], fn (QaFixture $shop): array => [
                 'edit' => $shop->ownLine->getKey(),
             ]),
+            'jobs.show:discount' => self::page('jobs.show', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->completedJob], fn (QaFixture $shop): array => [
+                'discount' => $shop->discountedLine->getKey(),
+            ]),
             'jobs.show:add-part' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob], fn (): array => ['add' => 'part']),
             'jobs.show:add-labor' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob], fn (): array => ['add' => 'labor']),
             'jobs.invoice.create' => self::page('jobs.invoice.create', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->completedJob]),

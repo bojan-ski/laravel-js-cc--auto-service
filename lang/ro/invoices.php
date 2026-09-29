@@ -64,6 +64,8 @@ return [
     ],
 
     'totals' => [
+        'before_discount' => 'Înainte de discount',
+        'discount' => 'Discount',
         'subtotal' => 'Subtotal',
         'vat' => 'TVA :rate%',
         'total' => 'Total',
@@ -94,6 +96,8 @@ return [
         'quantity' => 'Cant.',
         'price' => 'Preț unitar',
         'line_total' => 'Total poziție',
+        'discount' => 'Disc.',
+        'discount_value' => ':percent %',
     ],
 
     'void' => [

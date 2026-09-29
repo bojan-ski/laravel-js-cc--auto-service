@@ -98,6 +98,68 @@ class MoneyBoundaryTest extends TestCase
         }
     }
 
+    public function test_a_mechanics_job_item_query_omits_the_discount_and_front_office_keeps_it(): void
+    {
+        $item = JobItem::factory()->forJob(Job::factory()->inProgress()->create())->discounted('10.00')->create();
+
+        foreach (['receptionist', 'admin'] as $role) {
+            $scoped = JobItem::query()
+                ->visibleTo(User::factory()->{$role}()->create())
+                ->findOrFail($item->getKey());
+
+            $this->assertSame('10.00', $scoped->discount_percent);
+        }
+
+        $mechanic = User::factory()->mechanic()->create();
+        $scoped = JobItem::query()->visibleTo($mechanic)->findOrFail($item->getKey());
+
+        // The model declares a '0.00' default for fresh lines; hydration must
+        // replace it wholesale, or a mechanic would read a made-up zero.
+        $this->assertArrayNotHasKey('discount_percent', $scoped->getAttributes());
+        $this->expectException(MissingAttributeException::class);
+        $scoped->discount_percent;
+    }
+
+    public function test_a_mechanics_job_page_never_names_the_discount_column(): void
+    {
+        $job = Job::factory()->inProgress()->create();
+        JobItem::factory()->forJob($job)->discounted('10.00')->create();
+
+        $lineReads = $this->queriesTouching($this->queriesFor('mechanic', route('jobs.show', $job)), 'job_items');
+
+        $this->assertNotEmpty($lineReads, 'The mechanic\'s job page read no line items, so nothing here was checked.');
+
+        foreach ($lineReads as $sql) {
+            $this->assertStringNotContainsString('discount_percent', $sql, $sql);
+            // `select *` names no column while selecting every one, which would
+            // make the assertion above vacuous — spec 16's trap.
+            $this->assertStringNotContainsString('select *', $sql, $sql);
+            $this->assertStringContainsString('`quantity`', $sql, "The line query no longer names its columns: {$sql}");
+        }
+    }
+
+    public function test_no_discount_total_and_no_discount_panel_reach_a_mechanic(): void
+    {
+        $job = Job::factory()->completed()->create();
+        $item = JobItem::factory()->forJob($job)->discounted('10.00')->create();
+        $url = route('jobs.show', ['job' => $job, 'discount' => $item->getKey()]);
+
+        $this->actingAs(User::factory()->mechanic()->create())
+            ->get($url)
+            ->assertOk()
+            ->assertViewHas('discountTotal', fn (mixed $value): bool => $value === null)
+            ->assertViewHas('discounting', fn (mixed $value): bool => $value === null)
+            ->assertDontSee('id="line-discount-form"', false);
+
+        // The control: the same URL opens the panel and carries the total for
+        // front office, so the refusal above is about the role.
+        $this->actingAs(User::factory()->receptionist()->create())
+            ->get($url)
+            ->assertOk()
+            ->assertViewHas('discountTotal', fn (?string $total): bool => $total !== null)
+            ->assertSee('id="line-discount-form"', false);
+    }
+
     public function test_no_job_total_is_computed_for_a_mechanic(): void
     {
         $job = $this->jobWithLine();
@@ -105,7 +167,7 @@ class MoneyBoundaryTest extends TestCase
         $this->actingAs(User::factory()->mechanic()->create())
             ->get(route('jobs.show', $job))
             ->assertOk()
-            ->assertViewHas('subtotal', null)
+            ->assertViewHas('subtotal', fn (mixed $value): bool => $value === null)
             ->assertViewHas('showPricing', false);
 
         $this->actingAs(User::factory()->receptionist()->create())
@@ -217,8 +279,8 @@ class MoneyBoundaryTest extends TestCase
     /**
      * The job total is rendered by a component separate from the line-items
      * table head, so a regression could drop the Price column and still print
-     * the subtotal. assertViewHas('subtotal', null) proves the controller did
-     * not compute it; this proves the page does not show it.
+     * the subtotal. The null-subtotal view assertion above proves the controller
+     * did not compute it; this proves the page does not show it.
      */
     public function test_a_mechanics_job_page_shows_no_total(): void
     {
@@ -380,7 +442,7 @@ class MoneyBoundaryTest extends TestCase
         $this->assertNotEmpty($queries, "{$context} recorded no queries at all, so nothing here was checked.");
 
         foreach ($queries as $sql) {
-            foreach (['unit_price', 'cost_price'] as $column) {
+            foreach (['unit_price', 'cost_price', 'discount_percent', 'discount_total'] as $column) {
                 $this->assertStringNotContainsString($column, $sql, "{$context} named {$column}: {$sql}");
             }
 

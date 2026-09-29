@@ -47,7 +47,7 @@ class JobShowLineItemsViewTest extends TestCase
         $this->actingAs(User::factory()->mechanic()->create())
             ->get(route('jobs.show', ['job' => $job, 'edit' => $item->getKey()]))
             ->assertOk()
-            ->assertViewHas('editing', null)
+            ->assertViewHas('editing', fn (mixed $value): bool => $value === null)
             ->assertDontSee(self::UPDATE_METHOD_FIELD, false)
             ->assertSee(__('jobs.items.add.title'));
     }
@@ -70,7 +70,7 @@ class JobShowLineItemsViewTest extends TestCase
         $this->actingAs(User::factory()->receptionist()->create())
             ->get(route('jobs.show', $job).'?edit=0')
             ->assertOk()
-            ->assertViewHas('editing', null)
+            ->assertViewHas('editing', fn (mixed $value): bool => $value === null)
             ->assertDontSee(self::UPDATE_METHOD_FIELD, false)
             ->assertSee(__('jobs.items.add.title'));
     }
@@ -116,7 +116,7 @@ class JobShowLineItemsViewTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())
             ->get(route('jobs.show', ['job' => $job, 'edit' => $foreign->getKey()]))
             ->assertOk()
-            ->assertViewHas('editing', null)
+            ->assertViewHas('editing', fn (mixed $value): bool => $value === null)
             ->assertDontSee(self::UPDATE_METHOD_FIELD, false);
     }
 

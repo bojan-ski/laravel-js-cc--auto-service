@@ -26,6 +26,8 @@ return [
         'number' => 'Račun',
         'issued' => 'Izdat',
         'due' => 'Rok plaćanja',
+        'before_discount' => 'Pre popusta',
+        'discount' => 'Popust',
         'subtotal' => 'Osnovica',
         'vat' => 'PDV :rate%',
         'total' => 'Ukupno',

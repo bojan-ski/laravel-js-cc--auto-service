@@ -9,6 +9,7 @@ use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\User;
 use App\Services\InvoiceNumberGenerator;
+use App\Services\Money;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -27,7 +28,7 @@ class InvoiceFactory extends Factory
     {
         $subtotal = number_format(fake()->numberBetween(1_000, 100_000), 2, '.', '');
         $rate = (string) config('shop.vat_rate');
-        $tax = bcadd(bcdiv(bcmul($subtotal, $rate, 4), '100', 4), '0.005', 2);
+        $tax = Money::round(bcdiv(bcmul($subtotal, $rate, 4), '100', 4));
 
         return [
             'number' => function (): string {
@@ -45,6 +46,7 @@ class InvoiceFactory extends Factory
             'buyer_registration_number' => fn (array $attributes): ?string => $this->buyer($attributes)->registration_number,
             'status' => InvoiceStatus::Unpaid,
             'subtotal' => $subtotal,
+            'discount_total' => '0.00',
             'tax_rate' => $rate,
             'tax_amount' => $tax,
             'total' => bcadd($subtotal, $tax, 2),

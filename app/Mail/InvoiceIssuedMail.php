@@ -51,7 +51,7 @@ class InvoiceIssuedMail extends Mailable implements ShouldQueue
     }
 
     /**
-     * @return array{rate: string, subtotal: string, tax: string, total: string}
+     * @return array{rate: string, subtotal: string, tax: string, total: string, discount: string, before_discount: string, has_discount: bool}
      */
     public function money(): array
     {
@@ -60,6 +60,9 @@ class InvoiceIssuedMail extends Mailable implements ShouldQueue
             'subtotal' => $this->format($this->invoice->subtotal),
             'tax' => $this->format($this->invoice->tax_amount),
             'total' => $this->format($this->invoice->total),
+            'discount' => $this->format($this->invoice->discount_total),
+            'before_discount' => $this->format(bcadd($this->invoice->subtotal, $this->invoice->discount_total, 2)),
+            'has_discount' => $this->invoice->hasDiscount(),
         ];
     }
 

@@ -64,6 +64,8 @@ return [
     ],
 
     'totals' => [
+        'before_discount' => 'Before discount',
+        'discount' => 'Discount',
         'subtotal' => 'Subtotal',
         'vat' => 'VAT :rate%',
         'total' => 'Total',
@@ -94,6 +96,8 @@ return [
         'quantity' => 'Qty',
         'price' => 'Unit price',
         'line_total' => 'Line total',
+        'discount' => 'Disc.',
+        'discount_value' => ':percent%',
     ],
 
     'void' => [

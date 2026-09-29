@@ -91,15 +91,18 @@ class JobController extends Controller
         $job->items->each(fn (JobItem $item) => $item->setRelation('job', $job));
 
         $editing = $this->editableItem($job, $request->editingItemId());
+        $discounting = $editing === null ? $this->discountableItem($job, $request->discountingItemId()) : null;
         $adding = $request->addingType();
-        $showPartForm = $editing === null && $adding === 'part' && Gate::allows('createItem', $job);
+        $showPartForm = $editing === null && $discounting === null && $adding === 'part' && Gate::allows('createItem', $job);
 
         return view('pages.jobs.show', [
             'job' => $job,
             'invoice' => $this->activeInvoiceFor($job),
             'showPricing' => $showPricing,
             'subtotal' => $showPricing ? $job->subtotal() : null,
+            'discountTotal' => $showPricing && $job->items->contains->hasDiscount() ? $job->discountTotal() : null,
             'editing' => $editing,
+            'discounting' => $discounting,
             'adding' => $adding,
             'showPartForm' => $showPartForm,
             'userOptions' => $user->isFrontOffice() ? $this->users->pickerOptions() : [],
@@ -126,6 +129,17 @@ class JobController extends Controller
         $item = $job->items->firstWhere('id', $itemId);
 
         return $item !== null && Gate::allows('update', $item) ? $item : null;
+    }
+
+    private function discountableItem(Job $job, ?int $itemId): ?JobItem
+    {
+        if ($itemId === null) {
+            return null;
+        }
+
+        $item = $job->items->firstWhere('id', $itemId);
+
+        return $item !== null && Gate::allows('discount', $item) ? $item : null;
     }
 
     private function storeWalkIn(StoreJobRequest $request): RedirectResponse

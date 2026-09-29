@@ -64,6 +64,8 @@ return [
     ],
 
     'totals' => [
+        'before_discount' => 'Vor Rabatt',
+        'discount' => 'Rabatt',
         'subtotal' => 'Zwischensumme',
         'vat' => 'MwSt. :rate %',
         'total' => 'Gesamt',
@@ -94,6 +96,8 @@ return [
         'quantity' => 'Menge',
         'price' => 'Einzelpreis',
         'line_total' => 'Betrag',
+        'discount' => 'Rabatt',
+        'discount_value' => ':percent %',
     ],
 
     'void' => [

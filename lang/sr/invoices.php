@@ -64,6 +64,8 @@ return [
     ],
 
     'totals' => [
+        'before_discount' => 'Pre popusta',
+        'discount' => 'Popust',
         'subtotal' => 'Osnovica',
         'vat' => 'PDV :rate%',
         'total' => 'Ukupno',
@@ -94,6 +96,8 @@ return [
         'quantity' => 'Kol.',
         'price' => 'Jedinična cena',
         'line_total' => 'Iznos',
+        'discount' => 'Pop.',
+        'discount_value' => ':percent %',
     ],
 
     'void' => [

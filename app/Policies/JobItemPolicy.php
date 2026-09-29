@@ -26,4 +26,11 @@ class JobItemPolicy
     {
         return $this->update($user, $item);
     }
+
+    public function discount(User $user, JobItem $item): bool
+    {
+        $item->loadMissing('job');
+
+        return $user->isFrontOffice() && $item->job->acceptsDiscounts();
+    }
 }

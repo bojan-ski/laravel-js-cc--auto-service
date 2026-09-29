@@ -114,12 +114,16 @@ return [
             'description' => 'Descriere',
             'quantity' => 'Cant.',
             'price' => 'Preț',
+            'discount' => 'Disc.',
+            'line_total' => 'Total',
             'who' => 'Cine',
             'actions' => 'Acțiuni',
         ],
 
         'subtotal' => 'Subtotal',
         'complete_hint' => 'Adăugați cel puțin o poziție înainte ca lucrarea să poată fi finalizată.',
+        'discount_value' => ':percent %',
+        'discount_total' => 'Discount',
 
         'add' => [
             'title' => 'Adaugă manoperă',
@@ -156,6 +160,17 @@ return [
             'cancel' => 'Anulează',
         ],
 
+        'discount' => [
+            'open' => 'Discount',
+            'open_line' => 'Discount :description',
+            'title_for' => 'Discount: :description',
+            'percent' => 'Discount %',
+            'hint' => 'Prețul unitar rămâne neschimbat. Introduceți 0 pentru a elimina discountul.',
+            'save' => 'Salvează discountul',
+            'cancel' => 'Anulează',
+            'row_marker' => 'Discountul acestei poziții se setează mai jos.',
+        ],
+
         'delete' => [
             'label' => 'Șterge',
             'label_line' => 'Șterge :description',
@@ -167,6 +182,7 @@ return [
             'part_added' => 'Poziția de piesă a fost adăugată, iar piesa a fost scoasă din stoc.',
             'updated' => 'Poziție actualizată.',
             'deleted' => 'Poziție ștearsă.',
+            'discounted' => 'Discount salvat.',
             'stock_negative' => 'Stocul pentru :name este acum :balance. Stocul a devenit negativ.',
         ],
     ],

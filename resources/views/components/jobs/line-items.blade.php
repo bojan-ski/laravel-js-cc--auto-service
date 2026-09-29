@@ -1,4 +1,4 @@
-@props(['job', 'showPricing', 'subtotal', 'editing', 'userOptions', 'defaultRate', 'adding', 'showPartForm', 'partOptions'])
+@props(['job', 'showPricing', 'subtotal', 'discountTotal' => null, 'editing', 'discounting' => null, 'userOptions', 'defaultRate', 'adding', 'showPartForm', 'partOptions'])
 
 <section class="border border-border bg-surface p-4">
     <h2 class="text-xs font-semibold uppercase tracking-wider text-text-muted">
@@ -12,7 +12,9 @@
             :job="$job"
             :show-pricing="$showPricing"
             :subtotal="$subtotal"
+            :discount-total="$discountTotal"
             :editing="$editing"
+            :discounting="$discounting"
         />
     @endif
 
@@ -28,6 +30,8 @@
             :user-options="$userOptions"
             :default-rate="$defaultRate"
         />
+    @elseif ($discounting)
+        <x-jobs.line-discount-form :job="$job" :item="$discounting" />
     @elseif ($showPartForm)
         @if ($partOptions === [])
             <div id="line-item-form" class="mt-4 border border-border bg-surface-muted p-3">

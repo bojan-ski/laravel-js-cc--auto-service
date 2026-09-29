@@ -11,6 +11,7 @@ use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Job;
+use App\Models\JobItem;
 use App\Models\Part;
 use App\Models\PartNumber;
 use App\Models\User;
@@ -207,6 +208,41 @@ class DemoDataSeederTest extends TestCase
             $this->assertSame($fleet->tax_id, $invoice->buyer_tax_id);
             $this->assertSame($fleet->registration_number, $invoice->buyer_registration_number);
         }
+    }
+
+    public function test_discounts_appear_on_invoices_and_on_a_completed_uninvoiced_job(): void
+    {
+        $this->seed(DemoDataSeeder::class);
+
+        $discounted = Invoice::query()->where('discount_total', '>', 0)->get();
+
+        $this->assertNotEmpty($discounted, 'No demo invoice carries a discount.');
+        $this->assertTrue(
+            $discounted->contains(fn (Invoice $invoice): bool => $invoice->hasCompanyBuyer()),
+            'The fleet customer\'s invoices carry no discount.',
+        );
+
+        foreach (Invoice::query()->where('status', '!=', InvoiceStatus::Void)->with('job.items')->get() as $invoice) {
+            $this->assertSame($invoice->job->subtotal(), $invoice->subtotal, "Invoice {$invoice->number} subtotal disagrees with its lines.");
+            $this->assertSame($invoice->job->discountTotal(), $invoice->discount_total, "Invoice {$invoice->number} discount disagrees with its lines.");
+        }
+
+        $this->assertTrue(
+            JobItem::query()->where('discount_percent', '100.00')->whereHas('job', fn ($query) => $query->whereNotNull('locked_at'))->exists(),
+            'No goodwill line on an invoiced job.',
+        );
+
+        $this->assertTrue(
+            Job::query()
+                ->where('status', JobStatus::Completed)
+                ->whereNull('locked_at')
+                ->whereDoesntHave('invoices')
+                ->whereHas('items', fn ($query) => $query->where('discount_percent', '>', 0))
+                ->exists(),
+            'No completed, uninvoiced job carries a discount.',
+        );
+
+        $this->assertStockMatchesLedger();
     }
 
     public function test_stock_matches_the_ledger_and_the_catalogue_shows_low_and_negative_stock(): void
