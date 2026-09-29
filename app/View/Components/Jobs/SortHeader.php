@@ -16,7 +16,7 @@ class SortHeader extends Component
     public string $targetLabel;
 
     /**
-     * @param  array{status: string, search: string, sort: string, direction: string}  $filters
+     * @param  array{status: string, search: string, sort: string, direction: string, mine: bool}  $filters
      */
     public function __construct(
         public string $column,
@@ -32,6 +32,7 @@ class SortHeader extends Component
             'search' => $filters['search'],
             'sort' => $column,
             'direction' => $target,
+            'mine' => $filters['mine'],
         ]));
 
         $this->ariaSort = $this->active

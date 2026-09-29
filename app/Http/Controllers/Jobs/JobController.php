@@ -39,8 +39,8 @@ class JobController extends Controller
         $filters = $request->filters();
 
         return view('pages.jobs.index', [
-            'jobs' => $this->jobs->paginateFiltered($filters),
-            'counts' => $this->jobs->countByStatus($filters),
+            'jobs' => $this->jobs->paginateFiltered($filters, $request->user()),
+            'counts' => $this->jobs->countByStatus($filters, $request->user()),
             'filters' => $filters,
             'hasAny' => $this->jobs->hasAny(),
         ]);

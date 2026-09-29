@@ -37,14 +37,14 @@ class JobService
     ) {}
 
     /**
-     * @param  array{status: string, search: string, sort: string, direction: string}  $filters
+     * @param  array{status: string, search: string, sort: string, direction: string, mine: bool}  $filters
      * @return LengthAwarePaginator<int, Job>
      */
-    public function paginateFiltered(array $filters): LengthAwarePaginator
+    public function paginateFiltered(array $filters, User $user): LengthAwarePaginator
     {
         $direction = $filters['direction'];
 
-        return $this->boardQuery($filters['search'])
+        return $this->boardQuery($filters, $user)
             ->with(['vehicle', 'customer', 'laborItems:id,job_id,user_id,type', 'laborItems.user'])
             ->when($filters['status'], fn (Builder $query, string $status) => $query->where('jobs.status', $status))
             ->tap(fn (Builder $query) => match ($filters['sort']) {
@@ -59,12 +59,12 @@ class JobService
     }
 
     /**
-     * @param  array{status: string, search: string, sort: string, direction: string}  $filters
+     * @param  array{status: string, search: string, sort: string, direction: string, mine: bool}  $filters
      * @return array<string, int>
      */
-    public function countByStatus(array $filters): array
+    public function countByStatus(array $filters, User $user): array
     {
-        $counts = $this->boardQuery($filters['search'])
+        $counts = $this->boardQuery($filters, $user)
             ->select('jobs.status', DB::raw('COUNT(*) AS aggregate'))
             ->groupBy('jobs.status')
             ->pluck('aggregate', 'jobs.status');
@@ -144,13 +144,15 @@ class JobService
     }
 
     /**
+     * @param  array{status: string, search: string, sort: string, direction: string, mine: bool}  $filters
      * @return Builder<Job>
      */
-    private function boardQuery(string $search): Builder
+    private function boardQuery(array $filters, User $user): Builder
     {
         return Job::query()
             ->joinedForBoard()
-            ->when($search, fn (Builder $query, string $term) => $query->matching($term));
+            ->when($filters['search'], fn (Builder $query, string $term) => $query->matching($term))
+            ->when($filters['mine'], fn (Builder $query) => $query->workedOnBy($user));
     }
 
     /**

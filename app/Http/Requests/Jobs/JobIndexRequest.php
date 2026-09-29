@@ -30,11 +30,12 @@ class JobIndexRequest extends FormRequest
         return [
             'status' => ['nullable', Rule::enum(JobStatus::class)],
             'search' => ['nullable', 'string', 'max:255'],
+            'mine' => ['nullable', 'boolean'],
         ];
     }
 
     /**
-     * @return array{status: string, search: string, sort: string, direction: string}
+     * @return array{status: string, search: string, sort: string, direction: string, mine: bool}
      */
     public function filters(): array
     {
@@ -46,6 +47,7 @@ class JobIndexRequest extends FormRequest
             'search' => $this->string('search')->trim()->toString(),
             'sort' => in_array($sort, self::SORTS, true) ? $sort : self::DEFAULT_SORT,
             'direction' => $direction === 'asc' ? 'asc' : self::DEFAULT_DIRECTION,
+            'mine' => $this->boolean('mine'),
         ];
     }
 }

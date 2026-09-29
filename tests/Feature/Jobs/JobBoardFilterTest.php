@@ -19,8 +19,8 @@ class JobBoardFilterTest extends TestCase
     use ResolvesJobService;
 
     /**
-     * @param  array<string, string>  $overrides
-     * @return array{status: string, search: string, sort: string, direction: string}
+     * @param  array<string, string|bool>  $overrides
+     * @return array{status: string, search: string, sort: string, direction: string, mine: bool}
      */
     private function filters(array $overrides = []): array
     {
@@ -29,7 +29,13 @@ class JobBoardFilterTest extends TestCase
             'search' => '',
             'sort' => JobIndexRequest::DEFAULT_SORT,
             'direction' => JobIndexRequest::DEFAULT_DIRECTION,
+            'mine' => false,
         ], $overrides);
+    }
+
+    private function viewer(): User
+    {
+        return User::factory()->mechanic()->make();
     }
 
     public function test_default_order_is_newest_first(): void
@@ -37,7 +43,7 @@ class JobBoardFilterTest extends TestCase
         $older = Job::factory()->create(['created_at' => now()->subDays(2)]);
         $newer = Job::factory()->create(['created_at' => now()->subDay()]);
 
-        $page = $this->service()->paginateFiltered($this->filters());
+        $page = $this->service()->paginateFiltered($this->filters(), $this->viewer());
 
         $this->assertSame([$newer->getKey(), $older->getKey()], $page->pluck('id')->all());
     }
@@ -46,7 +52,7 @@ class JobBoardFilterTest extends TestCase
     {
         Job::factory()->count(26)->create();
 
-        $page = $this->service()->paginateFiltered($this->filters());
+        $page = $this->service()->paginateFiltered($this->filters(), $this->viewer());
 
         $this->assertCount(25, $page->items());
         $this->assertSame(26, $page->total());
@@ -58,7 +64,7 @@ class JobBoardFilterTest extends TestCase
         Job::factory()->received()->count(2)->create();
         $inProgress = Job::factory()->inProgress()->create();
 
-        $page = $this->service()->paginateFiltered($this->filters(['status' => 'in_progress']));
+        $page = $this->service()->paginateFiltered($this->filters(['status' => 'in_progress']), $this->viewer());
 
         $this->assertSame([$inProgress->getKey()], $page->pluck('id')->all());
     }
@@ -69,7 +75,7 @@ class JobBoardFilterTest extends TestCase
         Job::factory()->inProgress()->count(2)->create();
         Job::factory()->cancelled()->create();
 
-        $counts = $this->service()->countByStatus($this->filters());
+        $counts = $this->service()->countByStatus($this->filters(), $this->viewer());
 
         $this->assertSame([
             'received' => 3,
@@ -87,7 +93,7 @@ class JobBoardFilterTest extends TestCase
         Job::factory()->count(3)->create();
 
         DB::enableQueryLog();
-        $this->service()->countByStatus($this->filters());
+        $this->service()->countByStatus($this->filters(), $this->viewer());
         $queries = DB::getQueryLog();
         DB::disableQueryLog();
 
@@ -101,7 +107,7 @@ class JobBoardFilterTest extends TestCase
         Job::factory()->inProgress()->for($vehicle)->create();
         Job::factory()->received()->create(['vehicle_id' => Vehicle::factory()->create(['registration_plate' => 'NS887BB'])]);
 
-        $counts = $this->service()->countByStatus($this->filters(['search' => 'BG123', 'status' => 'received']));
+        $counts = $this->service()->countByStatus($this->filters(['search' => 'BG123', 'status' => 'received']), $this->viewer());
 
         $this->assertSame(1, $counts['received']);
         $this->assertSame(1, $counts['in_progress']);
@@ -113,7 +119,7 @@ class JobBoardFilterTest extends TestCase
         $hit = Job::factory()->for(Vehicle::factory()->create(['registration_plate' => 'BG123AA']))->create();
         Job::factory()->for(Vehicle::factory()->create(['registration_plate' => 'NS887BB']))->create();
 
-        $page = $this->service()->paginateFiltered($this->filters(['search' => 'bg12']));
+        $page = $this->service()->paginateFiltered($this->filters(['search' => 'bg12']), $this->viewer());
 
         $this->assertSame([$hit->getKey()], $page->pluck('id')->all());
     }
@@ -124,7 +130,7 @@ class JobBoardFilterTest extends TestCase
         $hit = Job::factory()->for(Vehicle::factory()->for($customer)->create())->create();
         Job::factory()->create();
 
-        $page = $this->service()->paginateFiltered($this->filters(['search' => 'petrov']));
+        $page = $this->service()->paginateFiltered($this->filters(['search' => 'petrov']), $this->viewer());
 
         $this->assertSame([$hit->getKey()], $page->pluck('id')->all());
     }
@@ -135,10 +141,10 @@ class JobBoardFilterTest extends TestCase
         $hit = Job::factory()->for(Vehicle::factory()->for($customer)->create())->create();
         $customer->delete();
 
-        $page = $this->service()->paginateFiltered($this->filters(['search' => 'Ilić']));
+        $page = $this->service()->paginateFiltered($this->filters(['search' => 'Ilić']), $this->viewer());
 
         $this->assertSame([$hit->getKey()], $page->pluck('id')->all());
-        $this->assertSame(1, array_sum($this->service()->countByStatus($this->filters(['search' => 'Ilić']))));
+        $this->assertSame(1, array_sum($this->service()->countByStatus($this->filters(['search' => 'Ilić']), $this->viewer())));
     }
 
     public function test_search_finds_a_job_whose_vehicle_is_soft_deleted(): void
@@ -147,7 +153,7 @@ class JobBoardFilterTest extends TestCase
         $hit = Job::factory()->for($vehicle)->create();
         $vehicle->delete();
 
-        $page = $this->service()->paginateFiltered($this->filters(['search' => 'BG440']));
+        $page = $this->service()->paginateFiltered($this->filters(['search' => 'BG440']), $this->viewer());
 
         $this->assertSame([$hit->getKey()], $page->pluck('id')->all());
     }
@@ -159,7 +165,7 @@ class JobBoardFilterTest extends TestCase
         $job->vehicle->delete();
         $job->createdBy->delete();
 
-        $page = $this->service()->paginateFiltered($this->filters());
+        $page = $this->service()->paginateFiltered($this->filters(), $this->viewer());
 
         $this->assertSame([$job->getKey()], $page->pluck('id')->all());
         $this->assertSame(1, $page->total());
@@ -169,7 +175,7 @@ class JobBoardFilterTest extends TestCase
     {
         Job::factory()->for(Vehicle::factory()->create(['registration_plate' => 'BG123AA']))->create();
 
-        $page = $this->service()->paginateFiltered($this->filters(['search' => '%']));
+        $page = $this->service()->paginateFiltered($this->filters(['search' => '%']), $this->viewer());
 
         $this->assertSame(0, $page->total());
     }
@@ -181,7 +187,7 @@ class JobBoardFilterTest extends TestCase
         Job::factory()->received()->for($vehicle)->create();
         Job::factory()->inProgress()->create();
 
-        $page = $this->service()->paginateFiltered($this->filters(['search' => 'BG123', 'status' => 'in_progress']));
+        $page = $this->service()->paginateFiltered($this->filters(['search' => 'BG123', 'status' => 'in_progress']), $this->viewer());
 
         $this->assertSame([$hit->getKey()], $page->pluck('id')->all());
     }
@@ -195,7 +201,7 @@ class JobBoardFilterTest extends TestCase
 
         $filters = $this->filters(['search' => 'BG123', 'status' => 'in_progress']);
 
-        $firstPage = $this->service()->paginateFiltered($filters);
+        $firstPage = $this->service()->paginateFiltered($filters, $this->viewer());
         $this->assertSame(26, $firstPage->total());
         $this->assertCount(25, $firstPage->items());
 

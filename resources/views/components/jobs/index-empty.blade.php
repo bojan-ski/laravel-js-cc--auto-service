@@ -16,8 +16,18 @@
         :title="__('jobs.board.empty.no_matches.title')"
         :body="__('jobs.board.empty.no_matches.body')"
     >
-        <x-ui.button variant="secondary" :href="route('jobs.index', array_filter(['status' => $filters['status'], 'sort' => $filters['sort'], 'direction' => $filters['direction']]))">
+        <x-ui.button variant="secondary" :href="route('jobs.index', array_filter(['status' => $filters['status'], 'sort' => $filters['sort'], 'direction' => $filters['direction'], 'mine' => $filters['mine']]))">
             {{ __('app.actions.clear_search') }}
+        </x-ui.button>
+    </x-ui.empty-state>
+@elseif ($filters['mine'])
+    <x-ui.empty-state
+        class="mt-4"
+        :title="__('jobs.board.empty.none_mine.title')"
+        :body="__('jobs.board.empty.none_mine.body')"
+    >
+        <x-ui.button variant="secondary" :href="route('jobs.index', array_filter(['status' => $filters['status'], 'sort' => $filters['sort'], 'direction' => $filters['direction']]))">
+            {{ __('jobs.board.empty.none_mine.clear') }}
         </x-ui.button>
     </x-ui.empty-state>
 @else

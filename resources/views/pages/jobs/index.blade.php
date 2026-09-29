@@ -3,7 +3,10 @@
 
     <x-jobs.status-tabs :filters="$filters" :counts="$counts" />
 
-    <x-jobs.search-form :filters="$filters" />
+    <div class="mt-4 flex flex-wrap items-end gap-2">
+        <x-jobs.search-form :filters="$filters" />
+        <x-jobs.mine-toggle :filters="$filters" />
+    </div>
 
     @if ($jobs->total() > 0)
         <x-jobs.table :jobs="$jobs" :filters="$filters" />

@@ -16,8 +16,8 @@ class JobBoardSortTest extends TestCase
     use LazilyRefreshDatabase;
 
     /**
-     * @param  array<string, string>  $overrides
-     * @return array{status: string, search: string, sort: string, direction: string}
+     * @param  array<string, string|bool>  $overrides
+     * @return array{status: string, search: string, sort: string, direction: string, mine: bool}
      */
     private function filters(array $overrides = []): array
     {
@@ -26,6 +26,7 @@ class JobBoardSortTest extends TestCase
             'search' => '',
             'sort' => JobIndexRequest::DEFAULT_SORT,
             'direction' => JobIndexRequest::DEFAULT_DIRECTION,
+            'mine' => false,
         ], $overrides);
     }
 
@@ -35,7 +36,7 @@ class JobBoardSortTest extends TestCase
     private function ids(string $sort, string $direction): array
     {
         return app(JobService::class)
-            ->paginateFiltered($this->filters(['sort' => $sort, 'direction' => $direction]))
+            ->paginateFiltered($this->filters(['sort' => $sort, 'direction' => $direction]), User::factory()->mechanic()->make())
             ->pluck('id')
             ->all();
     }

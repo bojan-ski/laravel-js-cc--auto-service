@@ -14,7 +14,7 @@ class StatusTabs extends Component
     public array $tabs;
 
     /**
-     * @param  array{status: string, search: string, sort: string, direction: string}  $filters
+     * @param  array{status: string, search: string, sort: string, direction: string, mine: bool}  $filters
      * @param  array<string, int>  $counts
      */
     public function __construct(
@@ -55,6 +55,7 @@ class StatusTabs extends Component
             'search' => $this->filters['search'],
             'sort' => $this->filters['sort'],
             'direction' => $this->filters['direction'],
+            'mine' => $this->filters['mine'],
         ]));
     }
 

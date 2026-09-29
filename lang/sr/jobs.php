@@ -17,6 +17,8 @@ return [
         'tab_all' => 'Svi',
         'search_label' => 'Pretraga radnih naloga',
         'search_placeholder' => 'Tablice ili klijent',
+        'mine' => 'Moji',
+        'mine_hint' => '(samo radni nalozi sa mojim stavkama rada)',
         'sort_by' => 'Sortiraj po koloni :column, :direction',
         'ascending' => 'rastuće',
         'descending' => 'opadajuće',
@@ -47,6 +49,12 @@ return [
             'no_matches' => [
                 'title' => 'Nijedan radni nalog ne odgovara pretrazi.',
                 'body' => 'Proverite tablice ili pokušajte sa delom imena klijenta.',
+            ],
+
+            'none_mine' => [
+                'title' => 'Ovde nema vaših radnih naloga.',
+                'body' => 'Radni nalog je vaš kada ima stavku rada na vaše ime.',
+                'clear' => 'Prikaži radne naloge svih',
             ],
         ],
     ],
