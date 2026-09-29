@@ -94,7 +94,7 @@ class JobItemVisibilityTest extends TestCase
         $response->assertDontSee('3,000.00');
         $response->assertDontSee('6,000.00');
         $response->assertDontSee(__('jobs.items.subtotal'));
-        $response->assertViewHas('subtotal', null);
+        $response->assertViewHas('subtotal', fn (mixed $value): bool => $value === null);
         $response->assertViewHas('showPricing', false);
 
         $this->assertStringNotContainsString(

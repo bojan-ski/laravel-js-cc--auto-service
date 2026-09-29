@@ -114,12 +114,16 @@ return [
             'description' => 'Description',
             'quantity' => 'Qty',
             'price' => 'Price',
+            'discount' => 'Disc.',
+            'line_total' => 'Total',
             'who' => 'Who',
             'actions' => 'Actions',
         ],
 
         'subtotal' => 'Subtotal',
         'complete_hint' => 'Add at least one line item before this job can be completed.',
+        'discount_value' => ':percent%',
+        'discount_total' => 'Discount',
 
         'add' => [
             'title' => 'Add labor',
@@ -156,6 +160,17 @@ return [
             'cancel' => 'Cancel',
         ],
 
+        'discount' => [
+            'open' => 'Discount',
+            'open_line' => 'Discount :description',
+            'title_for' => 'Discount: :description',
+            'percent' => 'Discount %',
+            'hint' => 'The unit price stays as it is. Enter 0 to remove the discount.',
+            'save' => 'Save discount',
+            'cancel' => 'Cancel',
+            'row_marker' => 'This line\'s discount is being set below.',
+        ],
+
         'delete' => [
             'label' => 'Delete',
             'label_line' => 'Delete :description',
@@ -167,6 +182,7 @@ return [
             'part_added' => 'Part line added and taken off the shelf.',
             'updated' => 'Line item updated.',
             'deleted' => 'Line item deleted.',
+            'discounted' => 'Discount saved.',
             'stock_negative' => ':name is now at :balance. Stock has gone negative.',
         ],
     ],

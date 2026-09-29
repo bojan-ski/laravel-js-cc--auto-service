@@ -10,7 +10,7 @@
     @if ($invoice->isVoid())
         <x-invoices.void-notice :invoice="$invoice" />
     @else
-        <x-invoices.line-items :items="$lineItems" />
+        <x-invoices.line-items :items="$lineItems" :show-discount="$invoice->hasDiscount()" />
     @endif
 
     <div class="mt-4 flex justify-end">

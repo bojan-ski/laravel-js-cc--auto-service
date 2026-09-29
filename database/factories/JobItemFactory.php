@@ -29,7 +29,13 @@ class JobItemFactory extends Factory
             'description' => fake()->sentence(3),
             'quantity' => 1.50,
             'unit_price' => config('shop.labor_rate'),
+            'discount_percent' => '0.00',
         ];
+    }
+
+    public function discounted(string $percent = '10.00'): static
+    {
+        return $this->state(fn () => ['discount_percent' => $percent]);
     }
 
     public function forJob(Job $job): static

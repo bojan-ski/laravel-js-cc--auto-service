@@ -30,9 +30,12 @@ class WorkshopSeeder extends DemoSeeder
 
     private const int FLEET_DUE_DAYS = 30;
 
+    private const string FLEET_LABOR_DISCOUNT = '10.00';
+
     /**
      * Outcomes: received, in_progress, awaiting_parts, cancelled, completed, unpaid, paid, voided, reissued.
      * Lines: [type, mechanic (null = added unassigned by the desk), description or SKU, quantity].
+     * Discounts: [line index => percent], set after completion and before the invoice.
      *
      * @var list<array<string, mixed>>
      */
@@ -50,7 +53,7 @@ class WorkshopSeeder extends DemoSeeder
             [JobItemType::Part, 'zoran', 'EO-6002', 5],
             [JobItemType::Part, 'zoran', 'AF-1102', 1],
         ]],
-        ['plate' => 'BG-2101-BK', 'day' => 56, 'at' => '08:30', 'booked' => null, 'by' => 'jelena', 'mileage' => 242150, 'complaint' => 'Clutch slipping under load.', 'outcome' => 'paid', 'paid_after' => 14, 'due' => self::FLEET_DUE_DAYS, 'lines' => [
+        ['plate' => 'BG-2101-BK', 'day' => 56, 'at' => '08:30', 'booked' => null, 'by' => 'jelena', 'mileage' => 242150, 'complaint' => 'Clutch slipping under load.', 'outcome' => 'paid', 'paid_after' => 14, 'due' => self::FLEET_DUE_DAYS, 'discounts' => [0 => self::FLEET_LABOR_DISCOUNT], 'lines' => [
             [JobItemType::Labor, 'dragan', 'Clutch replacement', 4.5],
             [JobItemType::Part, 'dragan', 'CK-8001', 1],
         ]],
@@ -81,7 +84,7 @@ class WorkshopSeeder extends DemoSeeder
             [JobItemType::Part, 'nikola', 'CF-1201', 1],
             [JobItemType::Part, 'nikola', 'WB-7001', 2],
         ]],
-        ['plate' => 'KG-088-MP', 'day' => 47, 'at' => '11:00', 'booked' => null, 'by' => 'ana', 'mileage' => 220150, 'complaint' => 'Grinding noise from the rear when braking.', 'outcome' => 'paid', 'lines' => [
+        ['plate' => 'KG-088-MP', 'day' => 47, 'at' => '11:00', 'booked' => null, 'by' => 'ana', 'mileage' => 220150, 'complaint' => 'Grinding noise from the rear when braking.', 'outcome' => 'paid', 'discounts' => [2 => '100.00'], 'lines' => [
             [JobItemType::Labor, 'zoran', 'Rear brake pads replacement', 1],
             [JobItemType::Part, 'zoran', 'BP-2003', 1],
             [JobItemType::Part, 'zoran', 'BS-2301', 1],
@@ -93,7 +96,7 @@ class WorkshopSeeder extends DemoSeeder
             [JobItemType::Part, 'dragan', 'AC-6101', 5],
             [JobItemType::Labor, 'dragan', 'Water pump and thermostat replacement', 2.5],
         ]],
-        ['plate' => 'BG-2102-BK', 'day' => 44, 'at' => '09:15', 'booked' => null, 'by' => 'jelena', 'mileage' => 229600, 'complaint' => 'Service due; front tyres wearing on the inside edge.', 'outcome' => 'paid', 'paid_after' => 12, 'due' => self::FLEET_DUE_DAYS, 'lines' => [
+        ['plate' => 'BG-2102-BK', 'day' => 44, 'at' => '09:15', 'booked' => null, 'by' => 'jelena', 'mileage' => 229600, 'complaint' => 'Service due; front tyres wearing on the inside edge.', 'outcome' => 'paid', 'paid_after' => 12, 'due' => self::FLEET_DUE_DAYS, 'discounts' => [0 => self::FLEET_LABOR_DISCOUNT, 3 => self::FLEET_LABOR_DISCOUNT], 'lines' => [
             [JobItemType::Labor, 'stefan', 'Oil and filter service', 1],
             [JobItemType::Part, 'stefan', 'OF-1001', 1],
             [JobItemType::Part, 'stefan', 'EO-6001', 5],
@@ -140,7 +143,7 @@ class WorkshopSeeder extends DemoSeeder
             [JobItemType::Labor, 'zoran', 'Replace front wheel bearing', 1.5],
             [JobItemType::Part, 'zoran', 'WB-4401', 1],
         ]],
-        ['plate' => 'BG-2103-BK', 'day' => 26, 'at' => '08:35', 'booked' => '08:30', 'by' => 'jelena', 'mileage' => 188000, 'complaint' => 'Service and brake check.', 'outcome' => 'paid', 'paid_after' => 14, 'due' => self::FLEET_DUE_DAYS, 'lines' => [
+        ['plate' => 'BG-2103-BK', 'day' => 26, 'at' => '08:35', 'booked' => '08:30', 'by' => 'jelena', 'mileage' => 188000, 'complaint' => 'Service and brake check.', 'outcome' => 'paid', 'paid_after' => 14, 'due' => self::FLEET_DUE_DAYS, 'discounts' => [0 => self::FLEET_LABOR_DISCOUNT, 3 => self::FLEET_LABOR_DISCOUNT], 'lines' => [
             [JobItemType::Labor, 'stefan', 'Oil and filter service', 1],
             [JobItemType::Part, 'stefan', 'OF-1002', 1],
             [JobItemType::Part, 'stefan', 'EO-6001', 5],
@@ -202,7 +205,7 @@ class WorkshopSeeder extends DemoSeeder
         ['plate' => 'NI-552-NS', 'day' => 5, 'at' => '08:05', 'booked' => '08:00', 'by' => 'jelena', 'mileage' => 270100, 'complaint' => 'Clutch judder when pulling away.', 'outcome' => 'cancelled', 'lines' => [
             [JobItemType::Labor, 'nikola', 'Clutch inspection', 0.5],
         ]],
-        ['plate' => 'BG-650-BV', 'day' => 4, 'at' => '09:30', 'booked' => null, 'by' => 'ana', 'mileage' => 289400, 'complaint' => 'Brake warning light on.', 'outcome' => 'completed', 'lines' => [
+        ['plate' => 'BG-650-BV', 'day' => 4, 'at' => '09:30', 'booked' => null, 'by' => 'ana', 'mileage' => 289400, 'complaint' => 'Brake warning light on.', 'outcome' => 'completed', 'discounts' => [0 => '5.00'], 'lines' => [
             [JobItemType::Labor, 'nikola', 'Rear brake pads and sensor replacement', 1.2],
             [JobItemType::Part, 'nikola', 'BP-2003', 1],
             [JobItemType::Part, 'nikola', 'BS-2301', 1],
@@ -406,6 +409,14 @@ class WorkshopSeeder extends DemoSeeder
         $this->at($cursor, function () use (&$job): void {
             $this->jobs->complete($job);
         });
+
+        if (isset($spec['discounts'])) {
+            $this->at($cursor->addMinutes(10), function () use (&$items, $spec): void {
+                foreach ($spec['discounts'] as $lineIndex => $percent) {
+                    $this->items->setDiscount($items[$lineIndex], $percent);
+                }
+            });
+        }
 
         if ($outcome === 'completed') {
             return;

@@ -1,4 +1,4 @@
-@props(['items'])
+@props(['items', 'showDiscount' => false])
 
 @php
     $cell = 'px-3 py-2 text-xs font-medium uppercase tracking-wider';
@@ -14,6 +14,9 @@
                     <th role="columnheader" scope="col" class="{{ $cell }}">{{ __('invoices.items.description') }}</th>
                     <th role="columnheader" scope="col" class="{{ $cell }} text-end">{{ __('invoices.items.quantity') }}</th>
                     <th role="columnheader" scope="col" class="{{ $cell }} text-end">{{ __('invoices.items.price') }}</th>
+                    @if ($showDiscount)
+                        <th role="columnheader" scope="col" class="{{ $cell }} text-end">{{ __('invoices.items.discount') }}</th>
+                    @endif
                     <th role="columnheader" scope="col" class="{{ $cell }} text-end">{{ __('invoices.items.line_total') }}</th>
                 </tr>
             </thead>
@@ -30,6 +33,12 @@
                         <td role="cell" class="px-3 py-2 text-end">
                             <x-ui.money :value="$item->unit_price" />
                         </td>
+
+                        @if ($showDiscount)
+                            <td role="cell" class="px-3 py-2 text-end tabular-nums">
+                                <x-ui.value :value="$item->hasDiscount() ? __('invoices.items.discount_value', ['percent' => $item->discountPercentLabel()]) : null" />
+                            </td>
+                        @endif
 
                         <td role="cell" class="px-3 py-2 text-end">
                             <x-ui.money :value="$item->lineTotal()" />

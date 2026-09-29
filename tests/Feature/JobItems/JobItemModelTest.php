@@ -6,7 +6,9 @@ use App\Enums\JobItemType;
 use App\Models\Job;
 use App\Models\JobItem;
 use App\Models\User;
+use App\Services\JobItemService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class JobItemModelTest extends TestCase
@@ -61,11 +63,103 @@ class JobItemModelTest extends TestCase
         $this->assertSame('4500.00', $item->lineTotal());
     }
 
-    public function test_the_line_total_keeps_two_decimal_places_on_awkward_numbers(): void
+    /**
+     * 0.33 × 3000.05 = 990.0165 rounds half-up to 990.02. The old pin of 990.01
+     * was truncation, which spec 30 replaced.
+     */
+    public function test_the_line_total_rounds_half_up_to_two_decimal_places_on_awkward_numbers(): void
     {
         $item = JobItem::factory()->create(['quantity' => '0.33', 'unit_price' => '3000.05']);
 
-        $this->assertSame('990.01', $item->lineTotal());
+        $this->assertSame('990.02', $item->lineTotal());
+    }
+
+    /**
+     * @return array<string, array{string, string, string, string, string, string}>
+     */
+    public static function arithmeticVectors(): array
+    {
+        return [
+            'awkward product, no discount' => ['0.33', '3000.05', '0.00', '990.02', '990.02', '0.00'],
+            'awkward product, 10% rounded once' => ['0.33', '3000.05', '10.00', '990.02', '891.01', '99.01'],
+            'hours at the labor rate, 10%' => ['1.50', '3000.00', '10.00', '4500.00', '4050.00', '450.00'],
+            'exactly half a cent after the discount' => ['1.00', '0.05', '50.00', '0.05', '0.03', '0.02'],
+            'a free line' => ['2.00', '100.00', '100.00', '200.00', '0.00', '200.00'],
+            'a fractional percentage' => ['1.00', '33.33', '12.50', '33.33', '29.16', '4.17'],
+            'a part at 15%' => ['3.00', '19.99', '15.00', '59.97', '50.97', '9.00'],
+        ];
+    }
+
+    #[DataProvider('arithmeticVectors')]
+    public function test_the_line_arithmetic_vectors_hold(
+        string $quantity,
+        string $unitPrice,
+        string $percent,
+        string $gross,
+        string $total,
+        string $discount,
+    ): void {
+        $item = JobItem::factory()->discounted($percent)->create(['quantity' => $quantity, 'unit_price' => $unitPrice]);
+
+        $this->assertSame($gross, $item->grossTotal());
+        $this->assertSame($total, $item->lineTotal());
+        $this->assertSame($discount, $item->discountAmount());
+    }
+
+    public function test_a_discount_is_detected_only_above_zero(): void
+    {
+        $this->assertFalse(JobItem::factory()->make()->hasDiscount());
+        $this->assertFalse(JobItem::factory()->discounted('0.00')->make()->hasDiscount());
+        $this->assertTrue(JobItem::factory()->discounted('0.01')->make()->hasDiscount());
+    }
+
+    public function test_the_discount_percentage_is_trimmed_for_display(): void
+    {
+        $this->assertSame('10', JobItem::factory()->discounted('10.00')->make()->discountPercentLabel());
+        $this->assertSame('12.5', JobItem::factory()->discounted('12.50')->make()->discountPercentLabel());
+        $this->assertSame('0.5', JobItem::factory()->discounted('0.50')->make()->discountPercentLabel());
+        $this->assertSame('100', JobItem::factory()->discounted('100.00')->make()->discountPercentLabel());
+        $this->assertSame('0', JobItem::factory()->make()->discountPercentLabel());
+    }
+
+    public function test_a_line_created_by_the_service_computes_its_total_before_any_reload(): void
+    {
+        $job = Job::factory()->inProgress()->create();
+
+        $item = app(JobItemService::class)->addLabor($job, User::factory()->receptionist()->create(), [
+            'description' => 'Diagnostics',
+            'quantity' => '1.5',
+            'user_id' => User::factory()->mechanic()->create()->getKey(),
+            'unit_price' => '3000.00',
+        ]);
+
+        $this->assertSame('0.00', $item->discount_percent);
+        $this->assertFalse($item->hasDiscount());
+        $this->assertSame('4500.00', $item->lineTotal());
+        $this->assertSame('0.00', $item->discountAmount());
+    }
+
+    public function test_a_jobs_subtotal_and_discount_total_sum_mixed_labor_and_part_lines(): void
+    {
+        $job = Job::factory()->create();
+        JobItem::factory()->forJob($job)->discounted('10.00')->create(['quantity' => '1.50', 'unit_price' => '3000.00']);
+        JobItem::factory()->forJob($job)->create(['quantity' => '0.50', 'unit_price' => '3000.00']);
+        JobItem::factory()->forJob($job)->part()->discounted('100.00')->create(['quantity' => 2, 'unit_price' => '100.00']);
+        JobItem::factory()->forJob($job)->part()->discounted('15.00')->create(['quantity' => 3, 'unit_price' => '19.99']);
+
+        $job->load('items');
+
+        $this->assertSame('5600.97', $job->subtotal());
+        $this->assertSame('659.00', $job->discountTotal());
+    }
+
+    public function test_an_undiscounted_job_has_a_zero_discount_total(): void
+    {
+        $job = Job::factory()->create();
+        JobItem::factory()->forJob($job)->create();
+        $job->load('items');
+
+        $this->assertSame('0.00', $job->discountTotal());
     }
 
     public function test_a_line_still_names_its_mechanic_after_that_mechanic_is_soft_deleted(): void

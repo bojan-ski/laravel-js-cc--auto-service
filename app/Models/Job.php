@@ -197,6 +197,12 @@ class Job extends Model
         return $this->status === JobStatus::Completed && ! $this->isLocked();
     }
 
+    public function acceptsDiscounts(): bool
+    {
+        return ! $this->isLocked()
+            && ($this->isWorking() || $this->status === JobStatus::Completed);
+    }
+
     public function canBeInvoiced(): bool
     {
         return $this->status === JobStatus::Completed
@@ -235,6 +241,14 @@ class Job extends Model
     {
         return $this->items->reduce(
             fn (string $carry, JobItem $item): string => bcadd($carry, $item->lineTotal(), 2),
+            '0.00',
+        );
+    }
+
+    public function discountTotal(): string
+    {
+        return $this->items->reduce(
+            fn (string $carry, JobItem $item): string => bcadd($carry, $item->discountAmount(), 2),
             '0.00',
         );
     }

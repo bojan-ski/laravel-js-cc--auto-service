@@ -187,6 +187,7 @@ trait AuthorizationMatrix
         $this->fixtures['lockedJob'] = $lockedJob;
         $this->fixtures['unpaidInvoice'] = Invoice::factory()->unpaid()->forJob($lockedJob)->create();
         $this->fixtures['ownLine'] = $this->fixtures['workingJob']->items->first();
+        $this->fixtures['completedLine'] = $this->fixtures['completedJob']->items->first();
 
         $this->deferred['ownAttachment'] = fn () => app(AttachmentService::class)->upload(
             $this->fixtures['pausableJob'],
@@ -506,6 +507,21 @@ trait AuthorizationMatrix
                 'capability' => 'See prices, line totals, job totals',
                 'requests' => [],
                 'walkable' => false,
+                'guest' => self::LOGIN,
+                'mechanic' => 403,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
+            '44' => [
+                'capability' => 'Set a line discount',
+                'requests' => [
+                    [
+                        'method' => 'patch',
+                        'route' => 'job-items.discount.update',
+                        'params' => ['completedLine'],
+                        'payload' => fn (): array => ['discount_percent' => '10'],
+                    ],
+                ],
                 'guest' => self::LOGIN,
                 'mechanic' => 403,
                 'receptionist' => self::ALLOW,

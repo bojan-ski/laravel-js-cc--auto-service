@@ -16,6 +16,7 @@ use App\Models\StockMovement;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Collection;
@@ -135,6 +136,8 @@ final class QaFixture
     public readonly JobItem $partLine;
 
     public readonly Job $completedJob;
+
+    public readonly JobItem $discountedLine;
 
     public readonly Job $lockedJob;
 
@@ -394,7 +397,7 @@ final class QaFixture
         $this->cancelledJob = $cancelledJobs[0];
 
         $this->completedJob = $this->job('completed', $this->vehicle);
-        $this->laborLine($this->completedJob, $this->technician);
+        $this->discountedLine = $this->laborLine($this->completedJob, $this->technician, '10.00');
         $this->partLine($this->completedJob, $this->part, 1);
 
         for ($i = 0; $i < 3; $i++) {
@@ -416,7 +419,7 @@ final class QaFixture
         for ($i = 0; $i < 12; $i++) {
             $vehicle = $lockedVehicles[$i] ?? $vehicleAt(20 + $i);
             $job = $this->job('completed', $vehicle);
-            $this->laborLine($job, $i % 3 === 0 ? $this->offboardedMechanic : $this->technician);
+            $this->laborLine($job, $i % 3 === 0 ? $this->offboardedMechanic : $this->technician, $i === 0 ? '12.50' : '0.00');
             $this->partLine($job, $this->parts->get(13 + ($i % 6)), 1);
             $job->locked_at = now()->subMinutes(30);
             $job->save();
@@ -509,28 +512,27 @@ final class QaFixture
      * issue would; the factory's random subtotal contradicts the page's own
      * invariant on a locked, non-void invoice.
      *
-     * @return array{subtotal: string, tax_amount: string, total: string}
+     * @return array{subtotal: string, discount_total: string, tax_amount: string, total: string}
      */
     private function totalsFromLines(Job $job): array
     {
-        $subtotal = JobItem::query()
-            ->where('job_id', $job->getKey())
-            ->get()
-            ->reduce(fn (string $carry, JobItem $item): string => bcadd($carry, bcmul((string) $item->quantity, (string) $item->unit_price, 2), 2), '0.00');
+        $issued = Job::query()->with('items')->findOrFail($job->getKey());
 
+        $subtotal = $issued->subtotal();
         $rate = (string) config('shop.vat_rate');
-        $tax = bcadd(bcdiv(bcmul($subtotal, $rate, 4), '100', 4), '0.005', 2);
+        $tax = Money::round(bcdiv(bcmul($subtotal, $rate, 4), '100', 4));
 
         return [
             'subtotal' => $subtotal,
+            'discount_total' => $issued->discountTotal(),
             'tax_amount' => $tax,
             'total' => bcadd($subtotal, $tax, 2),
         ];
     }
 
-    private function laborLine(Job $job, User $mechanic): JobItem
+    private function laborLine(Job $job, User $mechanic, string $discount = '0.00'): JobItem
     {
-        return JobItem::factory()->forJob($job)->performedBy($mechanic)->create();
+        return JobItem::factory()->forJob($job)->performedBy($mechanic)->discounted($discount)->create();
     }
 
     private function partLine(Job $job, Part $part, int $quantity): JobItem

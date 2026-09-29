@@ -12,6 +12,10 @@
 {{ __('mail.pair', ['label' => __('mail.invoice_issued.due'), 'value' => $invoice->due_at->translatedFormat('j M Y')]) }}
 @endif
 
+@if ($money['has_discount'])
+{{ __('mail.pair', ['label' => __('mail.invoice_issued.before_discount'), 'value' => $money['before_discount']]) }}
+{{ __('mail.pair', ['label' => __('mail.invoice_issued.discount'), 'value' => $money['discount']]) }}
+@endif
 {{ __('mail.pair', ['label' => __('mail.invoice_issued.subtotal'), 'value' => $money['subtotal']]) }}
 {{ __('mail.pair', ['label' => __('mail.invoice_issued.vat', ['rate' => $money['rate']]), 'value' => $money['tax']]) }}
 {{ __('mail.pair', ['label' => __('mail.invoice_issued.total'), 'value' => $money['total']]) }}

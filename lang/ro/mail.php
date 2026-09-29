@@ -26,6 +26,8 @@ return [
         'number' => 'Factură',
         'issued' => 'Emisă',
         'due' => 'Scadență',
+        'before_discount' => 'Înainte de discount',
+        'discount' => 'Discount',
         'subtotal' => 'Subtotal',
         'vat' => 'TVA :rate%',
         'total' => 'Total',

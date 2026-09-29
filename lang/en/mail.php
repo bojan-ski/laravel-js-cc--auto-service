@@ -26,6 +26,8 @@ return [
         'number' => 'Invoice',
         'issued' => 'Issued',
         'due' => 'Due',
+        'before_discount' => 'Before discount',
+        'discount' => 'Discount',
         'subtotal' => 'Subtotal',
         'vat' => 'VAT :rate%',
         'total' => 'Total',

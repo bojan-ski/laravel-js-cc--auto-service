@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\JobItemType;
 use App\Exceptions\JobLockedException;
+use App\Services\Money;
 use Database\Factories\JobItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -18,6 +19,13 @@ class JobItem extends Model
 {
     /** @use HasFactory<JobItemFactory> */
     use HasFactory;
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'discount_percent' => '0.00',
+    ];
 
     protected static function booted(): void
     {
@@ -89,9 +97,34 @@ class JobItem extends Model
         return $this->user_id !== null && $this->user_id === $user->getKey();
     }
 
+    public function grossTotal(): string
+    {
+        return Money::round(bcmul($this->quantity, $this->unit_price, 4));
+    }
+
     public function lineTotal(): string
     {
-        return bcmul($this->quantity, $this->unit_price, 2);
+        $gross = bcmul($this->quantity, $this->unit_price, 4);
+        $remaining = bcmul($gross, bcsub('100', $this->discount_percent, 2), 6);
+
+        return Money::round(bcdiv($remaining, '100', 8));
+    }
+
+    public function discountAmount(): string
+    {
+        return bcsub($this->grossTotal(), $this->lineTotal(), 2);
+    }
+
+    public function hasDiscount(): bool
+    {
+        return bccomp($this->discount_percent, '0', 2) > 0;
+    }
+
+    public function discountPercentLabel(): string
+    {
+        $trimmed = rtrim(rtrim($this->discount_percent, '0'), '.');
+
+        return $trimmed === '' ? '0' : $trimmed;
     }
 
     /**
@@ -117,6 +150,7 @@ class JobItem extends Model
             'type' => JobItemType::class,
             'quantity' => 'decimal:2',
             'unit_price' => 'decimal:2',
+            'discount_percent' => 'decimal:2',
         ];
     }
 }

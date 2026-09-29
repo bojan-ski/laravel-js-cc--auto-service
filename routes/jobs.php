@@ -5,6 +5,7 @@ use App\Http\Controllers\Jobs\JobAttachmentController;
 use App\Http\Controllers\Jobs\JobController;
 use App\Http\Controllers\Jobs\JobInvoiceController;
 use App\Http\Controllers\Jobs\JobItemController;
+use App\Http\Controllers\Jobs\JobItemDiscountController;
 use App\Http\Controllers\Jobs\JobPartLineController;
 use App\Http\Controllers\Jobs\JobTransitionController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,7 @@ Route::post('/jobs/{job}/items', [JobItemController::class, 'store'])->name('job
 Route::post('/jobs/{job}/parts', [JobPartLineController::class, 'store'])->name('jobs.parts.store');
 Route::put('/job-items/{jobItem}', [JobItemController::class, 'update'])->name('job-items.update');
 Route::delete('/job-items/{jobItem}', [JobItemController::class, 'destroy'])->name('job-items.destroy');
+Route::patch('/job-items/{jobItem}/discount', [JobItemDiscountController::class, 'update'])->name('job-items.discount.update');
 
 Route::post('/jobs/{job}/attachments', [JobAttachmentController::class, 'store'])->name('jobs.attachments.store');
 Route::get('/attachments/{attachment}/{variant?}', [AttachmentDownloadController::class, 'show'])

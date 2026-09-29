@@ -114,12 +114,16 @@ return [
             'description' => 'Beschreibung',
             'quantity' => 'Menge',
             'price' => 'Preis',
+            'discount' => 'Rabatt',
+            'line_total' => 'Gesamt',
             'who' => 'Wer',
             'actions' => 'Aktionen',
         ],
 
         'subtotal' => 'Zwischensumme',
         'complete_hint' => 'Fügen Sie mindestens eine Position hinzu, bevor dieser Auftrag abgeschlossen werden kann.',
+        'discount_value' => ':percent %',
+        'discount_total' => 'Rabatt',
 
         'add' => [
             'title' => 'Arbeit hinzufügen',
@@ -156,6 +160,17 @@ return [
             'cancel' => 'Abbrechen',
         ],
 
+        'discount' => [
+            'open' => 'Rabatt',
+            'open_line' => 'Rabatt für :description',
+            'title_for' => 'Rabatt: :description',
+            'percent' => 'Rabatt %',
+            'hint' => 'Der Einzelpreis bleibt unverändert. Geben Sie 0 ein, um den Rabatt zu entfernen.',
+            'save' => 'Rabatt speichern',
+            'cancel' => 'Abbrechen',
+            'row_marker' => 'Der Rabatt dieser Position wird unten festgelegt.',
+        ],
+
         'delete' => [
             'label' => 'Löschen',
             'label_line' => ':description löschen',
@@ -167,6 +182,7 @@ return [
             'part_added' => 'Teileposition hinzugefügt und aus dem Regal entnommen.',
             'updated' => 'Position aktualisiert.',
             'deleted' => 'Position gelöscht.',
+            'discounted' => 'Rabatt gespeichert.',
             'stock_negative' => ':name steht jetzt bei :balance. Der Bestand ist negativ.',
         ],
     ],

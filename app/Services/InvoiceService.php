@@ -94,6 +94,7 @@ class InvoiceService
             $invoice->buyer_tax_id = $customer->tax_id;
             $invoice->buyer_registration_number = $customer->registration_number;
             $invoice->subtotal = $totals['subtotal'];
+            $invoice->discount_total = $totals['discount'];
             $invoice->tax_rate = $totals['rate'];
             $invoice->tax_amount = $totals['tax'];
             $invoice->total = $totals['total'];
@@ -169,11 +170,12 @@ class InvoiceService
     }
 
     /**
-     * @return array{subtotal: string, rate: string, tax: string, total: string}
+     * @return array{subtotal: string, rate: string, tax: string, total: string, discount: string, before_discount: string, has_discount: bool}
      */
     public function totalsFor(Job $job): array
     {
         $subtotal = $job->subtotal();
+        $discount = $job->discountTotal();
         $rate = $this->rate();
         $tax = self::taxOn($subtotal, $rate);
 
@@ -182,11 +184,14 @@ class InvoiceService
             'rate' => $rate,
             'tax' => $tax,
             'total' => bcadd($subtotal, $tax, 2),
+            'discount' => $discount,
+            'before_discount' => bcadd($subtotal, $discount, 2),
+            'has_discount' => bccomp($discount, '0', 2) > 0,
         ];
     }
 
     /**
-     * @return array{subtotal: string, rate: string, tax: string, total: string}
+     * @return array{subtotal: string, rate: string, tax: string, total: string, discount: string, before_discount: string, has_discount: bool}
      */
     public function storedTotals(Invoice $invoice): array
     {
@@ -195,6 +200,9 @@ class InvoiceService
             'rate' => $invoice->taxRateLabel(),
             'tax' => $invoice->tax_amount,
             'total' => $invoice->total,
+            'discount' => $invoice->discount_total,
+            'before_discount' => bcadd($invoice->subtotal, $invoice->discount_total, 2),
+            'has_discount' => $invoice->hasDiscount(),
         ];
     }
 
@@ -205,7 +213,7 @@ class InvoiceService
 
     private static function taxOn(string $subtotal, string $rate): string
     {
-        return bcadd(bcdiv(bcmul($subtotal, $rate, 4), '100', 4), '0.005', 2);
+        return Money::round(bcdiv(bcmul($subtotal, $rate, 4), '100', 4));
     }
 
     /**

@@ -26,6 +26,8 @@ return [
         'number' => 'Rechnung',
         'issued' => 'Ausgestellt',
         'due' => 'Fällig',
+        'before_discount' => 'Vor Rabatt',
+        'discount' => 'Rabatt',
         'subtotal' => 'Zwischensumme',
         'vat' => 'MwSt. :rate %',
         'total' => 'Gesamt',

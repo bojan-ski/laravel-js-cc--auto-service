@@ -21,12 +21,18 @@ class JobShowRequest extends FormRequest
     {
         return [
             'edit' => ['nullable', 'integer'],
+            'discount' => ['nullable', 'integer'],
         ];
     }
 
     public function editingItemId(): ?int
     {
         return $this->filled('edit') ? $this->integer('edit') : null;
+    }
+
+    public function discountingItemId(): ?int
+    {
+        return $this->filled('discount') ? $this->integer('discount') : null;
     }
 
     public function addingType(): string

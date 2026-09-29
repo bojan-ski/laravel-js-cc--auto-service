@@ -18,8 +18,21 @@ class JobItemSchemaTest extends TestCase
     {
         $this->assertEqualsCanonicalizing([
             'id', 'job_id', 'type', 'part_id', 'user_id', 'description',
-            'quantity', 'unit_price', 'created_at', 'updated_at',
+            'quantity', 'unit_price', 'discount_percent', 'created_at', 'updated_at',
         ], Schema::getColumnListing('job_items'));
+    }
+
+    public function test_the_discount_percent_follows_the_unit_price_as_a_zero_default_decimal(): void
+    {
+        $listing = Schema::getColumnListing('job_items');
+
+        $this->assertSame('discount_percent', $listing[array_search('unit_price', $listing, true) + 1]);
+
+        $column = collect(Schema::getColumns('job_items'))->firstWhere('name', 'discount_percent');
+
+        $this->assertSame('decimal(5,2)', $column['type']);
+        $this->assertFalse($column['nullable']);
+        $this->assertSame('0.00', $column['default']);
     }
 
     public function test_line_items_are_hard_deleted(): void
@@ -37,7 +50,7 @@ class JobItemSchemaTest extends TestCase
             $this->assertTrue($nullable[$column], "{$column} should be nullable");
         }
 
-        foreach (['job_id', 'type', 'description', 'quantity', 'unit_price'] as $column) {
+        foreach (['job_id', 'type', 'description', 'quantity', 'unit_price', 'discount_percent'] as $column) {
             $this->assertFalse($nullable[$column], "{$column} should not be nullable");
         }
     }

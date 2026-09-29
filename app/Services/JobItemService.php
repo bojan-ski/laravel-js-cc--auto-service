@@ -123,6 +123,26 @@ class JobItemService
         });
     }
 
+    public function setDiscount(JobItem $item, string $percent): JobItem
+    {
+        return DB::transaction(function () use ($item, $percent): JobItem {
+            $job = Job::query()->whereKey($item->job_id)->lockForUpdate()->firstOrFail();
+
+            if ($job->isLocked()) {
+                throw new JobLockedException($job, ['discount_percent' => $percent]);
+            }
+
+            if (! $job->acceptsDiscounts()) {
+                throw new JobNotAcceptingLineItems($job);
+            }
+
+            $item->discount_percent = $percent;
+            $item->save();
+
+            return $item;
+        });
+    }
+
     private function lockWritableJob(int $jobId): Job
     {
         $job = Job::query()->whereKey($jobId)->lockForUpdate()->firstOrFail();

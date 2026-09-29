@@ -106,6 +106,11 @@ class Invoice extends Model
         return $this->buyer_tax_id !== null;
     }
 
+    public function hasDiscount(): bool
+    {
+        return bccomp($this->discount_total, '0', 2) > 0;
+    }
+
     public function canBeMarkedPaid(): bool
     {
         return $this->isUnpaid();
@@ -131,6 +136,7 @@ class Invoice extends Model
         return [
             'status' => InvoiceStatus::class,
             'subtotal' => 'decimal:2',
+            'discount_total' => 'decimal:2',
             'tax_rate' => 'decimal:2',
             'tax_amount' => 'decimal:2',
             'total' => 'decimal:2',

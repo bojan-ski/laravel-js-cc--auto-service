@@ -114,12 +114,16 @@ return [
             'description' => 'Opis',
             'quantity' => 'Kol.',
             'price' => 'Cena',
+            'discount' => 'Pop.',
+            'line_total' => 'Ukupno',
             'who' => 'Ko',
             'actions' => 'Radnje',
         ],
 
         'subtotal' => 'Osnovica',
         'complete_hint' => 'Dodajte bar jednu stavku pre nego što se radni nalog može završiti.',
+        'discount_value' => ':percent %',
+        'discount_total' => 'Popust',
 
         'add' => [
             'title' => 'Dodaj rad',
@@ -156,6 +160,17 @@ return [
             'cancel' => 'Otkaži',
         ],
 
+        'discount' => [
+            'open' => 'Popust',
+            'open_line' => 'Popust :description',
+            'title_for' => 'Popust: :description',
+            'percent' => 'Popust %',
+            'hint' => 'Jedinična cena ostaje ista. Unesite 0 da uklonite popust.',
+            'save' => 'Sačuvaj popust',
+            'cancel' => 'Otkaži',
+            'row_marker' => 'Popust za ovu stavku se podešava ispod.',
+        ],
+
         'delete' => [
             'label' => 'Obriši',
             'label_line' => 'Obriši :description',
@@ -167,6 +182,7 @@ return [
             'part_added' => 'Stavka dela je dodata i deo je skinut sa police.',
             'updated' => 'Stavka je izmenjena.',
             'deleted' => 'Stavka je obrisana.',
+            'discounted' => 'Popust je sačuvan.',
             'stock_negative' => 'Stanje za :name je sada :balance. Zaliha je otišla u minus.',
         ],
     ],
