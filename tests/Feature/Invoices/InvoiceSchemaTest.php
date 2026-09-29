@@ -22,9 +22,20 @@ class InvoiceSchemaTest extends TestCase
             'id', 'job_id', 'number', 'status',
             'buyer_name', 'buyer_address', 'buyer_tax_id', 'buyer_registration_number',
             'subtotal', 'tax_rate', 'tax_amount',
-            'total', 'issued_at', 'due_at', 'paid_at', 'voided_at', 'voided_by',
+            'total', 'issued_at', 'due_at', 'paid_at', 'payment_method', 'voided_at', 'voided_by',
             'issued_by', 'created_at', 'updated_at',
         ], Schema::getColumnListing('invoices'));
+    }
+
+    public function test_the_payment_method_follows_the_paid_date_as_a_short_string(): void
+    {
+        $listing = Schema::getColumnListing('invoices');
+
+        $this->assertSame('payment_method', $listing[array_search('paid_at', $listing, true) + 1]);
+
+        $type = collect(Schema::getColumns('invoices'))->firstWhere('name', 'payment_method')['type'];
+
+        $this->assertSame('varchar(20)', $type);
     }
 
     public function test_the_buyer_snapshot_columns_follow_the_status_in_order(): void
@@ -58,7 +69,7 @@ class InvoiceSchemaTest extends TestCase
             fn (array $column): array => [$column['name'] => $column['nullable']]
         );
 
-        foreach (['buyer_address', 'buyer_tax_id', 'buyer_registration_number', 'due_at', 'paid_at', 'voided_at', 'voided_by'] as $column) {
+        foreach (['buyer_address', 'buyer_tax_id', 'buyer_registration_number', 'due_at', 'paid_at', 'payment_method', 'voided_at', 'voided_by'] as $column) {
             $this->assertTrue($nullable[$column], "{$column} should be nullable");
         }
 
@@ -75,7 +86,7 @@ class InvoiceSchemaTest extends TestCase
         $this->assertNotNull($number);
         $this->assertTrue($number['unique']);
 
-        foreach (['job_id', 'status'] as $column) {
+        foreach (['job_id', 'status', 'payment_method'] as $column) {
             $this->assertTrue(
                 $indexes->contains(fn (array $index): bool => $index['columns'] === [$column]),
                 "Expected an index on {$column}."

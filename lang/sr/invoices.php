@@ -7,6 +7,12 @@ return [
         'void' => 'Storniran',
     ],
 
+    'payment_methods' => [
+        'cash' => 'Gotovina',
+        'card' => 'Kartica',
+        'bank_transfer' => 'Bankovni prenos',
+    ],
+
     'title' => 'Računi',
     'count' => ':count račun|:count računa|:count računa|{0}Nema računa|{1}Jedan račun',
 
@@ -72,6 +78,9 @@ return [
         'issued' => 'Izdat',
         'issued_by' => 'Izdao/la',
         'due' => 'Rok plaćanja',
+        'paid_on' => 'Datum plaćanja',
+        'payment_method' => 'Način plaćanja',
+        'payment_method_placeholder' => 'Izaberite…',
         'line_items' => 'Stavke',
         'actions' => 'Radnje sa računom',
         'print' => 'Štampaj',
@@ -123,10 +132,14 @@ return [
         'registration_number' => 'Matični broj (MB)',
     ],
 
+    'validation' => [
+        'payment_method_required' => 'Izaberite kako je račun plaćen.',
+    ],
+
     'flash' => [
         'issued' => 'Račun :number je izdat. Ovaj radni nalog je sada zaključan.',
         'not_issuable' => 'Za ovaj radni nalog nije moguće izdati račun. Možda ga je neko drugi već fakturisao.',
-        'paid' => 'Račun :number je označen kao plaćen.',
+        'paid' => 'Račun :number je označen kao plaćen. Način plaćanja: :method.',
         'not_payable' => 'Ovaj račun nije moguće označiti kao plaćen. Njegov status se možda promenio od učitavanja stranice.',
         'voided' => 'Račun :number je storniran. Radni nalog :reference je otključan.',
         'not_voidable' => 'Ovaj račun nije moguće stornirati. Njegov status se možda promenio od učitavanja stranice.',

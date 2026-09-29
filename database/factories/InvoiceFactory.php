@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentMethod;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Job;
@@ -50,6 +51,7 @@ class InvoiceFactory extends Factory
             'issued_at' => now()->subMinutes(30),
             'due_at' => null,
             'paid_at' => null,
+            'payment_method' => null,
             'voided_at' => null,
             'voided_by' => null,
             'issued_by' => User::factory()->receptionist(),
@@ -61,6 +63,7 @@ class InvoiceFactory extends Factory
         return $this->state(fn () => [
             'status' => InvoiceStatus::Unpaid,
             'paid_at' => null,
+            'payment_method' => null,
             'voided_at' => null,
         ]);
     }
@@ -70,6 +73,7 @@ class InvoiceFactory extends Factory
         return $this->state(fn () => [
             'status' => InvoiceStatus::Paid,
             'paid_at' => now()->subMinutes(10),
+            'payment_method' => PaymentMethod::Cash,
             'voided_at' => null,
         ]);
     }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\JobStatus;
+use App\Enums\PaymentMethod;
 use App\Exceptions\InvalidInvoiceTransition;
 use App\Exceptions\InvoiceNotIssuable;
 use App\Mail\InvoiceIssuedMail;
@@ -115,9 +116,9 @@ class InvoiceService
         });
     }
 
-    public function markPaid(Invoice $invoice): Invoice
+    public function markPaid(Invoice $invoice, PaymentMethod $method): Invoice
     {
-        return DB::transaction(function () use ($invoice): Invoice {
+        return DB::transaction(function () use ($invoice, $method): Invoice {
             $locked = Invoice::query()->whereKey($invoice->getKey())->lockForUpdate()->firstOrFail();
 
             if (! $locked->canBeMarkedPaid()) {
@@ -130,6 +131,7 @@ class InvoiceService
 
             $locked->status = InvoiceStatus::Paid;
             $locked->paid_at = now();
+            $locked->payment_method = $method;
             $locked->save();
 
             $invoice->setRawAttributes($locked->getAttributes(), true);

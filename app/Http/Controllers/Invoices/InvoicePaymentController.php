@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Invoices;
 
 use App\Exceptions\InvalidInvoiceTransition;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Invoices\MarkInvoicePaidRequest;
 use App\Models\Invoice;
 use App\Services\InvoiceService;
 use Illuminate\Http\RedirectResponse;
@@ -13,12 +14,12 @@ class InvoicePaymentController extends Controller
 {
     public function __construct(private InvoiceService $invoices) {}
 
-    public function markPaid(Invoice $invoice): RedirectResponse
+    public function markPaid(MarkInvoicePaidRequest $request, Invoice $invoice): RedirectResponse
     {
         Gate::authorize('markPaid', $invoice);
 
         try {
-            $this->invoices->markPaid($invoice);
+            $this->invoices->markPaid($invoice, $request->paymentMethod());
         } catch (InvalidInvoiceTransition) {
             return redirect()
                 ->route('invoices.show', $invoice)
@@ -27,6 +28,6 @@ class InvoicePaymentController extends Controller
 
         return redirect()
             ->route('invoices.show', $invoice)
-            ->with('success', __('invoices.flash.paid', ['number' => $invoice->number]));
+            ->with('success', __('invoices.flash.paid', ['number' => $invoice->number, 'method' => $request->paymentMethod()->label()]));
     }
 }

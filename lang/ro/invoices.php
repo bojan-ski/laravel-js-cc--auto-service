@@ -7,6 +7,12 @@ return [
         'void' => 'Stornată',
     ],
 
+    'payment_methods' => [
+        'cash' => 'Numerar',
+        'card' => 'Card',
+        'bank_transfer' => 'Transfer bancar',
+    ],
+
     'title' => 'Facturi',
     'count' => 'O factură|:count facturi|:count de facturi|{0}Nicio factură',
 
@@ -72,6 +78,9 @@ return [
         'issued' => 'Emisă',
         'issued_by' => 'Emisă de',
         'due' => 'Scadență',
+        'paid_on' => 'Data plății',
+        'payment_method' => 'Metodă de plată',
+        'payment_method_placeholder' => 'Alegeți…',
         'line_items' => 'Poziții',
         'actions' => 'Acțiuni factură',
         'print' => 'Tipărește',
@@ -123,10 +132,14 @@ return [
         'registration_number' => 'Nr. de înregistrare (MB)',
     ],
 
+    'validation' => [
+        'payment_method_required' => 'Alegeți cum a fost plătită factura.',
+    ],
+
     'flash' => [
         'issued' => 'Factura :number a fost emisă. Această lucrare este acum blocată.',
         'not_issuable' => 'Această lucrare nu a putut fi facturată. Este posibil să fi fost deja facturată de altcineva.',
-        'paid' => 'Factura :number a fost marcată ca plătită.',
+        'paid' => 'Factura :number a fost marcată ca plătită. Metodă de plată: :method.',
         'not_payable' => 'Această factură nu a putut fi marcată ca plătită. Este posibil ca starea ei să se fi schimbat de la încărcarea paginii.',
         'voided' => 'Factura :number a fost stornată. Lucrarea :reference este deblocată.',
         'not_voidable' => 'Această factură nu a putut fi stornată. Este posibil ca starea ei să se fi schimbat de la încărcarea paginii.',

@@ -993,9 +993,14 @@ trait AuthorizationMatrix
                 'admin' => self::ALLOW,
             ],
             '24' => [
-                'capability' => 'Mark an invoice paid',
+                'capability' => 'Mark an invoice paid (with a payment method)',
                 'requests' => [
-                    ['method' => 'patch', 'route' => 'invoices.paid', 'params' => ['unpaidInvoice']],
+                    [
+                        'method' => 'patch',
+                        'route' => 'invoices.paid',
+                        'params' => ['unpaidInvoice'],
+                        'payload' => fn ($t): array => ['payment_method' => 'cash'],
+                    ],
                 ],
                 'guest' => self::LOGIN,
                 'mechanic' => 403,

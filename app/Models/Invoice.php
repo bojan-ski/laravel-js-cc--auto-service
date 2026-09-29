@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentMethod;
 use App\Exceptions\InvalidInvoiceTransition;
 use Database\Factories\InvoiceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -95,6 +96,11 @@ class Invoice extends Model
         return $this->status === InvoiceStatus::Void;
     }
 
+    public function wasPaid(): bool
+    {
+        return $this->paid_at !== null;
+    }
+
     public function hasCompanyBuyer(): bool
     {
         return $this->buyer_tax_id !== null;
@@ -131,6 +137,7 @@ class Invoice extends Model
             'issued_at' => 'datetime',
             'due_at' => 'datetime',
             'paid_at' => 'datetime',
+            'payment_method' => PaymentMethod::class,
             'voided_at' => 'datetime',
         ];
     }

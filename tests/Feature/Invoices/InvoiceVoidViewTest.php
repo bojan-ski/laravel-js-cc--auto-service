@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Invoices;
 
+use App\Enums\PaymentMethod;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobItem;
@@ -165,7 +166,7 @@ class InvoiceVoidViewTest extends TestCase
 
         $this->assertStringNotContainsString(e($prefix), $this->confirmation($this->issued()));
 
-        $paid = app(InvoiceService::class)->markPaid($this->issued());
+        $paid = app(InvoiceService::class)->markPaid($this->issued(), PaymentMethod::Cash);
 
         $this->assertStringContainsString(
             e(__('invoices.void.paid_notice', ['date' => $paid->fresh()->paid_at->isoFormat('D MMM YYYY')])),

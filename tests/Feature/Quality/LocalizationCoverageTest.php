@@ -39,6 +39,7 @@ class LocalizationCoverageTest extends TestCase
         'jobs.statuses.' => ['app/Enums/JobStatus.php', "__('jobs.statuses.'.\$this->value)"],
         'appointments.statuses.' => ['app/Enums/AppointmentStatus.php', "__('appointments.statuses.'.\$this->value)"],
         'invoices.statuses.' => ['app/Enums/InvoiceStatus.php', "__('invoices.statuses.'.\$this->value)"],
+        'invoices.payment_methods.' => ['app/Enums/PaymentMethod.php', "__('invoices.payment_methods.'.\$this->value)"],
         'parts.reasons.' => ['app/Enums/StockMovementReason.php', "__('parts.reasons.'.\$this->value)"],
         'jobs.items.types.' => ['app/Enums/JobItemType.php', "__('jobs.items.types.'.\$this->value)"],
         'jobs.attachments.types.' => ['app/Enums/AttachmentType.php', "__('jobs.attachments.types.'.\$this->value)"],

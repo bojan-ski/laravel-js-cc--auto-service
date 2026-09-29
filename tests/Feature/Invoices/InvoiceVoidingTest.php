@@ -4,6 +4,7 @@ namespace Tests\Feature\Invoices;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\JobStatus;
+use App\Enums\PaymentMethod;
 use App\Exceptions\InvalidInvoiceTransition;
 use App\Models\Invoice;
 use App\Models\Job;
@@ -37,7 +38,7 @@ class InvoiceVoidingTest extends TestCase
 
     private function paid(): Invoice
     {
-        return $this->service()->markPaid($this->issued());
+        return $this->service()->markPaid($this->issued(), PaymentMethod::Card);
     }
 
     public function test_voiding_an_unpaid_invoice_records_the_status_the_time_and_the_admin(): void
@@ -151,11 +152,10 @@ class InvoiceVoidingTest extends TestCase
     }
 
     /**
-     * Run against a paid invoice as well as an unpaid one, because `paid_at` is
-     * null on an unpaid invoice and would sit in this list proving nothing. It
-     * is the one preserved column no page renders after voiding, so a void that
-     * cleared it would lose the record of when a corrected bill was settled
-     * with every other assertion in the suite still green.
+     * Run against a paid invoice as well as an unpaid one, because `paid_at` and
+     * `payment_method` are null on an unpaid invoice and would sit in this list
+     * proving nothing. A void that cleared either would lose the record of how
+     * and when a corrected bill was settled.
      */
     #[DataProvider('voidableStates')]
     public function test_voiding_preserves_the_number_totals_and_issue_details(string $state): void
@@ -164,11 +164,12 @@ class InvoiceVoidingTest extends TestCase
 
         $before = $invoice->only([
             'number', 'subtotal', 'tax_rate', 'tax_amount', 'total',
-            'issued_at', 'issued_by', 'due_at', 'paid_at',
+            'issued_at', 'issued_by', 'due_at', 'paid_at', 'payment_method',
         ]);
 
         if ($state === 'paid') {
             $this->assertNotNull($before['paid_at'], 'The paid fixture must carry a payment time.');
+            $this->assertSame(PaymentMethod::Card, $before['payment_method'], 'The paid fixture must carry a method.');
         }
 
         $this->service()->void($invoice, User::factory()->admin()->create());

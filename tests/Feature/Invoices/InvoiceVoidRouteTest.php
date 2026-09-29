@@ -3,6 +3,7 @@
 namespace Tests\Feature\Invoices;
 
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentMethod;
 use App\Exceptions\InvalidInvoiceTransition;
 use App\Models\Invoice;
 use App\Models\Job;
@@ -70,7 +71,7 @@ class InvoiceVoidRouteTest extends TestCase
 
     public function test_an_admin_voids_a_paid_invoice(): void
     {
-        $invoice = app(InvoiceService::class)->markPaid($this->issued());
+        $invoice = app(InvoiceService::class)->markPaid($this->issued(), PaymentMethod::Cash);
 
         $this->actingAs(User::factory()->admin()->create())
             ->patch(route('invoices.void', $invoice))
