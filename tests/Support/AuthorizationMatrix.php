@@ -384,6 +384,16 @@ trait AuthorizationMatrix
                 'receptionist' => self::ALLOW,
                 'admin' => self::ALLOW,
             ],
+            '43' => [
+                'capability' => 'Filter the board to my jobs (Mine)',
+                'requests' => [
+                    ['method' => 'get', 'route' => 'jobs.index', 'query' => fn (): array => ['mine' => 1]],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => self::ALLOW,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
             '4' => [
                 'capability' => 'Pause for parts or complete a job',
                 'requests' => [

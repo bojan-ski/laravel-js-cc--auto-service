@@ -17,6 +17,8 @@ return [
         'tab_all' => 'Toate',
         'search_label' => 'Caută lucrări',
         'search_placeholder' => 'Nr. înmatriculare sau client',
+        'mine' => 'Ale mele',
+        'mine_hint' => '(doar lucrările cu pozițiile mele de manoperă)',
         'sort_by' => 'Sortează după :column, :direction',
         'ascending' => 'crescător',
         'descending' => 'descrescător',
@@ -47,6 +49,12 @@ return [
             'no_matches' => [
                 'title' => 'Nicio lucrare nu corespunde căutării.',
                 'body' => 'Verificați numărul de înmatriculare sau încercați o parte din numele clientului.',
+            ],
+
+            'none_mine' => [
+                'title' => 'Nicio lucrare a dumneavoastră aici.',
+                'body' => 'O lucrare devine a dumneavoastră când are o poziție de manoperă pe numele dumneavoastră.',
+                'clear' => 'Afișează lucrările tuturor',
             ],
         ],
     ],

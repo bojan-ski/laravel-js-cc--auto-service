@@ -17,6 +17,8 @@ return [
         'tab_all' => 'All',
         'search_label' => 'Search jobs',
         'search_placeholder' => 'Plate or customer',
+        'mine' => 'Mine',
+        'mine_hint' => '(only jobs with my labor lines)',
         'sort_by' => 'Sort by :column, :direction',
         'ascending' => 'ascending',
         'descending' => 'descending',
@@ -47,6 +49,12 @@ return [
             'no_matches' => [
                 'title' => 'No job matches that search.',
                 'body' => 'Check the plate or try part of the customer\'s name.',
+            ],
+
+            'none_mine' => [
+                'title' => 'None of your jobs here.',
+                'body' => 'A job counts as yours once it has a labor line in your name.',
+                'clear' => 'Show everyone\'s jobs',
             ],
         ],
     ],

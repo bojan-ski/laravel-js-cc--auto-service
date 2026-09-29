@@ -81,6 +81,12 @@ trait WalksPages
                 'status' => JobStatus::InProgress->value,
                 'search' => QaFixture::PLATE_FRAGMENT,
             ]),
+            'jobs.index:mine' => self::page('jobs.index', self::ALL_STAFF, query: fn (): array => ['mine' => 1]),
+            'jobs.index:mine+status+search' => self::page('jobs.index', self::ALL_STAFF, query: fn (): array => [
+                'mine' => 1,
+                'status' => JobStatus::InProgress->value,
+                'search' => QaFixture::PLATE_FRAGMENT,
+            ]),
             'jobs.create' => self::plain('jobs.create', self::FRONT_OFFICE),
             'jobs.create:appointment' => self::page('jobs.create', self::FRONT_OFFICE, query: fn (QaFixture $shop): array => [
                 'appointment' => $shop->bookedAppointment->getKey(),

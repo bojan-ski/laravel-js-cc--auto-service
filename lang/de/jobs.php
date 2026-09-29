@@ -17,6 +17,8 @@ return [
         'tab_all' => 'Alle',
         'search_label' => 'Aufträge suchen',
         'search_placeholder' => 'Kennzeichen oder Kunde',
+        'mine' => 'Meine',
+        'mine_hint' => '(nur Aufträge mit meinen Arbeitspositionen)',
         'sort_by' => 'Sortieren nach :column, :direction',
         'ascending' => 'aufsteigend',
         'descending' => 'absteigend',
@@ -47,6 +49,12 @@ return [
             'no_matches' => [
                 'title' => 'Kein Auftrag passt zu dieser Suche.',
                 'body' => 'Prüfen Sie das Kennzeichen oder versuchen Sie einen Teil des Kundennamens.',
+            ],
+
+            'none_mine' => [
+                'title' => 'Hier sind keine Ihrer Aufträge.',
+                'body' => 'Ein Auftrag gilt als Ihrer, sobald er eine Arbeitsposition auf Ihren Namen hat.',
+                'clear' => 'Aufträge aller anzeigen',
             ],
         ],
     ],

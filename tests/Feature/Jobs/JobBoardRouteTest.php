@@ -68,7 +68,7 @@ class JobBoardRouteTest extends TestCase
         $this->actingAs(User::factory()->mechanic()->create())
             ->get(route('jobs.index', ['sort' => 'bogus', 'direction' => 'sideways']))
             ->assertOk()
-            ->assertViewHas('filters', ['status' => '', 'search' => '', 'sort' => 'received', 'direction' => 'desc'])
+            ->assertViewHas('filters', ['status' => '', 'search' => '', 'sort' => 'received', 'direction' => 'desc', 'mine' => false])
             ->assertViewHas('jobs', fn ($jobs) => $jobs->pluck('id')->all() === [$newer->getKey(), $older->getKey()]);
     }
 

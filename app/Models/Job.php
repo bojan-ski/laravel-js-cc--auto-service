@@ -146,6 +146,12 @@ class Job extends Model
         });
     }
 
+    #[Scope]
+    protected function workedOnBy(Builder $query, User $user): void
+    {
+        $query->whereRelation('laborItems', 'user_id', $user->getKey());
+    }
+
     public function isLocked(): bool
     {
         return $this->locked_at !== null;
