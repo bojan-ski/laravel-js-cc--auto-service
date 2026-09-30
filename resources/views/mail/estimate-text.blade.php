@@ -10,12 +10,6 @@
 {{ __('mail.pair', ['label' => $line['percent'] === null ? __('mail.estimate.line', ['description' => $line['description'], 'quantity' => $line['quantity']]) : __('mail.estimate.line_discounted', ['description' => $line['description'], 'quantity' => $line['quantity'], 'percent' => $line['percent']]), 'value' => $line['total']]) }}
 @endforeach
 
-@if ($money['has_discount'])
-{{ __('mail.pair', ['label' => __('mail.estimate.before_discount'), 'value' => $money['before_discount']]) }}
-{{ __('mail.pair', ['label' => __('mail.estimate.discount'), 'value' => $money['discount']]) }}
-@endif
-{{ __('mail.pair', ['label' => __('mail.estimate.subtotal'), 'value' => $money['subtotal']]) }}
-{{ __('mail.pair', ['label' => __('mail.estimate.vat', ['rate' => $money['rate']]), 'value' => $money['tax']]) }}
-{{ __('mail.pair', ['label' => __('mail.estimate.total'), 'value' => $money['total']]) }}
+<x-mail.totals-text :money="$money" />
 
 <x-mail.shop-footer-text />

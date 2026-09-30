@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Mail;
 
+use App\Mail\CustomerMailable;
+use App\Mail\EstimateMail;
 use App\Mail\InvoiceIssuedMail;
 use App\Mail\JobCompletedMail;
 use App\Models\Customer;
@@ -10,12 +12,11 @@ use App\Models\Job;
 use App\Models\JobItem;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\EstimateService;
 use App\Services\InvoiceService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Queue\Attributes\Backoff;
-use Illuminate\Queue\Attributes\Timeout;
-use Illuminate\Queue\Attributes\Tries;
+use Illuminate\Mail\SendQueuedMailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -35,7 +36,32 @@ class MailConfigurationTest extends TestCase
         return [
             'job completed' => [JobCompletedMail::class],
             'invoice issued' => [InvoiceIssuedMail::class],
+            'estimate' => [EstimateMail::class],
         ];
+    }
+
+    /**
+     * @param  class-string<CustomerMailable>  $mailable
+     */
+    private function mailableFor(string $mailable): CustomerMailable
+    {
+        return match ($mailable) {
+            JobCompletedMail::class => $this->jobCompletedMail(),
+            InvoiceIssuedMail::class => $this->invoiceIssuedMail(),
+            EstimateMail::class => $this->estimateMail(),
+        };
+    }
+
+    private function estimateMail(): EstimateMail
+    {
+        $customer = Customer::factory()->create(['email' => 'owner@example.test']);
+        $vehicle = Vehicle::factory()->for($customer)->create();
+        $job = Job::factory()->inProgress()->for($customer)->for($vehicle)->create();
+        JobItem::factory()->forJob($job)->create(['quantity' => 1, 'unit_price' => 2000]);
+
+        $estimate = app(EstimateService::class)->create($job, User::factory()->receptionist()->create());
+
+        return new EstimateMail($estimate, $customer, $vehicle);
     }
 
     private function jobCompletedMail(): JobCompletedMail
@@ -87,13 +113,40 @@ class MailConfigurationTest extends TestCase
      * @param  class-string  $mailable
      */
     #[DataProvider('mailables')]
-    public function test_it_declares_the_retry_timeout_and_backoff_values(string $mailable): void
+    public function test_the_queue_worker_resolves_the_retry_timeout_backoff_and_after_commit_values(string $mailable): void
     {
-        $reflection = new ReflectionClass($mailable);
+        $job = new SendQueuedMailable($this->mailableFor($mailable));
 
-        $this->assertSame(3, $reflection->getAttributes(Tries::class)[0]->newInstance()->tries);
-        $this->assertSame(30, $reflection->getAttributes(Timeout::class)[0]->newInstance()->timeout);
-        $this->assertSame(60, $reflection->getAttributes(Backoff::class)[0]->newInstance()->backoff);
+        $this->assertSame(3, $job->tries);
+        $this->assertSame(30, $job->timeout);
+        $this->assertSame(60, $job->backoff());
+        $this->assertTrue($job->afterCommit);
+    }
+
+    /**
+     * @param  class-string<CustomerMailable>  $mailable
+     */
+    #[DataProvider('mailables')]
+    public function test_a_failed_send_logs_the_concrete_mailable_and_its_record(string $mailable): void
+    {
+        $instance = $this->mailableFor($mailable);
+        $record = match ($mailable) {
+            JobCompletedMail::class => $instance->job->reference,
+            InvoiceIssuedMail::class => $instance->invoice->number,
+            EstimateMail::class => $instance->estimate->number,
+        };
+
+        Log::spy();
+
+        $instance->failed(new RuntimeException('transport refused'));
+
+        Log::shouldHaveReceived('error')->once()->withArgs(
+            fn (string $message, array $context) => $message === 'Customer email failed to send.'
+                && $context['mailable'] === $mailable
+                && $context['recipient'] === $instance->customer->email
+                && $context['record'] === $record
+                && $context['reason'] === 'transport refused',
+        );
     }
 
     /**
@@ -110,9 +163,7 @@ class MailConfigurationTest extends TestCase
     {
         $this->assertFalse(method_exists($mailable, 'attachments'));
 
-        $instance = $mailable === JobCompletedMail::class
-            ? $this->jobCompletedMail()
-            : $this->invoiceIssuedMail();
+        $instance = $this->mailableFor($mailable);
 
         $instance->render();
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DecisionMethod;
 use App\Enums\EstimateStatus;
 use App\Exceptions\InvalidEstimateTransition;
+use App\Models\Concerns\HasStoredTotals;
 use Database\Factories\EstimateFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +18,8 @@ class Estimate extends Model
 {
     /** @use HasFactory<EstimateFactory> */
     use HasFactory;
+
+    use HasStoredTotals;
 
     public const array MUTABLE = [
         'status',
@@ -106,18 +109,6 @@ class Estimate extends Model
     public function canBeEmailed(): bool
     {
         return $this->status->isOpen();
-    }
-
-    public function hasDiscount(): bool
-    {
-        return bccomp($this->discount_total, '0', 2) > 0;
-    }
-
-    public function taxRateLabel(): string
-    {
-        $trimmed = rtrim(rtrim($this->tax_rate, '0'), '.');
-
-        return $trimmed === '' ? '0' : $trimmed;
     }
 
     private function refuseFrozenWrite(): void

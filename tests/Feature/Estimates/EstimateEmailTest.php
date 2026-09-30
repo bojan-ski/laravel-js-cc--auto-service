@@ -16,9 +16,7 @@ use App\Services\EstimateService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Queue\Attributes\Backoff;
-use Illuminate\Queue\Attributes\Timeout;
-use Illuminate\Queue\Attributes\Tries;
+use Illuminate\Mail\SendQueuedMailable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -192,12 +190,13 @@ class EstimateEmailTest extends TestCase
 
         $this->assertTrue($mailable->afterCommit);
         $this->assertInstanceOf(ShouldQueue::class, $mailable);
-        $this->assertNotContains(Queueable::class, class_uses($mailable));
+        $this->assertNotContains(Queueable::class, class_uses_recursive($mailable));
 
-        $attributes = collect((new \ReflectionClass($mailable))->getAttributes())->mapWithKeys(fn ($attribute) => [$attribute->getName() => $attribute->getArguments()]);
-        $this->assertSame([3], $attributes[Tries::class]);
-        $this->assertSame([30], $attributes[Timeout::class]);
-        $this->assertSame([60], $attributes[Backoff::class]);
+        $job = new SendQueuedMailable($mailable);
+        $this->assertSame(3, $job->tries);
+        $this->assertSame(30, $job->timeout);
+        $this->assertSame(60, $job->backoff());
+        $this->assertTrue($job->afterCommit);
     }
 
     public function test_the_subject_names_the_number_and_the_plate(): void
@@ -220,13 +219,13 @@ class EstimateEmailTest extends TestCase
         $line = __('mail.estimate.line', ['description' => 'Brake service', 'quantity' => '1.5']);
         $this->assertHtmlRow($mailable, $line, '6,000.00');
         $this->assertHtmlRow($mailable, __('mail.estimate.number'), $estimate->number);
-        $this->assertHtmlRow($mailable, __('mail.estimate.subtotal'), '6,000.00');
-        $this->assertHtmlRow($mailable, __('mail.estimate.vat', ['rate' => '20']), '1,200.00');
-        $this->assertHtmlRow($mailable, __('mail.estimate.total'), '7,200.00');
-        $this->assertNoHtmlRowLabelled($mailable, __('mail.estimate.discount'));
+        $this->assertHtmlRow($mailable, __('mail.totals.subtotal'), '6,000.00');
+        $this->assertHtmlRow($mailable, __('mail.totals.vat', ['rate' => '20']), '1,200.00');
+        $this->assertHtmlRow($mailable, __('mail.totals.total'), '7,200.00');
+        $this->assertNoHtmlRowLabelled($mailable, __('mail.totals.discount'));
 
         $mailable->assertSeeInText(__('mail.pair', ['label' => $line, 'value' => '6,000.00']), false);
-        $mailable->assertSeeInText(__('mail.pair', ['label' => __('mail.estimate.total'), 'value' => '7,200.00']), false);
+        $mailable->assertSeeInText(__('mail.pair', ['label' => __('mail.totals.total'), 'value' => '7,200.00']), false);
         $mailable->assertSeeInText(__('mail.estimate.greeting', ['name' => 'Milan Petrovic']), false);
         $mailable->assertSeeInText(__('mail.estimate.reply'), false);
         $mailable->assertSeeInHtml(__('mail.estimate.reply'), false);
@@ -240,7 +239,7 @@ class EstimateEmailTest extends TestCase
 
         $mailable = new EstimateMail($estimate->fresh(), $this->customer, $this->vehicle);
 
-        $this->assertHtmlRow($mailable, __('mail.estimate.total'), '7,777.77');
+        $this->assertHtmlRow($mailable, __('mail.totals.total'), '7,777.77');
     }
 
     public function test_a_discounted_estimate_shows_the_percentage_per_line_and_the_discount_rows(): void
@@ -252,10 +251,10 @@ class EstimateEmailTest extends TestCase
 
         $line = __('mail.estimate.line_discounted', ['description' => 'Diagnostics', 'quantity' => '2', 'percent' => '10']);
         $this->assertHtmlRow($mailable, $line, '1,800.00');
-        $this->assertHtmlRow($mailable, __('mail.estimate.before_discount'), '8,000.00');
-        $this->assertHtmlRow($mailable, __('mail.estimate.discount'), '200.00');
-        $this->assertHtmlRow($mailable, __('mail.estimate.subtotal'), '7,800.00');
-        $mailable->assertSeeInText(__('mail.pair', ['label' => __('mail.estimate.discount'), 'value' => '200.00']), false);
+        $this->assertHtmlRow($mailable, __('mail.totals.before_discount'), '8,000.00');
+        $this->assertHtmlRow($mailable, __('mail.totals.discount'), '200.00');
+        $this->assertHtmlRow($mailable, __('mail.totals.subtotal'), '7,800.00');
+        $mailable->assertSeeInText(__('mail.pair', ['label' => __('mail.totals.discount'), 'value' => '200.00']), false);
     }
 
     public function test_the_message_carries_no_attachment(): void

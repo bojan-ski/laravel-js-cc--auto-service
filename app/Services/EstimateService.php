@@ -121,22 +121,6 @@ class EstimateService
     }
 
     /**
-     * @return array{subtotal: string, rate: string, tax: string, total: string, discount: string, before_discount: string, has_discount: bool}
-     */
-    public function storedTotals(Estimate $estimate): array
-    {
-        return [
-            'subtotal' => $estimate->subtotal,
-            'rate' => $estimate->taxRateLabel(),
-            'tax' => $estimate->tax_amount,
-            'total' => $estimate->total,
-            'discount' => $estimate->discount_total,
-            'before_discount' => bcadd($estimate->subtotal, $estimate->discount_total, 2),
-            'has_discount' => $estimate->hasDiscount(),
-        ];
-    }
-
-    /**
      * @return array{estimate: Estimate, warning: 'over'|'not_approved'|'declined'|null, over_by: ?string}|null
      */
     public function summaryFor(Job $job): ?array

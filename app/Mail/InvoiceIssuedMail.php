@@ -5,26 +5,12 @@ namespace App\Mail;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Vehicle;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Mail\Mailable;
+use App\Services\Money;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\Attributes\Backoff;
-use Illuminate\Queue\Attributes\Timeout;
-use Illuminate\Queue\Attributes\Tries;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
-use Throwable;
 
-#[Tries(3)]
-#[Timeout(30)]
-#[Backoff(60)]
-class InvoiceIssuedMail extends Mailable implements ShouldQueue
+class InvoiceIssuedMail extends CustomerMailable
 {
-    use SerializesModels;
-
-    public bool $afterCommit = true;
-
     public function __construct(
         public Invoice $invoice,
         public Customer $customer,
@@ -51,33 +37,20 @@ class InvoiceIssuedMail extends Mailable implements ShouldQueue
     }
 
     /**
-     * @return array{rate: string, subtotal: string, tax: string, total: string, discount: string, before_discount: string, has_discount: bool}
+     * @return array{subtotal: string, rate: string, tax: string, total: string, discount: string, before_discount: string, has_discount: bool}
      */
     public function money(): array
     {
-        return [
-            'rate' => $this->invoice->taxRateLabel(),
-            'subtotal' => $this->format($this->invoice->subtotal),
-            'tax' => $this->format($this->invoice->tax_amount),
-            'total' => $this->format($this->invoice->total),
-            'discount' => $this->format($this->invoice->discount_total),
-            'before_discount' => $this->format(bcadd($this->invoice->subtotal, $this->invoice->discount_total, 2)),
-            'has_discount' => $this->invoice->hasDiscount(),
-        ];
+        return Money::formatTotals($this->invoice->storedTotals());
     }
 
-    private function format(string $amount): string
+    protected function recipient(): Customer
     {
-        return number_format((float) $amount, 2);
+        return $this->customer;
     }
 
-    public function failed(Throwable $exception): void
+    protected function record(): string
     {
-        Log::error('Customer email failed to send.', [
-            'mailable' => self::class,
-            'recipient' => $this->customer->email,
-            'record' => $this->invoice->number,
-            'reason' => $exception->getMessage(),
-        ]);
+        return $this->invoice->number;
     }
 }

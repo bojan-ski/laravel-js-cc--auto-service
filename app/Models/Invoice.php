@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Exceptions\InvalidInvoiceTransition;
+use App\Models\Concerns\HasStoredTotals;
 use Database\Factories\InvoiceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -18,6 +19,8 @@ class Invoice extends Model
 {
     /** @use HasFactory<InvoiceFactory> */
     use HasFactory;
+
+    use HasStoredTotals;
 
     protected static function booted(): void
     {
@@ -106,11 +109,6 @@ class Invoice extends Model
         return $this->buyer_tax_id !== null;
     }
 
-    public function hasDiscount(): bool
-    {
-        return bccomp($this->discount_total, '0', 2) > 0;
-    }
-
     public function canBeMarkedPaid(): bool
     {
         return $this->isUnpaid();
@@ -119,13 +117,6 @@ class Invoice extends Model
     public function canBeVoided(): bool
     {
         return $this->isUnpaid() || $this->isPaid();
-    }
-
-    public function taxRateLabel(): string
-    {
-        $trimmed = rtrim(rtrim($this->tax_rate, '0'), '.');
-
-        return $trimmed === '' ? '0' : $trimmed;
     }
 
     /**

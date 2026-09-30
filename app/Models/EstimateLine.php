@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\JobItemType;
 use App\Exceptions\InvalidEstimateTransition;
+use App\Services\Money;
 use Database\Factories\EstimateLineFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,9 +48,7 @@ class EstimateLine extends Model
 
     public function discountPercentLabel(): string
     {
-        $trimmed = rtrim(rtrim($this->discount_percent, '0'), '.');
-
-        return $trimmed === '' ? '0' : $trimmed;
+        return Money::trimZeros($this->discount_percent);
     }
 
     public function lineTotal(): string

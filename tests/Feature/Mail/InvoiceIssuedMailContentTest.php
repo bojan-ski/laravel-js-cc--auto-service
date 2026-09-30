@@ -186,9 +186,9 @@ class InvoiceIssuedMailContentTest extends TestCase
             'mail.invoice_issued.number' => 'ZZ-NUMBER',
             'mail.invoice_issued.issued' => 'ZZ-ISSUED',
             'mail.invoice_issued.due' => 'ZZ-DUE',
-            'mail.invoice_issued.subtotal' => 'ZZ-SUBTOTAL',
-            'mail.invoice_issued.vat' => 'ZZ-VAT :rate',
-            'mail.invoice_issued.total' => 'ZZ-TOTAL',
+            'mail.totals.subtotal' => 'ZZ-SUBTOTAL',
+            'mail.totals.vat' => 'ZZ-VAT :rate',
+            'mail.totals.total' => 'ZZ-TOTAL',
         ], 'en');
 
         $invoice = $this->issue(now()->addDays(15));
@@ -219,5 +219,27 @@ class InvoiceIssuedMailContentTest extends TestCase
         $mailable->assertSeeInText('ZZ-PAIR ZZ-SUBTOTAL=10,600.00', false);
         $mailable->assertSeeInText('ZZ-PAIR ZZ-VAT 20=2,120.00', false);
         $mailable->assertSeeInText('ZZ-PAIR ZZ-TOTAL=12,720.00', false);
+    }
+
+    public function test_the_discount_rows_resolve_through_the_translator(): void
+    {
+        Lang::addLines([
+            'mail.pair' => 'ZZ-PAIR :label=:value',
+            'mail.totals.before_discount' => 'ZZ-BEFORE',
+            'mail.totals.discount' => 'ZZ-DISCOUNT',
+        ], 'en');
+
+        $this->customer = Customer::factory()->create();
+        $this->vehicle = Vehicle::factory()->for($this->customer)->create();
+        $job = Job::factory()->completed()->for($this->customer)->for($this->vehicle)->create();
+        JobItem::factory()->forJob($job)->discounted('10.00')->create(['quantity' => 1, 'unit_price' => '10000.00']);
+        $invoice = app(InvoiceService::class)->issue($job, User::factory()->receptionist()->create());
+
+        $mailable = new InvoiceIssuedMail($invoice, $this->customer, $this->vehicle);
+
+        $this->assertHtmlRow($mailable, 'ZZ-BEFORE', '10,000.00');
+        $this->assertHtmlRow($mailable, 'ZZ-DISCOUNT', '1,000.00');
+        $mailable->assertSeeInText('ZZ-PAIR ZZ-BEFORE=10,000.00', false);
+        $mailable->assertSeeInText('ZZ-PAIR ZZ-DISCOUNT=1,000.00', false);
     }
 }

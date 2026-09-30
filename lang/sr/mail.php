@@ -26,11 +26,6 @@ return [
         'number' => 'Račun',
         'issued' => 'Izdat',
         'due' => 'Rok plaćanja',
-        'before_discount' => 'Pre popusta',
-        'discount' => 'Popust',
-        'subtotal' => 'Osnovica',
-        'vat' => 'PDV :rate%',
-        'total' => 'Ukupno',
         'tax_id' => 'PIB',
         'registration_number' => 'Matični broj (MB)',
     ],
@@ -45,6 +40,9 @@ return [
         'created' => 'Datum',
         'line' => ':description × :quantity',
         'line_discounted' => ':description × :quantity (popust :percent%)',
+    ],
+
+    'totals' => [
         'before_discount' => 'Pre popusta',
         'discount' => 'Popust',
         'subtotal' => 'Osnovica',

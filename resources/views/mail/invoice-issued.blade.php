@@ -32,14 +32,5 @@
         @endif
     </table>
 
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 16px;">
-        @if ($money['has_discount'])
-            <x-mail.row :label="__('mail.invoice_issued.before_discount')" :value="$money['before_discount']" />
-            <x-mail.row :label="__('mail.invoice_issued.discount')" :value="$money['discount']" />
-        @endif
-
-        <x-mail.row :label="__('mail.invoice_issued.subtotal')" :value="$money['subtotal']" />
-        <x-mail.row :label="__('mail.invoice_issued.vat', ['rate' => $money['rate']])" :value="$money['tax']" />
-        <x-mail.row :label="__('mail.invoice_issued.total')" :value="$money['total']" total />
-    </table>
+    <x-mail.totals :money="$money" />
 </x-mail.layout>

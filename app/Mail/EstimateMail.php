@@ -6,26 +6,12 @@ use App\Models\Customer;
 use App\Models\Estimate;
 use App\Models\EstimateLine;
 use App\Models\Vehicle;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Mail\Mailable;
+use App\Services\Money;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\Attributes\Backoff;
-use Illuminate\Queue\Attributes\Timeout;
-use Illuminate\Queue\Attributes\Tries;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
-use Throwable;
 
-#[Tries(3)]
-#[Timeout(30)]
-#[Backoff(60)]
-class EstimateMail extends Mailable implements ShouldQueue
+class EstimateMail extends CustomerMailable
 {
-    use SerializesModels;
-
-    public bool $afterCommit = true;
-
     public function __construct(
         public Estimate $estimate,
         public Customer $customer,
@@ -52,19 +38,11 @@ class EstimateMail extends Mailable implements ShouldQueue
     }
 
     /**
-     * @return array{rate: string, subtotal: string, tax: string, total: string, discount: string, before_discount: string, has_discount: bool}
+     * @return array{subtotal: string, rate: string, tax: string, total: string, discount: string, before_discount: string, has_discount: bool}
      */
     public function money(): array
     {
-        return [
-            'rate' => $this->estimate->taxRateLabel(),
-            'subtotal' => $this->format($this->estimate->subtotal),
-            'tax' => $this->format($this->estimate->tax_amount),
-            'total' => $this->format($this->estimate->total),
-            'discount' => $this->format($this->estimate->discount_total),
-            'before_discount' => $this->format(bcadd($this->estimate->subtotal, $this->estimate->discount_total, 2)),
-            'has_discount' => $this->estimate->hasDiscount(),
-        ];
+        return Money::formatTotals($this->estimate->storedTotals());
     }
 
     /**
@@ -75,33 +53,21 @@ class EstimateMail extends Mailable implements ShouldQueue
         return $this->estimate->lines()->get()
             ->map(fn (EstimateLine $line): array => [
                 'description' => $line->description,
-                'quantity' => $this->trim($line->quantity),
+                'quantity' => Money::trimZeros($line->quantity),
                 'percent' => $line->hasDiscount() ? $line->discountPercentLabel() : null,
-                'total' => $this->format($line->lineTotal()),
+                'total' => Money::format($line->lineTotal()),
             ])
             ->values()
             ->all();
     }
 
-    private function format(string $amount): string
+    protected function recipient(): Customer
     {
-        return number_format((float) $amount, 2);
+        return $this->customer;
     }
 
-    private function trim(string $quantity): string
+    protected function record(): string
     {
-        $trimmed = rtrim(rtrim($quantity, '0'), '.');
-
-        return $trimmed === '' ? '0' : $trimmed;
-    }
-
-    public function failed(Throwable $exception): void
-    {
-        Log::error('Customer email failed to send.', [
-            'mailable' => self::class,
-            'recipient' => $this->customer->email,
-            'record' => $this->estimate->number,
-            'reason' => $exception->getMessage(),
-        ]);
+        return $this->estimate->number;
     }
 }
