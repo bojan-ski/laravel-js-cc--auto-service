@@ -2,8 +2,10 @@
 
 namespace Database\Seeders\Demo;
 
+use App\Enums\FuelLevel;
 use App\Enums\JobItemType;
 use App\Enums\PaymentMethod;
+use App\Enums\SignatureMethod;
 use App\Enums\StockMovementReason;
 use App\Models\Customer;
 use App\Models\Job;
@@ -12,6 +14,7 @@ use App\Models\JobTemplate;
 use App\Models\Part;
 use App\Models\Vehicle;
 use App\Services\AppointmentService;
+use App\Services\CheckInService;
 use App\Services\CustomerService;
 use App\Services\InvoiceService;
 use App\Services\JobItemService;
@@ -38,6 +41,7 @@ class WorkshopSeeder extends DemoSeeder
      * Outcomes: received, in_progress, awaiting_parts, cancelled, completed, unpaid, paid, voided, reissued.
      * Lines: [type, mechanic (null = added unassigned by the desk), description or SKU, quantity].
      * Discounts: [line index => percent], set after completion and before the invoice.
+     * Check-in: paper (default), drawn, unsigned or none.
      *
      * @var list<array<string, mixed>>
      */
@@ -219,12 +223,12 @@ class WorkshopSeeder extends DemoSeeder
         ['plate' => 'BG-2101-BK', 'day' => 1, 'at' => '14:00', 'booked' => null, 'by' => 'ana', 'mileage' => 247300, 'complaint' => 'Air conditioning not cooling.', 'outcome' => 'in_progress', 'lines' => [
             [JobItemType::Labor, 'nikola', 'A/C diagnostics', 0.5],
         ]],
-        ['plate' => 'BG-315-DM', 'day' => 0, 'at' => '08:05', 'booked' => '08:00', 'by' => 'jelena', 'mileage' => 261000, 'complaint' => 'Front suspension knocking.', 'outcome' => 'received', 'lines' => []],
+        ['plate' => 'BG-315-DM', 'day' => 0, 'at' => '08:05', 'booked' => '08:00', 'by' => 'jelena', 'mileage' => 261000, 'complaint' => 'Front suspension knocking.', 'outcome' => 'received', 'check_in' => 'unsigned', 'lines' => []],
         ['plate' => 'BG-204-SR', 'day' => 0, 'at' => '08:40', 'booked' => null, 'by' => 'ana', 'mileage' => 106900, 'complaint' => 'Rear light not working.', 'outcome' => 'received', 'lines' => []],
-        ['plate' => 'NS-747-DM', 'day' => 0, 'at' => '09:20', 'booked' => null, 'by' => 'jelena', 'mileage' => 245300, 'complaint' => 'Oil leak under the engine.', 'outcome' => 'in_progress', 'lines' => [
+        ['plate' => 'NS-747-DM', 'day' => 0, 'at' => '09:20', 'booked' => null, 'by' => 'jelena', 'mileage' => 245300, 'complaint' => 'Oil leak under the engine.', 'outcome' => 'in_progress', 'check_in' => 'drawn', 'lines' => [
             [JobItemType::Labor, 'stefan', 'Leak inspection', 0.5],
         ]],
-        ['plate' => 'VA-233-GL', 'day' => 0, 'at' => '10:10', 'booked' => null, 'by' => 'ana', 'mileage' => 135200, 'complaint' => 'Exhaust rattle at idle.', 'outcome' => 'received', 'lines' => []],
+        ['plate' => 'VA-233-GL', 'day' => 0, 'at' => '10:10', 'booked' => null, 'by' => 'ana', 'mileage' => 135200, 'complaint' => 'Exhaust rattle at idle.', 'outcome' => 'received', 'check_in' => 'none', 'lines' => []],
     ];
 
     /**
@@ -265,10 +269,37 @@ class WorkshopSeeder extends DemoSeeder
         [2, '12:00', 'ana', 'Delta Auto Delovi', null, ['CF-1201' => 6]],
     ];
 
+    /**
+     * Fuel level, damage notes and valuables, cycled through in timeline order.
+     *
+     * @var list<array{FuelLevel, ?string, ?string}>
+     */
+    private const array CHECK_IN_CONDITIONS = [
+        [FuelLevel::Half, null, null],
+        [FuelLevel::Quarter, 'Scratch on the rear bumper, left side.', null],
+        [FuelLevel::ThreeQuarters, null, 'Child seat in the back.'],
+        [FuelLevel::Full, 'Chipped windscreen, passenger side.', 'Sunglasses in the glovebox.'],
+        [FuelLevel::Empty, "Dent in the driver door.\nKerbed front left alloy.", null],
+    ];
+
+    /**
+     * The one sheet left open for staff to finish, so it shows every field.
+     *
+     * @var array{FuelLevel, string, string}
+     */
+    private const array OPEN_SHEET_CONDITION = [
+        FuelLevel::Quarter,
+        "Scratch on the rear bumper, left side.\nChipped windscreen, passenger side.",
+        'Child seat in the back; sunglasses in the glovebox.',
+    ];
+
     /** @var list<array{CarbonImmutable, int, Closure(): void}> */
     private array $timeline = [];
 
+    private int $checkInCount = 0;
+
     public function __construct(
+        private readonly CheckInService $checkIns,
         private readonly AppointmentService $appointments,
         private readonly JobService $jobs,
         private readonly JobItemService $items,
@@ -348,6 +379,8 @@ class WorkshopSeeder extends DemoSeeder
                 $job = $this->jobs->createFromAppointment($appointment, $this->staff($desk), $intake);
             });
         }
+
+        $this->scheduleCheckIn($spec['check_in'] ?? 'paper', $opened, $desk, $job);
 
         $outcome = $spec['outcome'];
 
@@ -485,6 +518,61 @@ class WorkshopSeeder extends DemoSeeder
     /**
      * @param  array{JobItemType, ?string, string, int|float}  $line
      */
+    /**
+     * @param  'paper'|'drawn'|'unsigned'|'none'  $signing
+     */
+    private function scheduleCheckIn(string $signing, CarbonImmutable $opened, string $desk, ?Job &$job): void
+    {
+        if ($signing === 'none') {
+            return;
+        }
+
+        [$fuel, $damage, $valuables] = $signing === 'unsigned'
+            ? self::OPEN_SHEET_CONDITION
+            : self::CHECK_IN_CONDITIONS[$this->checkInCount++ % count(self::CHECK_IN_CONDITIONS)];
+
+        $this->at($opened->addMinutes(5), function () use (&$job, $desk, $fuel, $damage, $valuables): void {
+            $this->checkIns->record($job, $this->staff($desk), [
+                'fuel_level' => $fuel->value,
+                'damage_notes' => $damage,
+                'valuables' => $valuables,
+            ]);
+        });
+
+        if ($signing === 'unsigned') {
+            return;
+        }
+
+        $this->at($opened->addMinutes(8), function () use (&$job, $desk, $signing): void {
+            $name = Customer::withTrashed()->whereKey($job->customer_id)->value('name');
+
+            $signing === 'drawn'
+                ? $this->checkIns->sign($job, $this->staff($desk), SignatureMethod::Drawn, $name, $this->drawnSignature())
+                : $this->checkIns->sign($job, $this->staff($desk), SignatureMethod::Paper, $name, null);
+        });
+    }
+
+    private function drawnSignature(): string
+    {
+        $image = imagecreatetruecolor(900, 300);
+        imagefill($image, 0, 0, (int) imagecolorallocate($image, 255, 255, 255));
+        imagesetthickness($image, 4);
+        $ink = (int) imagecolorallocate($image, 0, 0, 0);
+
+        $previous = [80, 190];
+
+        for ($x = 80; $x <= 820; $x += 20) {
+            $point = [$x, (int) (170 + 60 * sin($x / 45) - ($x - 80) / 12)];
+            imageline($image, $previous[0], $previous[1], $point[0], $point[1], $ink);
+            $previous = $point;
+        }
+
+        ob_start();
+        imagepng($image);
+
+        return CheckInService::DATA_URL_PREFIX.base64_encode((string) ob_get_clean());
+    }
+
     private function addLine(Job $job, array $line, string $desk): JobItem
     {
         [$type, $mechanic, $subject, $quantity] = $line;

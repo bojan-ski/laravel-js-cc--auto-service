@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\AttachmentType;
+use App\Enums\AttachmentCategory;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobItemType;
 use App\Enums\JobStatus;
@@ -113,17 +113,25 @@ class Job extends Model
     /**
      * @return HasMany<JobAttachment, $this>
      */
-    public function photos(): HasMany
+    public function generalAttachments(): HasMany
     {
-        return $this->attachments()->where('type', AttachmentType::Photo)->orderBy('id');
+        return $this->attachments()->where('category', AttachmentCategory::General)->orderBy('id');
     }
 
     /**
      * @return HasMany<JobAttachment, $this>
      */
-    public function documents(): HasMany
+    public function checkInPhotos(): HasMany
     {
-        return $this->attachments()->where('type', AttachmentType::Document)->orderBy('id');
+        return $this->attachments()->where('category', AttachmentCategory::CheckIn)->orderBy('id');
+    }
+
+    /**
+     * @return HasOne<JobCheckIn, $this>
+     */
+    public function checkIn(): HasOne
+    {
+        return $this->hasOne(JobCheckIn::class);
     }
 
     #[Scope]
@@ -195,6 +203,28 @@ class Job extends Model
     public function canReopen(): bool
     {
         return $this->status === JobStatus::Completed && ! $this->isLocked();
+    }
+
+    public function acceptsCheckIn(): bool
+    {
+        return $this->isWorking()
+            && ! $this->isLocked()
+            && ! ($this->currentCheckIn()?->isSigned() ?? false);
+    }
+
+    public function acceptsCheckInSignature(): bool
+    {
+        $checkIn = $this->currentCheckIn();
+
+        return $checkIn !== null
+            && ! $checkIn->isSigned()
+            && ! $this->isLocked()
+            && ($this->isWorking() || $this->status === JobStatus::Completed);
+    }
+
+    private function currentCheckIn(): ?JobCheckIn
+    {
+        return $this->relationLoaded('checkIn') ? $this->checkIn : $this->checkIn()->first();
     }
 
     public function acceptsDiscounts(): bool

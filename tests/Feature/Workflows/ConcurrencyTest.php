@@ -2,13 +2,17 @@
 
 namespace Tests\Feature\Workflows;
 
+use App\Enums\SignatureMethod;
 use App\Enums\StockMovementReason;
 use App\Models\Appointment;
 use App\Models\Job;
+use App\Models\JobAttachment;
 use App\Models\Part;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\AttachmentService;
+use App\Services\CheckInService;
 use App\Services\JobItemService;
 use App\Services\JobService;
 use App\Services\StockService;
@@ -16,12 +20,14 @@ use App\Services\SupplierService;
 use Closure;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Support\CreatesRealUploads;
 use Tests\TestCase;
 
 /**
  * The four row-lock sites that had no lock-query assertion when spec 24 was
- * loaded. Each is a real mutex: the appointment lock is what makes "arrival
+ * loaded, plus spec 32's four check-in writes on the job row. Each is a real mutex: the appointment lock is what makes "arrival
  * creates exactly one job" true, the vehicle lock is what stops a lost or
  * downward mileage write, the job lock under every line-item write is what
  * stops a write racing a cancellation and stranding a job_use no path can
@@ -38,6 +44,7 @@ use Tests\TestCase;
  */
 class ConcurrencyTest extends TestCase
 {
+    use CreatesRealUploads;
     use LazilyRefreshDatabase;
 
     /**
@@ -211,6 +218,71 @@ class ConcurrencyTest extends TestCase
         );
         $this->assertSame(1, Supplier::query()->count());
         $this->assertTrue($service->resolveByName('  bosch-srbija ')->is($first));
+    }
+
+    /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function checkInWriterProvider(): array
+    {
+        return [
+            'record' => ['record', 'insert into `job_check_ins`'],
+            'add photo' => ['add photo', 'insert into `job_attachments`'],
+            'delete photo' => ['delete photo', 'delete from `job_attachments`'],
+            'sign' => ['sign', 'update `job_check_ins`'],
+        ];
+    }
+
+    /**
+     * Rule (spec 32): every check-in write locks the job row, the same mutex
+     * every job transition takes, so a signature cannot interleave with an
+     * edit, a photo, a completion or a cancellation. The refusals under the
+     * lock are pinned by CheckInRecordTest, CheckInPhotoTest and
+     * CheckInSigningTest; this proves the lock precedes the write.
+     */
+    #[DataProvider('checkInWriterProvider')]
+    public function test_every_check_in_write_locks_the_job_row_before_writing(string $writer, string $write): void
+    {
+        Storage::fake(config('attachments.disk'));
+
+        $mechanic = User::factory()->mechanic()->create();
+        $job = Job::factory()->inProgress()->create();
+        $checkIns = app(CheckInService::class);
+
+        if ($writer !== 'record') {
+            $checkIns->record($job, $mechanic, ['fuel_level' => 'half']);
+        }
+
+        $photo = $writer === 'delete photo'
+            ? $checkIns->addPhoto($job, $this->realImageUpload('dent.jpg', 200, 150), $mechanic)
+            : null;
+
+        $queries = $this->queriesDuring(fn () => match ($writer) {
+            'record' => $checkIns->record($job, $mechanic, ['fuel_level' => 'half']),
+            'add photo' => $checkIns->addPhoto($job, $this->realImageUpload('dent.jpg', 200, 150), $mechanic),
+            'delete photo' => app(AttachmentService::class)->delete($photo),
+            'sign' => $checkIns->sign($job, $mechanic, SignatureMethod::Paper, 'Marko', null),
+        });
+
+        $this->assertLockPrecedes($queries, 'jobs', $write);
+    }
+
+    /**
+     * Control for the test above: a general attachment's delete takes no job
+     * lock, so the lock it observes belongs to the check-in branch — and the
+     * locked-job exception for general uploads is untouched.
+     */
+    public function test_deleting_a_general_attachment_takes_no_job_lock(): void
+    {
+        $photo = JobAttachment::factory()->photo()->create();
+
+        $queries = $this->queriesDuring(fn () => app(AttachmentService::class)->delete($photo));
+
+        $this->assertNoLockOn($queries, 'jobs');
+        $this->assertNotNull(
+            $this->firstIndexMatching($queries, fn (string $query): bool => str_contains($query, 'delete from `job_attachments`')),
+            'The attachment was not deleted, so the control proves nothing.',
+        );
     }
 
     private function receptionist(): User

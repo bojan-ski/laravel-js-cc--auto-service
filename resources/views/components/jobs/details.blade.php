@@ -33,6 +33,14 @@
         </dd>
 
         <dt class="text-xs font-medium uppercase tracking-wider text-text-muted sm:pt-0.5">
+            {{ __('check_ins.summary.label') }}
+        </dt>
+
+        <dd>
+            <x-check-ins.summary :job="$job" />
+        </dd>
+
+        <dt class="text-xs font-medium uppercase tracking-wider text-text-muted sm:pt-0.5">
             {{ __('jobs.show.origin') }}
         </dt>
 

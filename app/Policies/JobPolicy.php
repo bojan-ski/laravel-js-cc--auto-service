@@ -80,6 +80,22 @@ class JobPolicy
     }
 
     /**
+     * Determine whether the user can record the check-in sheet or add its photos.
+     */
+    public function recordCheckIn(User $user, Job $job): bool
+    {
+        return $job->acceptsCheckIn();
+    }
+
+    /**
+     * Determine whether the user can sign the check-in sheet.
+     */
+    public function signCheckIn(User $user, Job $job): bool
+    {
+        return $job->acceptsCheckInSignature();
+    }
+
+    /**
      * Determine whether the user can see prices, line totals, and job totals.
      */
     public function viewPricing(User $user): bool

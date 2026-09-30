@@ -7,6 +7,7 @@ use App\Models\Brand;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Job;
+use App\Models\JobCheckIn;
 use App\Models\JobItem;
 use App\Models\JobTemplate;
 use App\Models\JobTemplateItem;
@@ -198,6 +199,18 @@ trait AuthorizationMatrix
         $this->fixtures['ownLine'] = $this->fixtures['workingJob']->items->first();
         $this->fixtures['completedLine'] = $this->fixtures['completedJob']->items->first();
 
+        $checkInJob = Job::factory()->inProgress()->for($vehicle)->create();
+        JobCheckIn::factory()->forJob($checkInJob)->recordedBy($owner)->create();
+        $this->fixtures['checkInJob'] = $checkInJob;
+
+        // A drawn signature encodes a real PNG through GD; only row 48 needs one.
+        $this->deferred['signedCheckInJob'] = function () use ($vehicle, $owner): Job {
+            $job = Job::factory()->inProgress()->for($vehicle)->create();
+            JobCheckIn::factory()->forJob($job)->recordedBy($owner)->signedByDrawing()->create();
+
+            return $job;
+        };
+
         $this->deferred['ownAttachment'] = fn () => app(AttachmentService::class)->upload(
             $this->fixtures['pausableJob'],
             $this->realImageUpload('matrix.jpg', 240, 180),
@@ -375,8 +388,8 @@ trait AuthorizationMatrix
     }
 
     /**
-     * Rows 3–10b: the jobs board, the job page, its transitions, its lines and
-     * its attachments.
+     * Rows 3–10b and 48: the jobs board, the job page, its transitions, its
+     * lines, its check-in sheet and its attachments.
      *
      * @return array<string, array<string, mixed>>
      */
@@ -548,6 +561,36 @@ trait AuthorizationMatrix
                             'user_id' => $t->fixture('owner')->getKey(),
                         ],
                     ],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => self::ALLOW,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
+            '48' => [
+                'capability' => 'Record, sign, view, or print a check-in sheet',
+                'requests' => [
+                    ['method' => 'get', 'route' => 'jobs.check-in.show', 'params' => ['checkInJob']],
+                    [
+                        'method' => 'put',
+                        'route' => 'jobs.check-in.update',
+                        'params' => ['checkInJob'],
+                        'payload' => fn (): array => ['fuel_level' => 'half', 'damage_notes' => 'Scratch on rear bumper'],
+                    ],
+                    [
+                        'method' => 'post',
+                        'route' => 'jobs.check-in.photos.store',
+                        'params' => ['checkInJob'],
+                        'payload' => fn ($t): array => ['photo' => $t->realImageUpload('matrix-check-in.jpg', 200, 150)],
+                    ],
+                    ['method' => 'get', 'route' => 'jobs.check-in.print', 'params' => ['checkInJob']],
+                    [
+                        'method' => 'patch',
+                        'route' => 'jobs.check-in.sign',
+                        'params' => ['checkInJob'],
+                        'payload' => fn (): array => ['signature_method' => 'paper', 'signed_by_name' => 'Matrix Customer'],
+                    ],
+                    ['method' => 'get', 'route' => 'jobs.check-in.signature', 'params' => ['signedCheckInJob']],
                 ],
                 'guest' => self::LOGIN,
                 'mechanic' => self::ALLOW,

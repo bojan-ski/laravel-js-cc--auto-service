@@ -4,6 +4,7 @@
     'options',
     'selected' => null,
     'required' => false,
+    'inline' => false,
 ])
 
 @php
@@ -23,7 +24,10 @@
 >
     <legend id="{{ $name }}-label" class="px-1 text-sm font-medium">{{ $label }}</legend>
 
-    <div class="space-y-3 py-1">
+    <div @class([
+        'space-y-3 py-1',
+        'sm:flex sm:flex-wrap sm:gap-x-6 sm:gap-y-2 sm:space-y-0' => $inline,
+    ])>
         @foreach ($options as $value => $option)
             <div class="flex items-start gap-2">
                 <input

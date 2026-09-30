@@ -18,6 +18,7 @@ use App\Services\PartService;
 use App\Services\UserService;
 use App\Services\VehicleService;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -87,7 +88,8 @@ class JobController extends Controller
             'createdBy',
             'appointment',
             'items' => fn (HasMany $query) => $query->visibleTo($user)->with('user')->orderBy('id'),
-            'attachments' => fn (HasMany $query) => $query->with('uploadedBy')->orderBy('id'),
+            'generalAttachments' => fn (HasMany $query) => $query->with('uploadedBy'),
+            'checkIn' => fn (HasOne $query) => $query->withCount('photos'),
         ]);
 
         $job->items->each(fn (JobItem $item) => $item->setRelation('job', $job));
@@ -114,8 +116,8 @@ class JobController extends Controller
             'partOptions' => $showPartForm ? $this->parts->pickerOptions() : [],
             'templateOptions' => $showTemplateForm ? $this->templates->pickerOptions() : [],
             'defaultRate' => $showPricing ? (string) config('shop.labor_rate') : null,
-            'photos' => $job->attachments->filter(fn (JobAttachment $a): bool => $a->isPhoto())->values(),
-            'documents' => $job->attachments->filter(fn (JobAttachment $a): bool => $a->isDocument())->values(),
+            'photos' => $job->generalAttachments->filter(fn (JobAttachment $a): bool => $a->isPhoto())->values(),
+            'documents' => $job->generalAttachments->filter(fn (JobAttachment $a): bool => $a->isDocument())->values(),
         ]);
     }
 
