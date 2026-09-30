@@ -6,6 +6,7 @@ use App\Http\Controllers\Jobs\CheckInSignatureController;
 use App\Http\Controllers\Jobs\JobAttachmentController;
 use App\Http\Controllers\Jobs\JobCheckInController;
 use App\Http\Controllers\Jobs\JobController;
+use App\Http\Controllers\Jobs\JobEstimateController;
 use App\Http\Controllers\Jobs\JobInvoiceController;
 use App\Http\Controllers\Jobs\JobItemController;
 use App\Http\Controllers\Jobs\JobItemDiscountController;
@@ -28,6 +29,8 @@ Route::patch('/jobs/{job}/reopen', [JobTransitionController::class, 'reopen'])->
 
 Route::get('/jobs/{job}/invoice/create', [JobInvoiceController::class, 'create'])->name('jobs.invoice.create');
 Route::post('/jobs/{job}/invoice', [JobInvoiceController::class, 'store'])->name('jobs.invoice.store');
+
+Route::post('/jobs/{job}/estimates', [JobEstimateController::class, 'store'])->name('jobs.estimates.store');
 
 Route::post('/jobs/{job}/items', [JobItemController::class, 'store'])->name('jobs.items.store');
 Route::post('/jobs/{job}/parts', [JobPartLineController::class, 'store'])->name('jobs.parts.store');

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\AppointmentStatus;
+use App\Enums\EstimateStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobStatus;
 use App\Enums\PaymentMethod;
@@ -10,6 +11,7 @@ use App\Enums\SignatureMethod;
 use App\Enums\UserRole;
 use App\Models\Appointment;
 use App\Models\Customer;
+use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobAttachment;
@@ -20,6 +22,7 @@ use App\Models\Part;
 use App\Models\PartNumber;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\InvoiceService;
 use App\Services\TaxIdChecksum;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\Demo\DemoSeeder;
@@ -367,6 +370,40 @@ class DemoDataSeederTest extends TestCase
             $checkIns->where('signature_method', SignatureMethod::Paper)->count(),
         );
         $this->assertSame(0, JobAttachment::query()->count(), 'The demo data ships no image files, so no check-in photos.');
+    }
+
+    public function test_estimates_cover_every_status_one_exceeded_approval_and_one_email(): void
+    {
+        $this->seed(DemoDataSeeder::class);
+
+        $estimates = Estimate::query()->orderBy('id')->get();
+
+        $this->assertEqualsCanonicalizing(
+            EstimateStatus::cases(),
+            $estimates->pluck('status')->unique()->values()->all(),
+        );
+
+        $exceeded = $estimates
+            ->filter->isApproved()
+            ->filter(function (Estimate $estimate): bool {
+                $job = Job::query()->with('items')->findOrFail($estimate->job_id);
+
+                return bccomp(app(InvoiceService::class)->totalsFor($job)['total'], $estimate->total, 2) > 0;
+            });
+
+        $this->assertCount(1, $exceeded, 'Exactly one approved estimate is outgrown by its job.');
+        $this->assertSame(1, $estimates->whereNotNull('emailed_at')->count());
+        $this->assertNotNull(
+            Customer::withTrashed()->whereKey(Job::query()->whereKey($estimates->whereNotNull('emailed_at')->first()->job_id)->value('customer_id'))->value('email'),
+        );
+
+        $this->assertSame(
+            Estimate::query()->orderBy('created_at')->orderBy('id')->pluck('number')->all(),
+            Estimate::query()->orderBy('number')->pluck('number')->all(),
+        );
+
+        $this->assertTrue($estimates->every(fn (Estimate $estimate): bool => $estimate->lines()->exists()));
+        $this->assertStockMatchesLedger();
     }
 
     public function test_customer_mail_is_diverted_and_the_configuration_restored(): void

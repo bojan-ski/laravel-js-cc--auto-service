@@ -6,6 +6,7 @@ use App\Enums\JobStatus;
 use App\Models\Appointment;
 use App\Models\Brand;
 use App\Models\Customer;
+use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobAttachment;
@@ -185,6 +186,16 @@ final class QaFixture
 
     public readonly Job $unsignedClosedCheckInJob;
 
+    public readonly Estimate $pendingEstimate;
+
+    public readonly Estimate $approvedEstimate;
+
+    public readonly Estimate $declinedEstimate;
+
+    public readonly Estimate $supersededEstimate;
+
+    public readonly Estimate $estimateWithTrashedGraph;
+
     /** @var Collection<int, Customer> */
     private Collection $customersToTrash;
 
@@ -216,6 +227,7 @@ final class QaFixture
         $fixture->buildInvoices();
         $fixture->buildAttachments();
         $fixture->buildCheckIns();
+        $fixture->buildEstimates();
         $fixture->applyHistory();
 
         return $fixture;
@@ -550,6 +562,41 @@ final class QaFixture
 
         $this->paperCheckInJob = $this->jobWithTrashedGraph;
         JobCheckIn::factory()->forJob($this->paperCheckInJob)->recordedBy($this->offboardedMechanic)->signedOnPaper()->create();
+    }
+
+    /**
+     * Every state the estimate page and the two warnings render: a pending
+     * estimate carrying a discounted line on the job awaiting its invoice, an
+     * approved estimate the working job's live total has outgrown (with the
+     * superseded one before it, so the history list shows), a declined one,
+     * and one whose customer and creator applyHistory() soft-deletes.
+     */
+    private function buildEstimates(): void
+    {
+        $this->supersededEstimate = Estimate::factory()->withLines()->superseded()->forJob($this->workingJob)->create([
+            'created_by' => $this->creator->getKey(),
+        ]);
+
+        $this->approvedEstimate = Estimate::factory()->withLines()->approved()->emailed()->forJob($this->workingJob)->create([
+            'created_by' => $this->creator->getKey(),
+            'decided_by' => $this->receptionist->getKey(),
+            'total' => '1.00',
+        ]);
+
+        $this->pendingEstimate = Estimate::factory()->withLines()->pending()->forJob($this->completedJob)->create([
+            'created_by' => $this->creator->getKey(),
+        ]);
+
+        $this->declinedEstimate = Estimate::factory()->withLines()->declined()->forJob($this->jobsByStatus[JobStatus::AwaitingParts->value])->create([
+            'created_by' => $this->creator->getKey(),
+            'decided_by' => $this->receptionist->getKey(),
+            'decision_note' => 'Customer will bring the car back next month.',
+        ]);
+
+        $this->estimateWithTrashedGraph = Estimate::factory()->withLines()->approved()->forJob($this->jobWithTrashedGraph)->create([
+            'created_by' => $this->offboardedMechanic->getKey(),
+            'decided_by' => $this->offboardedMechanic->getKey(),
+        ]);
     }
 
     private function applyHistory(): void

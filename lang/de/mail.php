@@ -35,4 +35,21 @@ return [
         'registration_number' => 'Registernr. (MB)',
     ],
 
+    'estimate' => [
+        'subject' => 'Kostenvoranschlag :number — :plate',
+        'heading' => 'Kostenvoranschlag :number',
+        'greeting' => 'Guten Tag :name,',
+        'body' => 'Anbei erhalten Sie den Kostenvoranschlag für die Arbeiten an Ihrem :make :model (:plate).',
+        'reply' => 'Bitte kontaktieren Sie uns, um ihn freizugeben oder abzulehnen.',
+        'number' => 'Kostenvoranschlag',
+        'created' => 'Datum',
+        'line' => ':description × :quantity',
+        'line_discounted' => ':description × :quantity (:percent % Rabatt)',
+        'before_discount' => 'Vor Rabatt',
+        'discount' => 'Rabatt',
+        'subtotal' => 'Zwischensumme',
+        'vat' => 'MwSt. :rate %',
+        'total' => 'Gesamt',
+    ],
+
 ];

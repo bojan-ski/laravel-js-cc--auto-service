@@ -2,6 +2,8 @@
 
 namespace Database\Seeders\Demo;
 
+use App\Enums\DecisionMethod;
+use App\Enums\EstimateStatus;
 use App\Enums\FuelLevel;
 use App\Enums\JobItemType;
 use App\Enums\PaymentMethod;
@@ -16,6 +18,7 @@ use App\Models\Vehicle;
 use App\Services\AppointmentService;
 use App\Services\CheckInService;
 use App\Services\CustomerService;
+use App\Services\EstimateService;
 use App\Services\InvoiceService;
 use App\Services\JobItemService;
 use App\Services\JobService;
@@ -42,11 +45,12 @@ class WorkshopSeeder extends DemoSeeder
      * Lines: [type, mechanic (null = added unassigned by the desk), description or SKU, quantity].
      * Discounts: [line index => percent], set after completion and before the invoice.
      * Check-in: paper (default), drawn, unsigned or none.
+     * Estimates: [after line index, decision (approved, declined or null for pending), method, emailed], in the order they are created.
      *
      * @var list<array<string, mixed>>
      */
     public const array JOBS = [
-        ['plate' => 'BG-123-AB', 'day' => 58, 'at' => '08:10', 'booked' => '08:00', 'by' => 'jelena', 'mileage' => 184320, 'complaint' => 'Pulls right under braking; squeal from the front.', 'outcome' => 'paid', 'lines' => [
+        ['plate' => 'BG-123-AB', 'day' => 58, 'at' => '08:10', 'booked' => '08:00', 'by' => 'jelena', 'mileage' => 184320, 'complaint' => 'Pulls right under braking; squeal from the front.', 'outcome' => 'paid', 'estimates' => [[4, 'approved', 'phone', true]], 'lines' => [
             [JobItemType::Labor, 'dragan', 'Brake service front: pads and discs', 1.5],
             [JobItemType::Part, 'dragan', 'BP-2001', 1],
             [JobItemType::Part, 'dragan', 'BD-2101', 2],
@@ -208,16 +212,16 @@ class WorkshopSeeder extends DemoSeeder
             [JobItemType::Part, 'nikola', 'BP-2003', 1],
             [JobItemType::Part, 'nikola', 'BS-2301', 1],
         ]],
-        ['plate' => 'BG-440-FC', 'day' => 3, 'at' => '08:05', 'booked' => '08:00', 'by' => 'jelena', 'mileage' => 183100, 'complaint' => 'Front brakes grinding.', 'outcome' => 'awaiting_parts', 'lines' => [
+        ['plate' => 'BG-440-FC', 'day' => 3, 'at' => '08:05', 'booked' => '08:00', 'by' => 'jelena', 'mileage' => 183100, 'complaint' => 'Front brakes grinding.', 'outcome' => 'awaiting_parts', 'estimates' => [[0, 'declined', 'phone', false], [1, null, null, false], [1, 'approved', 'in_person', false]], 'lines' => [
             [JobItemType::Labor, 'stefan', 'Front brake pads replacement', 1],
             [JobItemType::Part, 'stefan', 'BP-2002', 1],
         ]],
-        ['plate' => 'KG-088-MP', 'day' => 2, 'at' => '08:30', 'booked' => null, 'by' => 'ana', 'mileage' => 223800, 'complaint' => 'Service; knocking from the front over bumps.', 'outcome' => 'in_progress', 'lines' => [
+        ['plate' => 'KG-088-MP', 'day' => 2, 'at' => '08:30', 'booked' => null, 'by' => 'ana', 'mileage' => 223800, 'complaint' => 'Service; knocking from the front over bumps.', 'outcome' => 'in_progress', 'estimates' => [[0, 'approved', 'in_person', false]], 'lines' => [
             [JobItemType::Labor, 'dragan', 'Oil and filter service', 1],
             [JobItemType::Part, 'dragan', 'OF-1001', 1],
             [JobItemType::Part, 'dragan', 'EO-6001', 5],
         ]],
-        ['plate' => 'BG-529-VK', 'day' => 1, 'at' => '09:00', 'booked' => null, 'by' => 'jelena', 'mileage' => 125100, 'complaint' => 'Service.', 'outcome' => 'in_progress', 'lines' => [
+        ['plate' => 'BG-529-VK', 'day' => 1, 'at' => '09:00', 'booked' => null, 'by' => 'jelena', 'mileage' => 125100, 'complaint' => 'Service.', 'outcome' => 'in_progress', 'estimates' => [[0, null, null, false]], 'lines' => [
             [JobItemType::Labor, 'stefan', 'Oil and filter service', 1],
         ]],
         ['plate' => 'BG-2101-BK', 'day' => 1, 'at' => '14:00', 'booked' => null, 'by' => 'ana', 'mileage' => 247300, 'complaint' => 'Air conditioning not cooling.', 'outcome' => 'in_progress', 'lines' => [
@@ -309,6 +313,7 @@ class WorkshopSeeder extends DemoSeeder
         private readonly VehicleService $vehicles,
         private readonly CustomerService $customers,
         private readonly StaffService $staffService,
+        private readonly EstimateService $estimates,
     ) {}
 
     protected function populate(): void
@@ -410,6 +415,8 @@ class WorkshopSeeder extends DemoSeeder
             $this->at($cursor, function () use (&$job, &$items, $line, $desk): void {
                 $items[] = $this->addLine($job, $line, $desk);
             });
+
+            $this->scheduleEstimates($spec['estimates'] ?? [], $index, $cursor, $desk, $job);
         }
 
         if (isset($spec['template'])) {
@@ -518,6 +525,37 @@ class WorkshopSeeder extends DemoSeeder
     /**
      * @param  array{JobItemType, ?string, string, int|float}  $line
      */
+    /**
+     * @param  list<array{int, ?string, ?string, bool}>  $estimates
+     */
+    private function scheduleEstimates(array $estimates, int $afterLine, CarbonImmutable $cursor, string $desk, ?Job &$job): void
+    {
+        foreach ($estimates as $order => [$line, $decision, $method, $emailed]) {
+            if ($line !== $afterLine) {
+                continue;
+            }
+
+            $created = $cursor->addMinutes(5 + 10 * $order);
+            $estimate = null;
+
+            $this->at($created, function () use (&$job, &$estimate, $desk): void {
+                $estimate = $this->estimates->create($job, $this->staff($desk));
+            });
+
+            if ($decision !== null) {
+                $this->at($created->addMinutes(3), function () use (&$estimate, $decision, $method, $desk): void {
+                    $this->estimates->decide($estimate, EstimateStatus::from($decision), DecisionMethod::from($method), null, $this->staff($desk));
+                });
+            }
+
+            if ($emailed) {
+                $this->at($created->addMinutes(4), function () use (&$estimate): void {
+                    $this->estimates->email($estimate);
+                });
+            }
+        }
+    }
+
     /**
      * @param  'paper'|'drawn'|'unsigned'|'none'  $signing
      */

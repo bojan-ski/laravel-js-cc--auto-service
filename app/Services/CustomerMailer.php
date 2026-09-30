@@ -10,13 +10,15 @@ use Illuminate\Support\Facades\Mail;
 
 class CustomerMailer
 {
-    public function send(Customer $customer, Mailable $mailable): void
+    public function send(Customer $customer, Mailable $mailable): bool
     {
         if (blank($customer->email)) {
-            return;
+            return false;
         }
 
         Mail::to($customer->email)->locale(Locale::shop()->value)->queue($mailable);
+
+        return true;
     }
 
     public function noticeFor(Job $job): string

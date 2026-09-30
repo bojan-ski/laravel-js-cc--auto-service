@@ -35,4 +35,21 @@ return [
         'registration_number' => 'Registration no. (MB)',
     ],
 
+    'estimate' => [
+        'subject' => 'Estimate :number — :plate',
+        'heading' => 'Estimate :number',
+        'greeting' => 'Dear :name,',
+        'body' => 'Here is the estimate for work on your :make :model (:plate).',
+        'reply' => 'Please contact us to approve or decline it.',
+        'number' => 'Estimate',
+        'created' => 'Date',
+        'line' => ':description × :quantity',
+        'line_discounted' => ':description × :quantity (:percent% off)',
+        'before_discount' => 'Before discount',
+        'discount' => 'Discount',
+        'subtotal' => 'Subtotal',
+        'vat' => 'VAT :rate%',
+        'total' => 'Total',
+    ],
+
 ];

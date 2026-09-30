@@ -134,6 +134,22 @@ class Job extends Model
         return $this->hasOne(JobCheckIn::class);
     }
 
+    /**
+     * @return HasMany<Estimate, $this>
+     */
+    public function estimates(): HasMany
+    {
+        return $this->hasMany(Estimate::class);
+    }
+
+    /**
+     * @return HasOne<Estimate, $this>
+     */
+    public function currentEstimate(): HasOne
+    {
+        return $this->hasOne(Estimate::class)->latestOfMany();
+    }
+
     #[Scope]
     protected function joinedForBoard(Builder $query): void
     {
@@ -239,6 +255,11 @@ class Job extends Model
             && ! $this->isLocked()
             && $this->hasLineItems()
             && ! $this->hasActiveInvoice();
+    }
+
+    public function canBeEstimated(): bool
+    {
+        return $this->isWorking() && ! $this->isLocked() && $this->hasLineItems();
     }
 
     public function hasActiveInvoice(): bool

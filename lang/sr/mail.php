@@ -35,4 +35,21 @@ return [
         'registration_number' => 'Matični broj (MB)',
     ],
 
+    'estimate' => [
+        'subject' => 'Predračun :number — :plate',
+        'heading' => 'Predračun :number',
+        'greeting' => 'Poštovani :name,',
+        'body' => 'U nastavku je predračun za radove na Vašem vozilu :make :model (:plate).',
+        'reply' => 'Molimo Vas da nas kontaktirate kako biste ga odobrili ili odbili.',
+        'number' => 'Predračun',
+        'created' => 'Datum',
+        'line' => ':description × :quantity',
+        'line_discounted' => ':description × :quantity (popust :percent%)',
+        'before_discount' => 'Pre popusta',
+        'discount' => 'Popust',
+        'subtotal' => 'Osnovica',
+        'vat' => 'PDV :rate%',
+        'total' => 'Ukupno',
+    ],
+
 ];

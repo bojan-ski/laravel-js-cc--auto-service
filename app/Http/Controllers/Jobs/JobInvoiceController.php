@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Jobs\IssueInvoiceRequest;
 use App\Models\Job;
 use App\Services\CustomerMailer;
+use App\Services\EstimateService;
 use App\Services\InvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -17,6 +18,7 @@ class JobInvoiceController extends Controller
     public function __construct(
         private InvoiceService $invoices,
         private CustomerMailer $mailer,
+        private EstimateService $estimates,
     ) {}
 
     public function create(Job $job): View
@@ -28,6 +30,7 @@ class JobInvoiceController extends Controller
         return view('pages.invoices.issue', [
             'job' => $job,
             'totals' => $this->invoices->totalsFor($job),
+            'estimate' => $this->estimates->summaryFor($job),
         ]);
     }
 

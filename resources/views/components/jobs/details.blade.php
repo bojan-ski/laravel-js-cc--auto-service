@@ -1,4 +1,4 @@
-@props(['job'])
+@props(['job', 'estimate' => null, 'showEstimate' => false])
 
 @php
     $mileage = $job->mileage_in === null
@@ -39,6 +39,16 @@
         <dd>
             <x-check-ins.summary :job="$job" />
         </dd>
+
+        @if ($showEstimate)
+            <dt class="text-xs font-medium uppercase tracking-wider text-text-muted sm:pt-0.5">
+                {{ __('estimates.summary.label') }}
+            </dt>
+
+            <dd>
+                <x-estimates.summary :job="$job" :summary="$estimate" />
+            </dd>
+        @endif
 
         <dt class="text-xs font-medium uppercase tracking-wider text-text-muted sm:pt-0.5">
             {{ __('jobs.show.origin') }}

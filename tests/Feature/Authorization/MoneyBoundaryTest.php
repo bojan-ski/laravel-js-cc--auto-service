@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Authorization;
 
+use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobItem;
@@ -381,6 +382,48 @@ class MoneyBoundaryTest extends TestCase
 
         $this->assertCount(1, $wholeRowReads, 'Exactly one whole-row part read is accepted: the stock lock.');
         $this->assertStringEndsWith('for update', $wholeRowReads[0]);
+    }
+
+    public function test_a_mechanics_job_page_reads_nothing_from_the_estimate_tables(): void
+    {
+        $job = $this->jobWithLine();
+        Estimate::factory()->approved()->forJob($job)->create();
+
+        $queries = $this->queriesFor('mechanic', route('jobs.show', $job));
+
+        $this->assertNotEmpty($queries);
+        $this->assertSame([], $this->queriesTouching($queries, 'estimates'));
+        $this->assertSame([], $this->queriesTouching($queries, 'estimate_lines'));
+    }
+
+    public function test_a_front_office_job_page_does_read_the_estimate_so_the_mechanic_check_can_fail(): void
+    {
+        $job = $this->jobWithLine();
+        Estimate::factory()->forJob($job)->create();
+
+        $this->assertNotEmpty($this->queriesTouching($this->queriesFor('receptionist', route('jobs.show', $job)), 'estimates'));
+    }
+
+    public function test_a_mechanics_estimate_requests_are_refused_before_any_estimate_read(): void
+    {
+        $estimate = Estimate::factory()->create();
+        $mechanic = User::factory()->mechanic()->create();
+        $requests = [
+            ['get', route('estimates.show', $estimate)],
+            ['patch', route('estimates.decision.update', $estimate)],
+            ['post', route('estimates.email.store', $estimate)],
+        ];
+
+        foreach ($requests as [$method, $url]) {
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+            $this->actingAs($mechanic)->{$method}($url, ['decision' => 'approved', 'decision_method' => 'phone'])->assertForbidden();
+            $queries = array_column(DB::getQueryLog(), 'query');
+            DB::disableQueryLog();
+
+            $this->assertSame([], $this->queriesTouching($queries, 'estimates'), "{$method} {$url}");
+            $this->assertSame([], $this->queriesTouching($queries, 'estimate_lines'), "{$method} {$url}");
+        }
     }
 
     private function jobWithLine(): Job

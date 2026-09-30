@@ -23,6 +23,10 @@ class StatusBadge extends Component
         'status-unpaid' => 'bg-status-unpaid/10 text-status-unpaid',
         'status-paid' => 'bg-status-paid/10 text-status-paid',
         'status-void' => 'bg-status-void/10 text-status-void',
+        'status-pending' => 'bg-status-pending/10 text-status-pending',
+        'status-approved' => 'bg-status-approved/10 text-status-approved',
+        'status-declined' => 'bg-status-declined/10 text-status-declined',
+        'status-superseded' => 'bg-status-superseded/10 text-status-superseded',
     ];
 
     public function __construct(

@@ -126,4 +126,12 @@ class JobPolicy
     {
         return $user->isFrontOffice() && $job->canBeInvoiced();
     }
+
+    /**
+     * Determine whether the user can create or revise an estimate for the job.
+     */
+    public function estimate(User $user, Job $job): bool
+    {
+        return $user->isFrontOffice() && $job->canBeEstimated();
+    }
 }
