@@ -27,7 +27,7 @@ class EstimateController extends Controller
 
         return view('pages.estimates.show', [
             'estimate' => $record,
-            'totals' => $this->estimates->storedTotals($record),
+            'totals' => $record->storedTotals(),
             'history' => $history->count() > 1 ? $history : new Collection,
             'canEmail' => Gate::allows('email', $record) && filled($record->job->customer->email),
         ]);

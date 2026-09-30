@@ -44,20 +44,20 @@ class InvoiceIssuedMailDiscountTest extends TestCase
     {
         $mailable = $this->mailable('10.00');
 
-        $this->assertHtmlRow($mailable, __('mail.invoice_issued.before_discount'), '10,000.00');
-        $this->assertHtmlRow($mailable, __('mail.invoice_issued.discount'), '1,000.00');
-        $this->assertHtmlRow($mailable, __('mail.invoice_issued.subtotal'), '9,000.00');
+        $this->assertHtmlRow($mailable, __('mail.totals.before_discount'), '10,000.00');
+        $this->assertHtmlRow($mailable, __('mail.totals.discount'), '1,000.00');
+        $this->assertHtmlRow($mailable, __('mail.totals.subtotal'), '9,000.00');
 
         $mailable->assertSeeInOrderInHtml([
-            __('mail.invoice_issued.before_discount'),
-            __('mail.invoice_issued.discount'),
-            __('mail.invoice_issued.subtotal'),
+            __('mail.totals.before_discount'),
+            __('mail.totals.discount'),
+            __('mail.totals.subtotal'),
         ]);
 
         $mailable->assertSeeInOrderInText([
-            __('mail.pair', ['label' => __('mail.invoice_issued.before_discount'), 'value' => '10,000.00']),
-            __('mail.pair', ['label' => __('mail.invoice_issued.discount'), 'value' => '1,000.00']),
-            __('mail.pair', ['label' => __('mail.invoice_issued.subtotal'), 'value' => '9,000.00']),
+            __('mail.pair', ['label' => __('mail.totals.before_discount'), 'value' => '10,000.00']),
+            __('mail.pair', ['label' => __('mail.totals.discount'), 'value' => '1,000.00']),
+            __('mail.pair', ['label' => __('mail.totals.subtotal'), 'value' => '9,000.00']),
         ], false);
     }
 
@@ -66,11 +66,11 @@ class InvoiceIssuedMailDiscountTest extends TestCase
         $mailable = $this->mailable('0.00');
 
         $this->assertFalse($mailable->money()['has_discount']);
-        $this->assertNoHtmlRowLabelled($mailable, __('mail.invoice_issued.before_discount'));
-        $this->assertNoHtmlRowLabelled($mailable, __('mail.invoice_issued.discount'));
-        $this->assertHtmlRow($mailable, __('mail.invoice_issued.subtotal'), '10,000.00');
+        $this->assertNoHtmlRowLabelled($mailable, __('mail.totals.before_discount'));
+        $this->assertNoHtmlRowLabelled($mailable, __('mail.totals.discount'));
+        $this->assertHtmlRow($mailable, __('mail.totals.subtotal'), '10,000.00');
 
-        $mailable->assertDontSeeInText(__('mail.invoice_issued.before_discount'), false);
-        $mailable->assertDontSeeInText(__('mail.invoice_issued.discount').':', false);
+        $mailable->assertDontSeeInText(__('mail.totals.before_discount'), false);
+        $mailable->assertDontSeeInText(__('mail.totals.discount').':', false);
     }
 }

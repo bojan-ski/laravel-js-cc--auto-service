@@ -133,13 +133,13 @@ class InvoiceDiscountTest extends TestCase
             'total' => '1080.00',
         ]);
 
-        $totals = app(InvoiceService::class)->storedTotals($invoice);
+        $totals = $invoice->storedTotals();
 
         $this->assertSame('100.00', $totals['discount']);
         $this->assertSame('1000.00', $totals['before_discount']);
         $this->assertTrue($totals['has_discount']);
 
-        $plain = app(InvoiceService::class)->storedTotals(Invoice::factory()->create());
+        $plain = Invoice::factory()->create()->storedTotals();
 
         $this->assertSame('0.00', $plain['discount']);
         $this->assertSame($plain['subtotal'], $plain['before_discount']);

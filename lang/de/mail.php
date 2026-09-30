@@ -26,11 +26,6 @@ return [
         'number' => 'Rechnung',
         'issued' => 'Ausgestellt',
         'due' => 'Fällig',
-        'before_discount' => 'Vor Rabatt',
-        'discount' => 'Rabatt',
-        'subtotal' => 'Zwischensumme',
-        'vat' => 'MwSt. :rate %',
-        'total' => 'Gesamt',
         'tax_id' => 'Steuernr. (PIB)',
         'registration_number' => 'Registernr. (MB)',
     ],
@@ -45,6 +40,9 @@ return [
         'created' => 'Datum',
         'line' => ':description × :quantity',
         'line_discounted' => ':description × :quantity (:percent % Rabatt)',
+    ],
+
+    'totals' => [
         'before_discount' => 'Vor Rabatt',
         'discount' => 'Rabatt',
         'subtotal' => 'Zwischensumme',

@@ -23,7 +23,7 @@ class InvoiceVoidController extends Controller
 
         return view('pages.invoices.void', [
             'invoice' => $invoice,
-            'totals' => $this->invoices->storedTotals($invoice),
+            'totals' => $invoice->storedTotals(),
         ]);
     }
 

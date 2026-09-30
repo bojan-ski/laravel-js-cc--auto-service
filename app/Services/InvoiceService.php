@@ -190,22 +190,6 @@ class InvoiceService
         ];
     }
 
-    /**
-     * @return array{subtotal: string, rate: string, tax: string, total: string, discount: string, before_discount: string, has_discount: bool}
-     */
-    public function storedTotals(Invoice $invoice): array
-    {
-        return [
-            'subtotal' => $invoice->subtotal,
-            'rate' => $invoice->taxRateLabel(),
-            'tax' => $invoice->tax_amount,
-            'total' => $invoice->total,
-            'discount' => $invoice->discount_total,
-            'before_discount' => bcadd($invoice->subtotal, $invoice->discount_total, 2),
-            'has_discount' => $invoice->hasDiscount(),
-        ];
-    }
-
     public function rate(): string
     {
         return (string) config('shop.vat_rate');

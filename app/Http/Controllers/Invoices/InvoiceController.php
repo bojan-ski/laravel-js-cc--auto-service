@@ -37,7 +37,7 @@ class InvoiceController extends Controller
 
         return view('pages.invoices.show', [
             'invoice' => $invoice,
-            'totals' => $this->invoices->storedTotals($invoice),
+            'totals' => $invoice->storedTotals(),
             'lineItems' => $invoice->isVoid()
                 ? new Collection
                 : $invoice->job->items()->visibleTo($request->user())->orderBy('id')->get(),

@@ -122,9 +122,7 @@ class JobItem extends Model
 
     public function discountPercentLabel(): string
     {
-        $trimmed = rtrim(rtrim($this->discount_percent, '0'), '.');
-
-        return $trimmed === '' ? '0' : $trimmed;
+        return Money::trimZeros($this->discount_percent);
     }
 
     /**

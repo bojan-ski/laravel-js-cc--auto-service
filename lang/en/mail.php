@@ -26,11 +26,6 @@ return [
         'number' => 'Invoice',
         'issued' => 'Issued',
         'due' => 'Due',
-        'before_discount' => 'Before discount',
-        'discount' => 'Discount',
-        'subtotal' => 'Subtotal',
-        'vat' => 'VAT :rate%',
-        'total' => 'Total',
         'tax_id' => 'Tax ID (PIB)',
         'registration_number' => 'Registration no. (MB)',
     ],
@@ -45,6 +40,9 @@ return [
         'created' => 'Date',
         'line' => ':description × :quantity',
         'line_discounted' => ':description × :quantity (:percent% off)',
+    ],
+
+    'totals' => [
         'before_discount' => 'Before discount',
         'discount' => 'Discount',
         'subtotal' => 'Subtotal',

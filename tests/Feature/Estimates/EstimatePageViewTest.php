@@ -200,6 +200,28 @@ class EstimatePageViewTest extends TestCase
         $this->assertStringContainsString('data-print-slot', $html);
     }
 
+    public function test_a_discounted_estimate_shows_the_amount_before_discount_from_its_stored_columns(): void
+    {
+        $estimate = Estimate::factory()->forJob($this->jobFor())->create([
+            'subtotal' => '7800.00',
+            'discount_total' => '200.00',
+            'tax_rate' => '20.00',
+            'tax_amount' => '1560.00',
+            'total' => '9360.00',
+        ]);
+
+        $html = $this->page($estimate);
+
+        $this->assertMatchesRegularExpression(
+            '/<dt[^>]*>\s*'.preg_quote(e(__('invoices.totals.before_discount')), '/').'\s*<\/dt>\s*<dd><span class="tabular-nums">8,000\.00<\/span>\s*<\/dd>/',
+            $html,
+        );
+        $this->assertMatchesRegularExpression(
+            '/<dt[^>]*>\s*'.preg_quote(e(__('invoices.totals.discount')), '/').'\s*<\/dt>\s*<dd><span class="tabular-nums">200\.00<\/span>\s*<\/dd>/',
+            $html,
+        );
+    }
+
     public function test_the_page_reads_a_pinned_number_of_queries(): void
     {
         $job = $this->jobFor();

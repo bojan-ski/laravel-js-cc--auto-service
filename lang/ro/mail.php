@@ -26,11 +26,6 @@ return [
         'number' => 'Factură',
         'issued' => 'Emisă',
         'due' => 'Scadență',
-        'before_discount' => 'Înainte de discount',
-        'discount' => 'Discount',
-        'subtotal' => 'Subtotal',
-        'vat' => 'TVA :rate%',
-        'total' => 'Total',
         'tax_id' => 'Cod fiscal (PIB)',
         'registration_number' => 'Nr. de înregistrare (MB)',
     ],
@@ -45,6 +40,9 @@ return [
         'created' => 'Data',
         'line' => ':description × :quantity',
         'line_discounted' => ':description × :quantity (discount :percent%)',
+    ],
+
+    'totals' => [
         'before_discount' => 'Înainte de discount',
         'discount' => 'Discount',
         'subtotal' => 'Subtotal',
