@@ -15,6 +15,7 @@ return [
         'user_menu' => 'Kontomenü',
         'staff' => 'Mitarbeiter',
         'brands' => 'Marken',
+        'templates' => 'Auftragsvorlagen',
         'sign_out' => 'Abmelden',
     ],
 

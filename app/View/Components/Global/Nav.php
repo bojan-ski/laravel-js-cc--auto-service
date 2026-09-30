@@ -6,6 +6,7 @@ use App\Enums\Locale;
 use App\Enums\Theme;
 use App\Models\Brand;
 use App\Models\Invoice;
+use App\Models\JobTemplate;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
@@ -23,7 +24,7 @@ class Nav extends Component
     /**
      * @var array<int, array{label: string, url: string, active: bool}>
      */
-    public array $adminLinks;
+    public array $menuLinks;
 
     /**
      * @var array<int, array{value: string, label: string, current: bool}>
@@ -39,7 +40,7 @@ class Nav extends Component
     {
         $this->user = auth()->user();
         $this->items = $this->buildItems();
-        $this->adminLinks = $this->buildAdminLinks();
+        $this->menuLinks = $this->buildMenuLinks();
         $this->themeOptions = $this->buildThemeOptions();
         $this->localeOptions = Locale::options();
     }
@@ -59,7 +60,7 @@ class Nav extends Component
     /**
      * @return array<int, array{label: string, url: string, active: bool}>
      */
-    private function buildAdminLinks(): array
+    private function buildMenuLinks(): array
     {
         $links = [];
 
@@ -76,6 +77,14 @@ class Nav extends Component
                 'label' => __('app.nav.brands'),
                 'url' => route('admin.brands.index'),
                 'active' => request()->routeIs('admin.brands.*'),
+            ];
+        }
+
+        if (Gate::allows('viewAny', JobTemplate::class)) {
+            $links[] = [
+                'label' => __('app.nav.templates'),
+                'url' => route('job-templates.index'),
+                'active' => request()->routeIs('job-templates.*'),
             ];
         }
 

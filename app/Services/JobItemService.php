@@ -6,11 +6,16 @@ use App\Enums\JobItemType;
 use App\Enums\StockMovementReason;
 use App\Exceptions\JobLockedException;
 use App\Exceptions\JobNotAcceptingLineItems;
+use App\Exceptions\JobTemplateHasDeletedPart;
 use App\Models\Job;
 use App\Models\JobItem;
+use App\Models\JobTemplate;
+use App\Models\JobTemplateItem;
 use App\Models\Part;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 class JobItemService
 {
@@ -68,6 +73,49 @@ class JobItemService
             $item->setRelation('part', $part);
 
             return $item;
+        });
+    }
+
+    /**
+     * @return Collection<int, JobItem>
+     */
+    public function applyTemplate(Job $job, JobTemplate $template, User $actor, ?int $mechanicId): Collection
+    {
+        return DB::transaction(function () use ($job, $template, $actor, $mechanicId): Collection {
+            $this->lockWritableJob($job->getKey());
+
+            if ($template->trashed()) {
+                throw new InvalidArgumentException('A deleted template cannot be applied.');
+            }
+
+            $lines = $template->items()->orderBy('position')->orderBy('id')->get();
+
+            if ($actor->isFrontOffice() && $mechanicId === null && $lines->contains(fn (JobTemplateItem $line): bool => $line->isLabor())) {
+                throw new InvalidArgumentException('A mechanic must be chosen for a template with labor lines.');
+            }
+
+            $parts = Part::withTrashed()
+                ->visibleTo($actor)
+                ->whereKey($lines->pluck('part_id')->filter()->unique()->all())
+                ->get()
+                ->keyBy('id');
+
+            $deleted = $lines->first(fn (JobTemplateItem $line): bool => $line->isPart() && $parts[$line->part_id]->trashed());
+
+            if ($deleted !== null) {
+                throw new JobTemplateHasDeletedPart($parts[$deleted->part_id]->name);
+            }
+
+            return $lines->map(fn (JobTemplateItem $line): JobItem => $line->isLabor()
+                ? $this->addLabor($job, $actor, [
+                    'description' => $line->description,
+                    'quantity' => $line->quantity,
+                    'user_id' => $mechanicId,
+                ])
+                : $this->addPart($job, $parts[$line->part_id], $actor, [
+                    'quantity' => $line->quantity,
+                    'user_id' => $mechanicId,
+                ]))->toBase();
         });
     }
 

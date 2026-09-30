@@ -12,6 +12,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobItem;
+use App\Models\JobTemplate;
 use App\Models\Part;
 use App\Models\PartNumber;
 use App\Models\User;
@@ -19,6 +20,7 @@ use App\Models\Vehicle;
 use App\Services\TaxIdChecksum;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\Demo\DemoSeeder;
+use Database\Seeders\Demo\JobTemplateSeeder;
 use Database\Seeders\DemoDataSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Env;
@@ -253,6 +255,45 @@ class DemoDataSeederTest extends TestCase
         $this->assertTrue(Part::query()->where('quantity_in_stock', '<', 0)->exists());
         $this->assertGreaterThan(0, Part::query()->whereColumn('quantity_in_stock', '<=', 'reorder_level')->count());
         $this->assertSame(1, Part::onlyTrashed()->count());
+    }
+
+    public function test_templates_are_seeded_one_on_the_retired_part_and_two_jobs_are_filled_by_an_apply(): void
+    {
+        $this->seed(DemoDataSeeder::class);
+
+        $this->assertGreaterThanOrEqual(4, JobTemplate::query()->count());
+
+        $retired = Part::onlyTrashed()->where('sku', 'OF-0999')->sole();
+        $budget = JobTemplate::query()->where('name', JobTemplateSeeder::BUDGET_SERVICE)->sole();
+        $this->assertTrue($budget->items()->where('part_id', $retired->getKey())->exists());
+        $this->assertTrue($budget->created_at->lessThan($retired->deleted_at), 'The budget template must predate the part being retired.');
+
+        $applied = [
+            [JobTemplateSeeder::DIESEL_SERVICE, 'NS-221-TT', 'Regular service: oil and filters.', 'zoran', 'ana'],
+            [JobTemplateSeeder::FRONT_BRAKE_PADS, 'SM-045-VK', 'Front brakes noisy.', 'stefan', 'stefan'],
+        ];
+
+        foreach ($applied as [$name, $plate, $complaint, $mechanic, $actor]) {
+            $template = JobTemplate::query()->where('name', $name)->sole();
+            $job = Job::query()
+                ->whereHas('vehicle', fn ($query) => $query->withTrashed()->where('registration_plate', $plate))
+                ->where('complaint', $complaint)
+                ->sole();
+            $lines = JobItem::query()->where('job_id', $job->getKey())->orderBy('id')->get();
+
+            $this->assertSame(
+                $template->items()->orderBy('position')->get()->map(fn ($line): array => [$line->type, $line->part_id, $line->quantity])->all(),
+                $lines->map(fn (JobItem $line): array => [$line->type, $line->part_id, $line->quantity])->all(),
+                "{$plate}'s lines must be exactly the {$name} template's.",
+            );
+            $this->assertSame([User::withTrashed()->where('email', DemoSeeder::emailFor($mechanic))->value('id')], $lines->pluck('user_id')->unique()->values()->all());
+            $this->assertSame(
+                [User::withTrashed()->where('email', DemoSeeder::emailFor($actor))->value('id')],
+                DB::table('stock_movements')->whereIn('job_item_id', $lines->pluck('id'))->distinct()->pluck('user_id')->all(),
+            );
+        }
+
+        $this->assertStockMatchesLedger();
     }
 
     public function test_references_and_invoice_numbers_follow_the_timeline_and_nothing_is_dated_in_the_future(): void

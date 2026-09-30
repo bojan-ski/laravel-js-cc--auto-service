@@ -7,6 +7,7 @@ use App\Http\Controllers\Jobs\JobInvoiceController;
 use App\Http\Controllers\Jobs\JobItemController;
 use App\Http\Controllers\Jobs\JobItemDiscountController;
 use App\Http\Controllers\Jobs\JobPartLineController;
+use App\Http\Controllers\Jobs\JobTemplateApplicationController;
 use App\Http\Controllers\Jobs\JobTransitionController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,7 @@ Route::post('/jobs/{job}/invoice', [JobInvoiceController::class, 'store'])->name
 
 Route::post('/jobs/{job}/items', [JobItemController::class, 'store'])->name('jobs.items.store');
 Route::post('/jobs/{job}/parts', [JobPartLineController::class, 'store'])->name('jobs.parts.store');
+Route::post('/jobs/{job}/templates', [JobTemplateApplicationController::class, 'store'])->name('jobs.templates.apply');
 Route::put('/job-items/{jobItem}', [JobItemController::class, 'update'])->name('job-items.update');
 Route::delete('/job-items/{jobItem}', [JobItemController::class, 'destroy'])->name('job-items.destroy');
 Route::patch('/job-items/{jobItem}/discount', [JobItemDiscountController::class, 'update'])->name('job-items.discount.update');

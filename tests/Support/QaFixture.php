@@ -10,6 +10,8 @@ use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobAttachment;
 use App\Models\JobItem;
+use App\Models\JobTemplate;
+use App\Models\JobTemplateItem;
 use App\Models\Part;
 use App\Models\PartNumber;
 use App\Models\StockMovement;
@@ -123,6 +125,14 @@ final class QaFixture
 
     public readonly PartNumber $partNumber;
 
+    public readonly JobTemplate $template;
+
+    public readonly JobTemplateItem $templateLine;
+
+    public readonly JobTemplate $templateWithTrashedPart;
+
+    public readonly JobTemplate $trashedTemplate;
+
     /** @var Collection<int, Job> */
     public readonly Collection $jobs;
 
@@ -191,6 +201,7 @@ final class QaFixture
         $fixture->buildStaff();
         $fixture->buildCustomersAndVehicles();
         $fixture->buildParts();
+        $fixture->buildTemplates();
         $fixture->buildAppointments();
         $fixture->buildJobs();
         $fixture->buildInvoices();
@@ -299,6 +310,24 @@ final class QaFixture
         StockMovement::factory()->forPart($this->part)->manualAdjustment(-1)->causedBy($this->voider)->create();
         StockMovement::factory()->forPart($this->lowPart)->restock(5)->fromSupplier($this->supplier)->causedBy($this->creator)->create();
         StockMovement::factory()->forPart($this->negativePart)->manualAdjustment(-2)->causedBy($this->creator)->create();
+    }
+
+    /**
+     * The template on the part that applyHistory() trashes is built while the
+     * part is still active, as a real shop's would have been.
+     */
+    private function buildTemplates(): void
+    {
+        $this->template = JobTemplate::factory()->create(['name' => 'Small service', 'description' => 'Oil, oil filter and a check.']);
+        JobTemplateItem::factory()->forTemplate($this->template)->labor()->create(['position' => 1, 'description' => 'Oil and filter service']);
+        $this->templateLine = JobTemplateItem::factory()->forTemplate($this->template)->forPart($this->part, 1)->create(['position' => 2]);
+
+        $this->templateWithTrashedPart = JobTemplate::factory()->create(['name' => 'Budget service']);
+        JobTemplateItem::factory()->forTemplate($this->templateWithTrashedPart)->labor()->create(['position' => 1]);
+        JobTemplateItem::factory()->forTemplate($this->templateWithTrashedPart)->forPart($this->trashedPart, 1)->create(['position' => 2]);
+
+        $this->trashedTemplate = JobTemplate::factory()->trashed()->create(['name' => 'Retired template']);
+        JobTemplateItem::factory()->forTemplate($this->trashedTemplate)->labor()->create(['position' => 1]);
     }
 
     private function buildAppointments(): void

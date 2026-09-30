@@ -15,6 +15,7 @@ return [
         'user_menu' => 'Meni naloga',
         'staff' => 'Zaposleni',
         'brands' => 'Brendovi',
+        'templates' => 'Šabloni naloga',
         'sign_out' => 'Odjava',
     ],
 

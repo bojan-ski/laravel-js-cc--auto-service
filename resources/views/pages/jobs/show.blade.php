@@ -25,6 +25,8 @@
             :show-part-form="$showPartForm"
             :user-options="$userOptions"
             :part-options="$partOptions"
+            :show-template-form="$showTemplateForm"
+            :template-options="$templateOptions"
             :default-rate="$defaultRate"
         />
     </div>

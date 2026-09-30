@@ -15,6 +15,7 @@ return [
         'user_menu' => 'Meniu cont',
         'staff' => 'Personal',
         'brands' => 'Mărci',
+        'templates' => 'Șabloane de lucrări',
         'sign_out' => 'Deconectare',
     ],
 

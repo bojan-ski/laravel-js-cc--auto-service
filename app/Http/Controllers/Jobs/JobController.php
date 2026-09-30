@@ -13,6 +13,7 @@ use App\Models\JobAttachment;
 use App\Models\JobItem;
 use App\Services\CustomerIntakeService;
 use App\Services\JobService;
+use App\Services\JobTemplateService;
 use App\Services\PartService;
 use App\Services\UserService;
 use App\Services\VehicleService;
@@ -29,6 +30,7 @@ class JobController extends Controller
         private VehicleService $vehicles,
         private UserService $users,
         private PartService $parts,
+        private JobTemplateService $templates,
         private CustomerIntakeService $intake,
     ) {}
 
@@ -93,7 +95,9 @@ class JobController extends Controller
         $editing = $this->editableItem($job, $request->editingItemId());
         $discounting = $editing === null ? $this->discountableItem($job, $request->discountingItemId()) : null;
         $adding = $request->addingType();
-        $showPartForm = $editing === null && $discounting === null && $adding === 'part' && Gate::allows('createItem', $job);
+        $addPanel = $editing === null && $discounting === null && Gate::allows('createItem', $job) ? $adding : null;
+        $showPartForm = $addPanel === 'part';
+        $showTemplateForm = $addPanel === 'template';
 
         return view('pages.jobs.show', [
             'job' => $job,
@@ -105,8 +109,10 @@ class JobController extends Controller
             'discounting' => $discounting,
             'adding' => $adding,
             'showPartForm' => $showPartForm,
+            'showTemplateForm' => $showTemplateForm,
             'userOptions' => $user->isFrontOffice() ? $this->users->pickerOptions() : [],
-            'partOptions' => $showPartForm ? $this->parts->pickerOptions($user) : [],
+            'partOptions' => $showPartForm ? $this->parts->pickerOptions() : [],
+            'templateOptions' => $showTemplateForm ? $this->templates->pickerOptions() : [],
             'defaultRate' => $showPricing ? (string) config('shop.labor_rate') : null,
             'photos' => $job->attachments->filter(fn (JobAttachment $a): bool => $a->isPhoto())->values(),
             'documents' => $job->attachments->filter(fn (JobAttachment $a): bool => $a->isDocument())->values(),

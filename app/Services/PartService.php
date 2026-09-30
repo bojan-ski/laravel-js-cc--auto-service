@@ -91,10 +91,10 @@ class PartService
     /**
      * @return array<int, string>
      */
-    public function pickerOptions(User $user): array
+    public function pickerOptions(): array
     {
         return Part::query()
-            ->visibleTo($user)
+            ->select(['id', 'sku', 'name', 'quantity_in_stock', 'reorder_level', 'location'])
             ->orderBy('name')
             ->orderBy('id')
             ->get()
