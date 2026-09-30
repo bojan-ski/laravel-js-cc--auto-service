@@ -64,6 +64,21 @@ class InvoiceShowViewTest extends TestCase
         $invoice->due_at = now()->addDays(14);
         $invoice->save();
 
+        $this->assertPageShowsEveryFact($invoice);
+    }
+
+    public function test_a_name_with_an_apostrophe_is_matched_as_the_page_escapes_it(): void
+    {
+        $invoice = $this->issued();
+        $invoice->due_at = now()->addDays(14);
+        $invoice->save();
+        $invoice->issuedBy->update(['name' => "Dr. Kiley D'Amore Jr."]);
+
+        $this->assertPageShowsEveryFact($invoice->fresh());
+    }
+
+    private function assertPageShowsEveryFact(Invoice $invoice): void
+    {
         $html = $this->page($invoice);
 
         foreach ([
@@ -77,7 +92,7 @@ class InvoiceShowViewTest extends TestCase
             $invoice->due_at->isoFormat('D MMM YYYY'),
             __('invoices.statuses.unpaid'),
         ] as $fact) {
-            $this->assertStringContainsString($fact, $html, "The page must show {$fact}.");
+            $this->assertStringContainsString(e($fact), $html, "The page must show {$fact}.");
         }
     }
 
