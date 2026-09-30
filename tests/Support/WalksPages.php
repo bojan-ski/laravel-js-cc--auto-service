@@ -104,7 +104,15 @@ trait WalksPages
             'jobs.show:add-part' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob], fn (): array => ['add' => 'part']),
             'jobs.show:add-labor' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob], fn (): array => ['add' => 'labor']),
             'jobs.show:template' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob], fn (): array => ['add' => 'template']),
-            'jobs.invoice.create' => self::page('jobs.invoice.create', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->completedJob]),
+            'jobs.show:estimate-over' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob]),
+            'jobs.invoice.create' => self::page('jobs.invoice.create', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->voidedJob]),
+            'jobs.invoice.create:estimate-pending' => self::page('jobs.invoice.create', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->completedJob]),
+
+            'estimates.show:pending' => self::page('estimates.show', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->pendingEstimate]),
+            'estimates.show:approved' => self::page('estimates.show', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->approvedEstimate]),
+            'estimates.show:declined' => self::page('estimates.show', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->declinedEstimate]),
+            'estimates.show:superseded' => self::page('estimates.show', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->supersededEstimate]),
+            'estimates.show:trashed-graph' => self::page('estimates.show', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->estimateWithTrashedGraph]),
 
             'invoices.index' => self::plain('invoices.index', self::FRONT_OFFICE),
             'invoices.index:search' => self::page('invoices.index', self::FRONT_OFFICE, query: fn (QaFixture $shop): array => ['search' => $shop->unpaidInvoice->number]),

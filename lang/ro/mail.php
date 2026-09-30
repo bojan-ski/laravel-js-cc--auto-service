@@ -35,4 +35,21 @@ return [
         'registration_number' => 'Nr. de înregistrare (MB)',
     ],
 
+    'estimate' => [
+        'subject' => 'Deviz :number — :plate',
+        'heading' => 'Deviz :number',
+        'greeting' => 'Bună ziua, :name,',
+        'body' => 'Vă transmitem devizul pentru lucrările la vehiculul dumneavoastră :make :model (:plate).',
+        'reply' => 'Vă rugăm să ne contactați pentru a-l aproba sau refuza.',
+        'number' => 'Deviz',
+        'created' => 'Data',
+        'line' => ':description × :quantity',
+        'line_discounted' => ':description × :quantity (discount :percent%)',
+        'before_discount' => 'Înainte de discount',
+        'discount' => 'Discount',
+        'subtotal' => 'Subtotal',
+        'vat' => 'TVA :rate%',
+        'total' => 'Total',
+    ],
+
 ];

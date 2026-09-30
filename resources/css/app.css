@@ -51,6 +51,12 @@
     --color-status-paid: #166534;
     --color-status-void: #57534E;
 
+    /* Status — estimate lifecycle */
+    --color-status-pending: #854D0E;
+    --color-status-approved: #166534;
+    --color-status-declined: #B91C1C;
+    --color-status-superseded: #57534E;
+
     /* Inventory warning */
     --color-status-low-stock: #B91C1C;
 }
@@ -119,6 +125,12 @@
         --color-status-unpaid: #FDE047;
         --color-status-paid: #86EFAC;
         --color-status-void: #D6D3D1;
+
+        /* Status — estimate lifecycle */
+        --color-status-pending: #FDE047;
+        --color-status-approved: #86EFAC;
+        --color-status-declined: #FCA5A5;
+        --color-status-superseded: #D6D3D1;
 
         /* Inventory warning */
         --color-status-low-stock: #FCA5A5;

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Contracts\ProvidesStatusPresentation;
 use App\Enums\AppointmentStatus;
+use App\Enums\EstimateStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobStatus;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -43,6 +44,7 @@ class StatusBadgeContrastTest extends TestCase
             ...JobStatus::cases(),
             ...AppointmentStatus::cases(),
             ...InvoiceStatus::cases(),
+            ...EstimateStatus::cases(),
         ];
 
         $tokens = [];

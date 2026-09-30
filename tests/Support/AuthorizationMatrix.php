@@ -5,6 +5,7 @@ namespace Tests\Support;
 use App\Models\Appointment;
 use App\Models\Brand;
 use App\Models\Customer;
+use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobCheckIn;
@@ -198,6 +199,7 @@ trait AuthorizationMatrix
         $this->fixtures['unpaidInvoice'] = Invoice::factory()->unpaid()->forJob($lockedJob)->create();
         $this->fixtures['ownLine'] = $this->fixtures['workingJob']->items->first();
         $this->fixtures['completedLine'] = $this->fixtures['completedJob']->items->first();
+        $this->fixtures['pendingEstimate'] = Estimate::factory()->pending()->forJob($this->fixtures['completedJob'])->create();
 
         $checkInJob = Job::factory()->inProgress()->for($vehicle)->create();
         JobCheckIn::factory()->forJob($checkInJob)->recordedBy($owner)->create();
@@ -564,6 +566,43 @@ trait AuthorizationMatrix
                 ],
                 'guest' => self::LOGIN,
                 'mechanic' => self::ALLOW,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
+            '49' => [
+                'capability' => 'View estimates',
+                'requests' => [
+                    ['method' => 'get', 'route' => 'estimates.show', 'params' => ['pendingEstimate']],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => 403,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
+            '50' => [
+                'capability' => 'Create an estimate, record its decision, email it',
+                'requests' => [
+                    [
+                        'method' => 'post',
+                        'route' => 'jobs.estimates.store',
+                        'params' => ['workingJob'],
+                        'payload' => fn (): array => [],
+                    ],
+                    [
+                        'method' => 'patch',
+                        'route' => 'estimates.decision.update',
+                        'params' => ['pendingEstimate'],
+                        'payload' => fn (): array => ['decision' => 'approved', 'decision_method' => 'phone'],
+                    ],
+                    [
+                        'method' => 'post',
+                        'route' => 'estimates.email.store',
+                        'params' => ['pendingEstimate'],
+                        'payload' => fn (): array => [],
+                    ],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => 403,
                 'receptionist' => self::ALLOW,
                 'admin' => self::ALLOW,
             ],

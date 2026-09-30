@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Appointment;
 use App\Models\Customer;
+use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobItem;
@@ -67,6 +68,11 @@ class TableHeaderAccessibilityTest extends TestCase
 
         JobTemplateItem::factory()->forTemplate(JobTemplate::factory()->create(['description' => 'Oil and filters']))->create();
 
+        $estimated = Job::factory()->inProgress()->create();
+        JobItem::factory()->forJob($estimated)->create();
+        Estimate::factory()->withLines()->superseded()->forJob($estimated)->create();
+        Estimate::factory()->withLines()->forJob($estimated)->create();
+
         return $customer;
     }
 
@@ -85,6 +91,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'part detail' => ['parts.show'],
             'invoices index' => ['invoices.index'],
             'invoice detail' => ['invoices.show'],
+            'estimate detail' => ['estimates.show'],
             'staff index' => ['admin.users.index'],
             'brands index' => ['admin.brands.index'],
             'job templates index' => ['job-templates.index'],
@@ -101,6 +108,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'vehicles.show' => route($route, $customer->vehicles()->sole()),
             'parts.show' => route($route, Part::query()->sole()),
             'invoices.show' => route($route, Invoice::query()->sole()),
+            'estimates.show' => route($route, Estimate::query()->where('status', 'pending')->sole()),
             default => route($route),
         };
 
@@ -128,6 +136,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'vehicles.show' => route($route, $customer->vehicles()->sole()),
             'parts.show' => route($route, Part::query()->sole()),
             'invoices.show' => route($route, Invoice::query()->sole()),
+            'estimates.show' => route($route, Estimate::query()->where('status', 'pending')->sole()),
             default => route($route),
         };
 

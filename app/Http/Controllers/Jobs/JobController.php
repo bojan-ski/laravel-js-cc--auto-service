@@ -7,11 +7,13 @@ use App\Http\Requests\Jobs\JobIndexRequest;
 use App\Http\Requests\Jobs\JobShowRequest;
 use App\Http\Requests\Jobs\StoreJobRequest;
 use App\Models\Appointment;
+use App\Models\Estimate;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobAttachment;
 use App\Models\JobItem;
 use App\Services\CustomerIntakeService;
+use App\Services\EstimateService;
 use App\Services\JobService;
 use App\Services\JobTemplateService;
 use App\Services\PartService;
@@ -33,6 +35,7 @@ class JobController extends Controller
         private PartService $parts,
         private JobTemplateService $templates,
         private CustomerIntakeService $intake,
+        private EstimateService $estimates,
     ) {}
 
     public function index(JobIndexRequest $request): View
@@ -81,6 +84,7 @@ class JobController extends Controller
 
         $user = $request->user();
         $showPricing = Gate::allows('viewPricing', Job::class);
+        $showEstimate = Gate::allows('viewAny', Estimate::class);
 
         $job->load([
             'customer',
@@ -104,6 +108,8 @@ class JobController extends Controller
         return view('pages.jobs.show', [
             'job' => $job,
             'invoice' => $this->activeInvoiceFor($job),
+            'showEstimate' => $showEstimate,
+            'estimate' => $showEstimate ? $this->estimates->summaryFor($job) : null,
             'showPricing' => $showPricing,
             'subtotal' => $showPricing ? $job->subtotal() : null,
             'discountTotal' => $showPricing && $job->items->contains->hasDiscount() ? $job->discountTotal() : null,

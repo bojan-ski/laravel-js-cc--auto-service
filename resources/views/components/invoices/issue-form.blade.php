@@ -1,4 +1,4 @@
-@props(['job', 'totals'])
+@props(['job', 'totals', 'estimate' => null])
 
 <form method="POST" action="{{ route('jobs.invoice.store', $job) }}" class="mt-4 max-w-2xl space-y-4">
     @csrf
@@ -31,6 +31,10 @@
 
         <p class="mt-2">{{ __('invoices.issue.bill_to_hint') }}</p>
     </div>
+
+    @if ($estimate['warning'] ?? null)
+        <x-estimates.issue-note :summary="$estimate" />
+    @endif
 
     <x-invoices.totals :totals="$totals" />
 

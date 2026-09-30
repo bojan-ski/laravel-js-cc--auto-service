@@ -5,7 +5,7 @@
 
     <div class="mt-4 grid items-start gap-4 xl:grid-cols-3">
         <div class="min-w-0">
-            <x-jobs.details :job="$job" />
+            <x-jobs.details :job="$job" :estimate="$estimate" :show-estimate="$showEstimate" />
         </div>
 
         <div class="min-w-0 xl:col-span-2">

@@ -4,5 +4,5 @@
         <span class="tabular-nums">{{ $job->reference }}</span>
     </h1>
 
-    <x-invoices.issue-form :job="$job" :totals="$totals" />
+    <x-invoices.issue-form :job="$job" :totals="$totals" :estimate="$estimate" />
 </x-layouts.app>
