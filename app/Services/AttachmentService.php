@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Enums\AttachmentCategory;
 use App\Enums\AttachmentType;
+use App\Exceptions\CheckInNotOpen;
 use App\Exceptions\UnreadableAttachment;
 use App\Models\Job;
 use App\Models\JobAttachment;
 use App\Models\User;
+use Closure;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -29,8 +32,16 @@ class AttachmentService
 
     private const int WEBP_QUALITY = 80;
 
-    public function upload(Job $job, UploadedFile $file, User $uploadedBy): JobAttachment
-    {
+    /**
+     * @param  (Closure(): void)|null  $inside
+     */
+    public function upload(
+        Job $job,
+        UploadedFile $file,
+        User $uploadedBy,
+        AttachmentCategory $category = AttachmentCategory::General,
+        ?Closure $inside = null,
+    ): JobAttachment {
         $mimeType = (string) $file->getMimeType();
         $type = AttachmentType::forMimeType($mimeType);
 
@@ -43,6 +54,7 @@ class AttachmentService
         $attachment = new JobAttachment;
         $attachment->job_id = $job->getKey();
         $attachment->type = $type;
+        $attachment->category = $category;
         $attachment->original_filename = $file->getClientOriginalName();
         $attachment->mime_type = $mimeType;
         $attachment->size_bytes = (int) $file->getSize();
@@ -51,7 +63,11 @@ class AttachmentService
         $written = [];
 
         try {
-            DB::transaction(function () use ($attachment, $file, $job, $variants, &$written): void {
+            DB::transaction(function () use ($attachment, $file, $job, $variants, $inside, &$written): void {
+                if ($inside !== null) {
+                    $inside();
+                }
+
                 $directory = config('attachments.directory').'/'.$job->getKey();
                 $key = (string) Str::ulid();
 
@@ -91,7 +107,17 @@ class AttachmentService
     {
         $paths = $attachment->storedPaths();
 
-        DB::transaction(fn () => $attachment->delete());
+        DB::transaction(function () use ($attachment): void {
+            if ($attachment->isCheckInPhoto()) {
+                $job = Job::query()->whereKey($attachment->job_id)->lockForUpdate()->firstOrFail();
+
+                if (! $job->acceptsCheckIn()) {
+                    throw new CheckInNotOpen($job);
+                }
+            }
+
+            $attachment->delete();
+        });
 
         $this->disk()->delete($paths);
     }

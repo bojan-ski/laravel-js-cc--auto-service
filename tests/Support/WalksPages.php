@@ -185,6 +185,17 @@ trait WalksPages
             'attachments.show:photo-full' => self::page('attachments.show', self::ALL_STAFF, fn (QaFixture $shop): array => ['attachment' => $shop->photo, 'variant' => 'full'], html: false),
             'attachments.show:document' => self::page('attachments.show', self::ALL_STAFF, fn (QaFixture $shop): array => ['attachment' => $shop->document], html: false),
 
+            'jobs.check-in.show:none-open' => self::page('jobs.check-in.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->jobsByStatus[JobStatus::Received->value]]),
+            'jobs.check-in.show:none-closed' => self::page('jobs.check-in.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->cancelledJob]),
+            'jobs.check-in.show:unsigned' => self::page('jobs.check-in.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob]),
+            'jobs.check-in.show:signed-drawn' => self::page('jobs.check-in.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->drawnCheckInJob]),
+            'jobs.check-in.show:signed-paper' => self::page('jobs.check-in.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->paperCheckInJob]),
+            'jobs.check-in.show:unsigned-closed' => self::page('jobs.check-in.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->unsignedClosedCheckInJob]),
+            'jobs.check-in.print:unsigned' => self::page('jobs.check-in.print', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob]),
+            'jobs.check-in.print:signed-drawn' => self::page('jobs.check-in.print', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->drawnCheckInJob]),
+            'jobs.check-in.print:signed-paper' => self::page('jobs.check-in.print', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->paperCheckInJob]),
+            'jobs.check-in.signature:drawn' => self::page('jobs.check-in.signature', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->drawnCheckInJob], html: false),
+
             'admin.users.index' => self::plain('admin.users.index', self::ADMIN_ONLY),
             'admin.users.index:search' => self::page('admin.users.index', self::ADMIN_ONLY, query: fn (): array => ['search' => 'Bench']),
             'admin.users.create' => self::plain('admin.users.create', self::ADMIN_ONLY),

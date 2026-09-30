@@ -43,6 +43,8 @@ class LocalizationCoverageTest extends TestCase
         'parts.reasons.' => ['app/Enums/StockMovementReason.php', "__('parts.reasons.'.\$this->value)"],
         'jobs.items.types.' => ['app/Enums/JobItemType.php', "__('jobs.items.types.'.\$this->value)"],
         'jobs.attachments.types.' => ['app/Enums/AttachmentType.php', "__('jobs.attachments.types.'.\$this->value)"],
+        'check_ins.fuel_levels.' => ['app/Enums/FuelLevel.php', "__('check_ins.fuel_levels.'.\$this->value)"],
+        'check_ins.signature_methods.' => ['app/Enums/SignatureMethod.php', "__('check_ins.signature_methods.'.\$this->value)"],
         'app.roles.' => ['app/Enums/UserRole.php', "__('app.roles.'.\$this->value)"],
         'app.theme.' => ['app/Enums/Theme.php', "__('app.theme.'.\$this->value)"],
         'app.languages.' => ['app/Enums/Locale.php', "__('app.languages.'.\$this->value)"],
@@ -228,7 +230,7 @@ class LocalizationCoverageTest extends TestCase
     {
         $modules = glob(resource_path('js/modules/*.js')) ?: [];
 
-        $this->assertCount(9, $modules, 'The module count changed; extend this test to the new module.');
+        $this->assertCount(10, $modules, 'The module count changed; extend this test to the new module.');
 
         foreach ($modules as $module) {
             $source = (string) file_get_contents($module);

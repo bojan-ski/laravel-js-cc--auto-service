@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Jobs;
 
+use App\Exceptions\CheckInNotOpen;
 use App\Exceptions\UnreadableAttachment;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Jobs\StoreAttachmentRequest;
@@ -34,14 +35,22 @@ class JobAttachmentController extends Controller
 
     public function destroy(JobAttachment $attachment): RedirectResponse
     {
+        if ($attachment->isCheckInPhoto()) {
+            $attachment->loadMissing('job.checkIn');
+        }
+
         Gate::authorize('delete', $attachment);
 
-        $jobId = $attachment->job_id;
+        $back = $attachment->isCheckInPhoto() ? 'jobs.check-in.show' : 'jobs.show';
 
-        $this->attachments->delete($attachment);
+        try {
+            $this->attachments->delete($attachment);
+        } catch (CheckInNotOpen) {
+            return redirect()->route($back, $attachment->job_id)->with('error', __('check_ins.flash.not_open'));
+        }
 
         return redirect()
-            ->route('jobs.show', $jobId)
-            ->with('success', __('jobs.attachments.flash.deleted'));
+            ->route($back, $attachment->job_id)
+            ->with('success', $attachment->isCheckInPhoto() ? __('check_ins.flash.photo_deleted') : __('jobs.attachments.flash.deleted'));
     }
 }

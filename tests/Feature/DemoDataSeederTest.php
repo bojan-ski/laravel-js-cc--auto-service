@@ -6,11 +6,14 @@ use App\Enums\AppointmentStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobStatus;
 use App\Enums\PaymentMethod;
+use App\Enums\SignatureMethod;
 use App\Enums\UserRole;
 use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Job;
+use App\Models\JobAttachment;
+use App\Models\JobCheckIn;
 use App\Models\JobItem;
 use App\Models\JobTemplate;
 use App\Models\Part;
@@ -26,6 +29,7 @@ use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Env;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Tests\Support\AssertsStockInvariant;
 use Tests\TestCase;
@@ -41,6 +45,8 @@ class DemoDataSeederTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Storage::fake(config('attachments.disk'));
 
         foreach (['ADMIN_EMAIL', 'ADMIN_PASSWORD'] as $key) {
             $value = Env::getRepository()->get($key);
@@ -333,6 +339,34 @@ class DemoDataSeederTest extends TestCase
         $this->seed(DatabaseSeeder::class);
 
         $this->assertSame(3, PartNumber::query()->normalizedAs('03c-115-561-h')->count());
+    }
+
+    public function test_check_ins_are_paper_signed_with_one_unsigned_one_drawn_and_one_missing(): void
+    {
+        $this->seed(DemoDataSeeder::class);
+
+        $checkIns = JobCheckIn::query()->get();
+        $unsigned = $checkIns->reject->isSigned();
+        $drawn = $checkIns->filter->hasDrawnSignature();
+
+        $this->assertSame(Job::query()->count() - 1, $checkIns->count(), 'Every demo job but one carries a check-in sheet.');
+        $this->assertCount(1, $unsigned);
+        $this->assertTrue(Job::query()->findOrFail($unsigned->first()->job_id)->isWorking());
+        $this->assertNotNull($unsigned->first()->damage_notes, 'The open sheet must show damage notes.');
+        $this->assertNotNull($unsigned->first()->valuables, 'The open sheet must show valuables.');
+
+        foreach ($checkIns->filter->isSigned() as $signed) {
+            $this->assertSame(Customer::withTrashed()->whereKey(Job::query()->whereKey($signed->job_id)->value('customer_id'))->value('name'), $signed->signed_by_name);
+            $this->assertTrue($signed->signed_at->greaterThanOrEqualTo($signed->created_at), 'A sheet was signed before it was recorded.');
+        }
+
+        $this->assertCount(1, $drawn);
+        Storage::disk(config('attachments.disk'))->assertExists($drawn->first()->signature_path);
+        $this->assertSame(
+            $checkIns->count() - 2,
+            $checkIns->where('signature_method', SignatureMethod::Paper)->count(),
+        );
+        $this->assertSame(0, JobAttachment::query()->count(), 'The demo data ships no image files, so no check-in photos.');
     }
 
     public function test_customer_mail_is_diverted_and_the_configuration_restored(): void

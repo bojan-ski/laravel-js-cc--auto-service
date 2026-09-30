@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobAttachment;
+use App\Models\JobCheckIn;
 use App\Models\JobItem;
 use App\Models\JobTemplate;
 use App\Models\JobTemplateItem;
@@ -176,6 +177,14 @@ final class QaFixture
 
     public readonly JobAttachment $orphanedUploaderPhoto;
 
+    public readonly JobAttachment $checkInPhoto;
+
+    public readonly Job $drawnCheckInJob;
+
+    public readonly Job $paperCheckInJob;
+
+    public readonly Job $unsignedClosedCheckInJob;
+
     /** @var Collection<int, Customer> */
     private Collection $customersToTrash;
 
@@ -206,6 +215,7 @@ final class QaFixture
         $fixture->buildJobs();
         $fixture->buildInvoices();
         $fixture->buildAttachments();
+        $fixture->buildCheckIns();
         $fixture->applyHistory();
 
         return $fixture;
@@ -514,6 +524,32 @@ final class QaFixture
         $this->orphanedUploaderPhoto = $this->attach(JobAttachment::factory()->photo()->forJob($this->workingJob)->uploadedBy($this->offboardedMechanic));
         $this->attach(JobAttachment::factory()->document()->forJob($this->workingJob)->uploadedBy($this->mechanic));
         $this->attach(JobAttachment::factory()->photo()->forJob($this->completedJob)->uploadedBy($this->technician));
+    }
+
+    /**
+     * Every branch the sheet, print view and job-page summary render: an open
+     * sheet with a photo, a drawn signature over a photo that is now locked
+     * with it, a completed job whose sheet can still be signed, and a paper
+     * signature whose customer and recorder are both soft-deleted by
+     * applyHistory() afterwards.
+     */
+    private function buildCheckIns(): void
+    {
+        JobCheckIn::factory()->forJob($this->workingJob)->recordedBy($this->mechanic)->create([
+            'damage_notes' => "Scratch on rear bumper, left\nChipped windscreen",
+            'valuables' => 'Child seat',
+        ]);
+        $this->checkInPhoto = $this->attach(JobAttachment::factory()->checkIn()->forJob($this->workingJob)->uploadedBy($this->mechanic));
+
+        $this->drawnCheckInJob = $this->jobFromAppointment;
+        $this->attach(JobAttachment::factory()->checkIn()->forJob($this->drawnCheckInJob)->uploadedBy($this->technician));
+        JobCheckIn::factory()->forJob($this->drawnCheckInJob)->recordedBy($this->technician)->signedByDrawing()->create();
+
+        $this->unsignedClosedCheckInJob = $this->completedJob;
+        JobCheckIn::factory()->forJob($this->unsignedClosedCheckInJob)->recordedBy($this->creator)->create();
+
+        $this->paperCheckInJob = $this->jobWithTrashedGraph;
+        JobCheckIn::factory()->forJob($this->paperCheckInJob)->recordedBy($this->offboardedMechanic)->signedOnPaper()->create();
     }
 
     private function applyHistory(): void

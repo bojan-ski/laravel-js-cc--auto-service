@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Jobs;
 
+use App\Enums\AttachmentCategory;
 use App\Enums\AttachmentType;
 use App\Models\Job;
 use App\Models\JobAttachment;
@@ -82,26 +83,38 @@ class JobAttachmentModelTest extends TestCase
     }
 
     /**
-     * These two relations ship per the spec's Contracts table; JobController
-     * partitions the already-loaded collection in PHP instead, so nothing in
-     * app/ calls them. Without this, breaking either where() clause — or
-     * deleting the methods outright — fails nothing.
+     * attachments() is no longer loaded by the job page, which reads
+     * generalAttachments() instead, so this is the only assertion on it.
+     * Another job's attachment proves each relation is scoped to its job.
      */
-    public function test_the_photos_and_documents_relations_filter_by_type(): void
+    public function test_the_attachment_relations_split_by_category_in_id_order(): void
     {
         $job = Job::factory()->inProgress()->create();
 
-        $photo = JobAttachment::factory()->photo()->forJob($job)->create();
         $document = JobAttachment::factory()->document()->forJob($job)->create();
+        $checkInPhoto = JobAttachment::factory()->checkIn()->forJob($job)->create();
+        $photo = JobAttachment::factory()->photo()->forJob($job)->create();
 
         JobAttachment::factory()->photo()->create();
+        JobAttachment::factory()->checkIn()->create();
 
-        $this->assertSame([$photo->getKey()], $job->photos()->pluck('id')->all());
-        $this->assertSame([$document->getKey()], $job->documents()->pluck('id')->all());
+        $this->assertSame([$document->getKey(), $photo->getKey()], $job->generalAttachments()->pluck('id')->all());
+        $this->assertSame([$checkInPhoto->getKey()], $job->checkInPhotos()->pluck('id')->all());
         $this->assertEqualsCanonicalizing(
-            [$photo->getKey(), $document->getKey()],
+            [$document->getKey(), $checkInPhoto->getKey(), $photo->getKey()],
             $job->attachments()->pluck('id')->all(),
         );
+    }
+
+    public function test_a_new_attachment_is_general_and_the_category_predicate_agrees(): void
+    {
+        $general = JobAttachment::factory()->photo()->create()->fresh();
+        $checkIn = JobAttachment::factory()->checkIn()->create()->fresh();
+
+        $this->assertSame(AttachmentCategory::General, $general->category);
+        $this->assertFalse($general->isCheckInPhoto());
+        $this->assertSame(AttachmentCategory::CheckIn, $checkIn->category);
+        $this->assertTrue($checkIn->isCheckInPhoto());
     }
 
     public function test_every_attachment_type_resolves_a_label(): void

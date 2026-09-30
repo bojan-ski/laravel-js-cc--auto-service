@@ -6,6 +6,7 @@ import { registerDropdowns } from './modules/dropdown';
 import { registerFlashMessages } from './modules/flash';
 import { registerLightbox } from './modules/lightbox';
 import { registerPrintButtons } from './modules/print';
+import { registerSignaturePads } from './modules/signature-pad';
 
 registerAppointmentOverlap();
 registerConfirmForms();
@@ -15,3 +16,4 @@ registerDropdowns();
 registerFlashMessages();
 registerLightbox();
 registerPrintButtons();
+registerSignaturePads();

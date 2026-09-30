@@ -4,6 +4,7 @@ namespace Tests\Feature\Jobs;
 
 use App\Models\Job;
 use App\Models\JobAttachment;
+use App\Models\JobCheckIn;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -300,6 +301,45 @@ class JobAttachmentsViewTest extends TestCase
             $this->queriesForJobWith(10),
             'The uploader must be eager loaded, not fetched once per attachment.',
         );
+    }
+
+    /**
+     * Spec 32: check-in photos belong to the sheet. The job page shows only
+     * general attachments, and its cost does not grow with check-in photos —
+     * their count rides on the checkIn eager load as a subquery.
+     */
+    public function test_check_in_photos_stay_off_the_section_and_cost_no_queries(): void
+    {
+        $job = Job::factory()->inProgress()->create();
+        JobCheckIn::factory()->forJob($job)->create();
+        $checkIn = JobAttachment::factory()->checkIn()->forJob($job)->create(['original_filename' => 'check-in-only.jpg']);
+
+        $section = $this->attachmentsSection((string) $this->actingAs(User::factory()->receptionist()->create())
+            ->get(route('jobs.show', $job))
+            ->assertOk()
+            ->getContent());
+
+        $this->assertStringNotContainsString(route('attachments.show', ['attachment' => $checkIn, 'variant' => 'thumb']), $section);
+        $this->assertStringContainsString(e(__('jobs.show.attachments_empty')), $section);
+
+        $this->assertSame($this->queriesForJobWithCheckInPhotos(1), $this->queriesForJobWithCheckInPhotos(10));
+    }
+
+    private function queriesForJobWithCheckInPhotos(int $photos): int
+    {
+        $job = Job::factory()->inProgress()->create();
+        JobCheckIn::factory()->forJob($job)->create();
+        JobAttachment::factory()->checkIn()->forJob($job)->count($photos)->create();
+
+        DB::enableQueryLog();
+        $this->actingAs(User::factory()->receptionist()->create())
+            ->get(route('jobs.show', $job))
+            ->assertOk();
+        $count = count(DB::getQueryLog());
+        DB::disableQueryLog();
+        DB::flushQueryLog();
+
+        return $count;
     }
 
     private function queriesForJobWith(int $attachments): int

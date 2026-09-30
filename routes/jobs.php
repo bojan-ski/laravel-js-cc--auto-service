@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\Jobs\AttachmentDownloadController;
+use App\Http\Controllers\Jobs\CheckInPhotoController;
+use App\Http\Controllers\Jobs\CheckInSignatureController;
 use App\Http\Controllers\Jobs\JobAttachmentController;
+use App\Http\Controllers\Jobs\JobCheckInController;
 use App\Http\Controllers\Jobs\JobController;
 use App\Http\Controllers\Jobs\JobInvoiceController;
 use App\Http\Controllers\Jobs\JobItemController;
@@ -38,3 +41,10 @@ Route::get('/attachments/{attachment}/{variant?}', [AttachmentDownloadController
     ->whereIn('variant', ['thumb', 'full', 'original'])
     ->name('attachments.show');
 Route::delete('/attachments/{attachment}', [JobAttachmentController::class, 'destroy'])->name('attachments.destroy');
+
+Route::get('/jobs/{job}/check-in', [JobCheckInController::class, 'show'])->name('jobs.check-in.show');
+Route::put('/jobs/{job}/check-in', [JobCheckInController::class, 'update'])->name('jobs.check-in.update');
+Route::get('/jobs/{job}/check-in/print', [JobCheckInController::class, 'print'])->name('jobs.check-in.print');
+Route::post('/jobs/{job}/check-in/photos', [CheckInPhotoController::class, 'store'])->name('jobs.check-in.photos.store');
+Route::patch('/jobs/{job}/check-in/sign', [CheckInSignatureController::class, 'store'])->name('jobs.check-in.sign');
+Route::get('/jobs/{job}/check-in/signature', [CheckInSignatureController::class, 'show'])->name('jobs.check-in.signature');

@@ -20,6 +20,10 @@ class JobAttachmentPolicy
      */
     public function delete(User $user, JobAttachment $attachment): bool
     {
-        return $user->isFrontOffice() || $attachment->isUploadedBy($user);
+        if (! $user->isFrontOffice() && ! $attachment->isUploadedBy($user)) {
+            return false;
+        }
+
+        return ! $attachment->isCheckInPhoto() || $attachment->job->acceptsCheckIn();
     }
 }

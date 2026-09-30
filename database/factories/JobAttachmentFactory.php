@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\AttachmentCategory;
 use App\Enums\AttachmentType;
 use App\Models\Job;
 use App\Models\JobAttachment;
@@ -48,6 +49,15 @@ class JobAttachmentFactory extends Factory
                 'size_bytes' => 1258291,
             ];
         });
+    }
+
+    public function checkIn(): static
+    {
+        return $this->state(fn (): array => [
+            ...$this->photoAttributes(),
+            'category' => AttachmentCategory::CheckIn,
+            'original_filename' => 'rear-bumper-scratch.jpg',
+        ]);
     }
 
     public function forJob(Job $job): static

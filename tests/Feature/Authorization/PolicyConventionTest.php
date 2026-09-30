@@ -118,7 +118,7 @@ class PolicyConventionTest extends TestCase
         // One row per Authorization Summary capability, plus lettered rows
         // (4a, 4b, 10a, 10b, 16a, 20a) where a capability spans separate
         // routes carrying different verdicts.
-        $this->assertCount(53, self::matrix());
+        $this->assertCount(54, self::matrix());
 
         // Cast: PHP stores a numeric row key as an integer, so '13' comes back
         // as 13 while the lettered keys stay strings.
