@@ -103,6 +103,7 @@ trait WalksPages
             ]),
             'jobs.show:add-part' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob], fn (): array => ['add' => 'part']),
             'jobs.show:add-labor' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob], fn (): array => ['add' => 'labor']),
+            'jobs.show:template' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob], fn (): array => ['add' => 'template']),
             'jobs.invoice.create' => self::page('jobs.invoice.create', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->completedJob]),
 
             'invoices.index' => self::plain('invoices.index', self::FRONT_OFFICE),
@@ -168,6 +169,15 @@ trait WalksPages
             'parts.edit' => self::page('parts.edit', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->part]),
             'parts.adjust.create' => self::page('parts.adjust.create', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->part]),
             'parts.import.create' => self::plain('parts.import.create', self::FRONT_OFFICE),
+
+            'job-templates.index' => self::plain('job-templates.index', self::FRONT_OFFICE),
+            'job-templates.create' => self::plain('job-templates.create', self::FRONT_OFFICE),
+            'job-templates.edit' => self::page('job-templates.edit', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->template]),
+            'job-templates.edit:add-part' => self::page('job-templates.edit', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->template], fn (): array => ['add' => 'part']),
+            'job-templates.edit:edit-line' => self::page('job-templates.edit', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->template], fn (QaFixture $shop): array => [
+                'edit' => $shop->templateLine->getKey(),
+            ]),
+            'job-templates.edit:deleted-part' => self::page('job-templates.edit', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->templateWithTrashedPart]),
             'parts.import.template' => self::plain('parts.import.template', self::FRONT_OFFICE, ['html' => false]),
 
             'attachments.show:photo-original' => self::page('attachments.show', self::ALL_STAFF, fn (QaFixture $shop): array => ['attachment' => $shop->photo], html: false),

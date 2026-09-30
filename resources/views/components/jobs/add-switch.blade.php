@@ -16,4 +16,12 @@
     >
         {{ __('jobs.items.add.part_link') }}
     </x-jobs.add-link>
+
+    <x-jobs.add-link
+        :href="route('jobs.show', ['job' => $job, 'add' => 'template']).'#line-item-form'"
+        :active="$adding === 'template'"
+        :aria-label="__('templates.apply.link_label')"
+    >
+        {{ __('templates.apply.link') }}
+    </x-jobs.add-link>
 </div>

@@ -10,6 +10,7 @@ Route::middleware('auth')->group(function () {
     require __DIR__.'/appointments.php';
     require __DIR__.'/customers.php';
     require __DIR__.'/invoices.php';
+    require __DIR__.'/job-templates.php';
     require __DIR__.'/jobs.php';
     require __DIR__.'/parts.php';
     require __DIR__.'/preferences.php';

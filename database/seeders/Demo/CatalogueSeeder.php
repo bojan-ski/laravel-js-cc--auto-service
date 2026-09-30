@@ -132,6 +132,9 @@ class CatalogueSeeder extends DemoSeeder
             $this->stock->record($part, $quantity, StockMovementReason::ManualAdjustment, $this->staff('jelena'), note: 'Opening stock count');
         }
 
+        $this->travelTo($this->daysAgo(75, '15:00'));
+        $this->call(JobTemplateSeeder::class);
+
         $this->travelTo($this->daysAgo(60, '12:00'));
         $this->brands->delete($brands[self::RETIRED_BRAND]);
 

@@ -8,6 +8,7 @@ use App\Enums\StockMovementReason;
 use App\Models\Customer;
 use App\Models\Job;
 use App\Models\JobItem;
+use App\Models\JobTemplate;
 use App\Models\Part;
 use App\Models\Vehicle;
 use App\Services\AppointmentService;
@@ -21,6 +22,7 @@ use App\Services\SupplierService;
 use App\Services\VehicleService;
 use Carbon\CarbonImmutable;
 use Closure;
+use Illuminate\Support\Collection;
 
 class WorkshopSeeder extends DemoSeeder
 {
@@ -47,12 +49,7 @@ class WorkshopSeeder extends DemoSeeder
             [JobItemType::Part, 'dragan', 'BF-2201', 1],
             [JobItemType::Labor, 'dragan', 'Brake fluid flush', 0.5],
         ]],
-        ['plate' => 'NS-221-TT', 'day' => 57, 'at' => '09:00', 'booked' => null, 'by' => 'ana', 'mileage' => 213050, 'complaint' => 'Regular service: oil and filters.', 'outcome' => 'paid', 'paid_after' => 3, 'lines' => [
-            [JobItemType::Labor, 'zoran', 'Oil and filter service', 1],
-            [JobItemType::Part, 'zoran', 'OF-1003', 1],
-            [JobItemType::Part, 'zoran', 'EO-6002', 5],
-            [JobItemType::Part, 'zoran', 'AF-1102', 1],
-        ]],
+        ['plate' => 'NS-221-TT', 'day' => 57, 'at' => '09:00', 'booked' => null, 'by' => 'ana', 'mileage' => 213050, 'complaint' => 'Regular service: oil and filters.', 'outcome' => 'paid', 'paid_after' => 3, 'lines' => [], 'template' => [JobTemplateSeeder::DIESEL_SERVICE, 'ana', 'zoran']],
         ['plate' => 'BG-2101-BK', 'day' => 56, 'at' => '08:30', 'booked' => null, 'by' => 'jelena', 'mileage' => 242150, 'complaint' => 'Clutch slipping under load.', 'outcome' => 'paid', 'paid_after' => 14, 'due' => self::FLEET_DUE_DAYS, 'discounts' => [0 => self::FLEET_LABOR_DISCOUNT], 'lines' => [
             [JobItemType::Labor, 'dragan', 'Clutch replacement', 4.5],
             [JobItemType::Part, 'dragan', 'CK-8001', 1],
@@ -119,10 +116,7 @@ class WorkshopSeeder extends DemoSeeder
             [JobItemType::Part, 'dragan', 'IC-3201', 1],
             [JobItemType::Part, 'dragan', 'SP-3001', 4],
         ]],
-        ['plate' => 'SM-045-VK', 'day' => 36, 'at' => '08:00', 'booked' => null, 'by' => 'jelena', 'mileage' => 98900, 'complaint' => 'Front brakes noisy.', 'outcome' => 'paid', 'lines' => [
-            [JobItemType::Labor, 'stefan', 'Front brake pads replacement', 1],
-            [JobItemType::Part, 'stefan', 'BP-2002', 1],
-        ]],
+        ['plate' => 'SM-045-VK', 'day' => 36, 'at' => '08:00', 'booked' => null, 'by' => 'jelena', 'mileage' => 98900, 'complaint' => 'Front brakes noisy.', 'outcome' => 'paid', 'lines' => [], 'template' => [JobTemplateSeeder::FRONT_BRAKE_PADS, 'stefan', null]],
         ['plate' => 'KG-089-MP', 'day' => 35, 'at' => '12:00', 'booked' => null, 'by' => 'ana', 'mileage' => 89100, 'complaint' => 'Oil service.', 'outcome' => 'paid', 'paid_after' => 2, 'lines' => [
             [JobItemType::Labor, 'nikola', 'Oil and filter service', 0.8],
             [JobItemType::Part, 'nikola', 'OF-1001', 1],
@@ -385,6 +379,13 @@ class WorkshopSeeder extends DemoSeeder
             });
         }
 
+        if (isset($spec['template'])) {
+            $cursor = $cursor->addMinutes(35);
+            $this->at($cursor, function () use (&$job, &$items, $spec): void {
+                array_push($items, ...$this->applyTemplate($job, ...$spec['template'])->all());
+            });
+        }
+
         if ($outcome === 'in_progress') {
             return;
         }
@@ -574,5 +575,18 @@ class WorkshopSeeder extends DemoSeeder
     private function part(string $sku): Part
     {
         return Part::query()->where('sku', $sku)->firstOrFail();
+    }
+
+    /**
+     * @return Collection<int, JobItem>
+     */
+    private function applyTemplate(Job $job, string $name, string $by, ?string $mechanic): Collection
+    {
+        return $this->items->applyTemplate(
+            $job,
+            JobTemplate::query()->where('name', $name)->firstOrFail(),
+            $this->staff($by),
+            $mechanic === null ? null : $this->staff($mechanic)->getKey(),
+        );
     }
 }

@@ -7,6 +7,8 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobItem;
+use App\Models\JobTemplate;
+use App\Models\JobTemplateItem;
 use App\Models\Part;
 use App\Models\StockMovement;
 use App\Models\User;
@@ -63,6 +65,8 @@ class TableHeaderAccessibilityTest extends TestCase
         JobItem::factory()->forJob($invoiced)->create(['quantity' => 1, 'unit_price' => 100]);
         app(InvoiceService::class)->issue($invoiced, User::factory()->receptionist()->create());
 
+        JobTemplateItem::factory()->forTemplate(JobTemplate::factory()->create(['description' => 'Oil and filters']))->create();
+
         return $customer;
     }
 
@@ -83,6 +87,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'invoice detail' => ['invoices.show'],
             'staff index' => ['admin.users.index'],
             'brands index' => ['admin.brands.index'],
+            'job templates index' => ['job-templates.index'],
         ];
     }
 
@@ -163,6 +168,7 @@ class TableHeaderAccessibilityTest extends TestCase
             'invoices index' => ['invoices.index'],
             'staff index' => ['admin.users.index'],
             'brands index' => ['admin.brands.index'],
+            'job templates index' => ['job-templates.index'],
         ];
     }
 

@@ -35,6 +35,7 @@ class EmptyInstallTest extends TestCase
         'parts.index' => ['parts.empty.none.title'],
         'invoices.index' => ['invoices.empty.none.title'],
         'admin.brands.index' => ['brands.empty.none.title'],
+        'job-templates.index' => ['templates.empty.none.title'],
     ];
 
     public function test_the_install_holds_only_the_seeded_admin(): void

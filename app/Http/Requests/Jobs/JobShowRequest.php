@@ -37,6 +37,10 @@ class JobShowRequest extends FormRequest
 
     public function addingType(): string
     {
-        return $this->query('add') === 'part' ? 'part' : 'labor';
+        return match ($this->query('add')) {
+            'part' => 'part',
+            'template' => 'template',
+            default => 'labor',
+        };
     }
 }

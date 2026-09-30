@@ -15,6 +15,7 @@ return [
         'user_menu' => 'Account menu',
         'staff' => 'Staff',
         'brands' => 'Brands',
+        'templates' => 'Job templates',
         'sign_out' => 'Sign out',
     ],
 

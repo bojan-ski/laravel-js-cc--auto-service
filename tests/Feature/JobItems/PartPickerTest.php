@@ -132,6 +132,8 @@ class PartPickerTest extends TestCase
         $selects = $this->partSelects();
 
         $this->assertCount(1, $selects);
+        $this->assertStringContainsString('`sku`', $selects[0]);
+        $this->assertStringNotContainsString('select *', $selects[0]);
         $this->assertStringNotContainsString('unit_price', $selects[0]);
         $this->assertStringNotContainsString('cost_price', $selects[0]);
     }
@@ -145,6 +147,23 @@ class PartPickerTest extends TestCase
         $selects = $this->partSelects();
 
         $this->assertCount(1, $selects);
+        $this->assertStringContainsString('`sku`', $selects[0]);
+        $this->assertStringNotContainsString('select *', $selects[0]);
+        $this->assertStringNotContainsString('cost_price', $selects[0]);
+    }
+
+    public function test_an_admins_picker_query_selects_no_price_column(): void
+    {
+        Part::factory()->create();
+
+        DB::enableQueryLog();
+        $this->picker('admin');
+        $selects = $this->partSelects();
+
+        $this->assertCount(1, $selects);
+        $this->assertStringContainsString('`sku`', $selects[0]);
+        $this->assertStringNotContainsString('select *', $selects[0]);
+        $this->assertStringNotContainsString('unit_price', $selects[0]);
         $this->assertStringNotContainsString('cost_price', $selects[0]);
     }
 
@@ -168,6 +187,8 @@ class PartPickerTest extends TestCase
      */
     private function picker(string $role = 'receptionist'): array
     {
-        return app(PartService::class)->pickerOptions(User::factory()->{$role}()->create());
+        $this->actingAs(User::factory()->{$role}()->create());
+
+        return app(PartService::class)->pickerOptions();
     }
 }

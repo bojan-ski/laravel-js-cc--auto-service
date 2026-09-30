@@ -8,6 +8,8 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobItem;
+use App\Models\JobTemplate;
+use App\Models\JobTemplateItem;
 use App\Models\Part;
 use App\Models\PartNumber;
 use App\Models\User;
@@ -87,6 +89,7 @@ trait AuthorizationMatrix
             + self::customerAndVehicleRows()
             + self::appointmentRows()
             + self::partRows()
+            + self::templateRows()
             + self::invoiceRows()
             + self::adminRows()
             + self::sessionRows();
@@ -178,6 +181,12 @@ trait AuthorizationMatrix
         $this->fixtures['resetToken'] = Password::broker()->createToken($resetUser);
 
         $this->fixtures['partNumber'] = PartNumber::factory()->for($part)->create();
+
+        $template = JobTemplate::factory()->create();
+        $this->fixtures['template'] = $template;
+        $this->fixtures['templateLine'] = JobTemplateItem::factory()->forTemplate($template)->labor()->create(['position' => 1]);
+        JobTemplateItem::factory()->forTemplate($template)->forPart($part, 1)->create(['position' => 2]);
+        $this->fixtures['trashedTemplate'] = JobTemplate::factory()->trashed()->create();
         $this->fixtures['workingJob'] = $this->jobWithLine('inProgress', $owner, $vehicle);
         $this->fixtures['completedJob'] = $this->jobWithLine('completed', $owner, $vehicle);
 
@@ -524,6 +533,24 @@ trait AuthorizationMatrix
                 ],
                 'guest' => self::LOGIN,
                 'mechanic' => 403,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
+            '45' => [
+                'capability' => 'Apply a job template to a job',
+                'requests' => [
+                    [
+                        'method' => 'post',
+                        'route' => 'jobs.templates.apply',
+                        'params' => ['workingJob'],
+                        'payload' => fn ($t): array => [
+                            'job_template_id' => $t->fixture('template')->getKey(),
+                            'user_id' => $t->fixture('owner')->getKey(),
+                        ],
+                    ],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => self::ALLOW,
                 'receptionist' => self::ALLOW,
                 'admin' => self::ALLOW,
             ],
@@ -978,6 +1005,70 @@ trait AuthorizationMatrix
                 'guest' => self::LOGIN,
                 'mechanic' => 403,
                 'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
+        ];
+    }
+
+    /**
+     * Rows 46 and 47: managing job templates. Applying one is row 45, with the
+     * other line-item rows, because JobPolicy::createItem authorizes it.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private static function templateRows(): array
+    {
+        return [
+            '46' => [
+                'capability' => 'Create / edit job templates',
+                'requests' => [
+                    ['method' => 'get', 'route' => 'job-templates.index'],
+                    ['method' => 'get', 'route' => 'job-templates.create'],
+                    [
+                        'method' => 'post',
+                        'route' => 'job-templates.store',
+                        'payload' => fn (): array => ['name' => 'Matrix template'],
+                    ],
+                    ['method' => 'get', 'route' => 'job-templates.edit', 'params' => ['template']],
+                    [
+                        'method' => 'put',
+                        'route' => 'job-templates.update',
+                        'params' => ['template'],
+                        'payload' => fn (): array => ['name' => 'Matrix template, renamed'],
+                    ],
+                    [
+                        'method' => 'post',
+                        'route' => 'job-templates.items.store',
+                        'params' => ['template'],
+                        'payload' => fn (): array => ['type' => 'labor', 'line_description' => 'Test drive', 'quantity' => '0.50'],
+                    ],
+                    [
+                        'method' => 'put',
+                        'route' => 'job-templates.items.update',
+                        'params' => ['template', 'templateLine'],
+                        'payload' => fn (): array => ['line_description' => 'Oil service, revised', 'quantity' => '1.25'],
+                    ],
+                    [
+                        'method' => 'delete',
+                        'route' => 'job-templates.items.destroy',
+                        'params' => ['template', 'templateLine'],
+                    ],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => 403,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
+            '47' => [
+                'capability' => 'Delete / restore a job template',
+                'admin_only' => true,
+                'requests' => [
+                    ['method' => 'delete', 'route' => 'job-templates.destroy', 'params' => ['template']],
+                    ['method' => 'patch', 'route' => 'job-templates.restore', 'params' => ['trashedTemplate']],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => 403,
+                'receptionist' => 403,
                 'admin' => self::ALLOW,
             ],
         ];
