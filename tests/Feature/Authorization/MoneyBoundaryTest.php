@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\Support\ReadsLineItemsTable;
 use Tests\TestCase;
 
@@ -448,6 +449,17 @@ class MoneyBoundaryTest extends TestCase
             }
         }
 
+        // The export's own invoice query exists only once its streamed body has
+        // been produced, so its presence proves the loop above checked the
+        // export's statements and not only those issued before the stream.
+        $this->assertNotEmpty(
+            array_filter(
+                $this->queriesFor('receptionist', route('reports.export')),
+                fn (string $sql): bool => str_contains($sql, 'from `invoices` inner join `jobs`'),
+            ),
+            'The export\'s own query is missing, so its streamed body was never read.',
+        );
+
         $this->assertNotEmpty(
             $this->queriesTouching($this->queriesFor('receptionist', route('reports.index')), 'parts'),
             'The report must read parts at all, or the cost check above could pass on a page that never looked.',
@@ -495,12 +507,27 @@ class MoneyBoundaryTest extends TestCase
     /**
      * @return list<string>
      */
+    /**
+     * The statements one page issues for one role. The user is created before
+     * the log opens, so a page that issues nothing reads as empty rather than
+     * as the user's own insert. A streamed response (the CSV export) runs its
+     * queries only while its body is produced, so the body is read before the
+     * log is.
+     *
+     * @return list<string>
+     */
     private function queriesFor(string $role, string $url): array
     {
+        $user = User::factory()->{$role}()->create();
+
         DB::flushQueryLog();
         DB::enableQueryLog();
 
-        $this->actingAs(User::factory()->{$role}()->create())->get($url)->assertOk();
+        $response = $this->actingAs($user)->get($url)->assertOk();
+
+        if ($response->baseResponse instanceof StreamedResponse) {
+            $response->streamedContent();
+        }
 
         $queries = array_map(fn (array $query): string => $query['query'], DB::getQueryLog());
 
