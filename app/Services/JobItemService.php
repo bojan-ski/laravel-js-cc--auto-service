@@ -84,7 +84,7 @@ class JobItemService
         return DB::transaction(function () use ($job, $template, $actor, $mechanicId): Collection {
             $this->lockWritableJob($job->getKey());
 
-            if ($template->trashed()) {
+            if (JobTemplate::withTrashed()->whereKey($template->getKey())->valueOrFail('deleted_at') !== null) {
                 throw new InvalidArgumentException('A deleted template cannot be applied.');
             }
 
@@ -127,7 +127,7 @@ class JobItemService
         return DB::transaction(function () use ($item, $actor, $attributes): JobItem {
             $this->lockWritableJob($item->job_id);
 
-            $previousQuantity = (int) $item->getOriginal('quantity');
+            $previousQuantity = $this->syncLockedQuantity($item);
 
             $item->fill($attributes);
 
@@ -155,12 +155,14 @@ class JobItemService
         DB::transaction(function () use ($item, $actor): void {
             $this->lockWritableJob($item->job_id);
 
+            $quantity = $this->syncLockedQuantity($item);
+
             if ($item->isPart()) {
                 $part = $this->resolvePart($item, $actor);
 
                 $this->stock->record(
                     $part,
-                    (int) $item->quantity,
+                    $quantity,
                     StockMovementReason::JobReturn,
                     $actor,
                     $item,
@@ -204,6 +206,16 @@ class JobItemService
         }
 
         return $job;
+    }
+
+    private function syncLockedQuantity(JobItem $item): int
+    {
+        $current = JobItem::query()->whereKey($item->getKey())->valueOrFail('quantity');
+
+        $item->quantity = $current;
+        $item->syncOriginalAttribute('quantity');
+
+        return (int) $current;
     }
 
     private function applyQuantityDelta(JobItem $item, User $actor, int $previousQuantity): void

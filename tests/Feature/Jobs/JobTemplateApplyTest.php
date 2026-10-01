@@ -182,6 +182,29 @@ class JobTemplateApplyTest extends TestCase
         }
     }
 
+    /**
+     * The route resolves the template before the job row is locked; a template
+     * deleted in that window must still be refused, so the check reads the row
+     * under the lock rather than the instance it was handed (spec 36 review).
+     */
+    public function test_a_template_deleted_after_it_was_resolved_is_refused(): void
+    {
+        $job = Job::factory()->inProgress()->create();
+        $template = $this->template('Brakes', [['labor', 'Brake service', '1.00'], ['part', $this->stockedPart('Pads', '54.00', 4), 1]]);
+        JobTemplate::query()->findOrFail($template->getKey())->delete();
+        $movementsBefore = StockMovement::query()->count();
+
+        $this->assertFalse($template->trashed(), 'The instance handed to the service must still read as live.');
+        $this->expectException(InvalidArgumentException::class);
+
+        try {
+            app(JobItemService::class)->applyTemplate($job, $template, User::factory()->mechanic()->create(), null);
+        } finally {
+            $this->assertSame(0, JobItem::query()->count());
+            $this->assertSame($movementsBefore, StockMovement::query()->count());
+        }
+    }
+
     public function test_a_template_with_a_deleted_part_writes_nothing_and_names_the_part(): void
     {
         $job = Job::factory()->inProgress()->create();

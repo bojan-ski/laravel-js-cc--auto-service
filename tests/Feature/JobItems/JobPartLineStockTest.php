@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\JobItemService;
 use App\Services\JobService;
 use App\Services\StockService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\Support\AssertsStockInvariant;
@@ -206,6 +207,75 @@ class JobPartLineStockTest extends TestCase
         $this->assertSame(7, $good->fresh()->quantity_in_stock);
         $this->assertSame(self::SIGNED_INT_MAX, $brimming->fresh()->quantity_in_stock);
         $this->assertSame($movementsBefore, StockMovement::query()->count());
+        $this->assertStockMatchesLedger();
+    }
+
+    /**
+     * The route resolves the line before the job row is locked, so a second
+     * writer can change it in between. The delta must come from the row as it
+     * stands under the lock, or the shelf drifts from what the line says
+     * (spec 36 review, workflow-auditor).
+     */
+    public function test_an_edit_from_a_stale_line_moves_stock_by_what_the_row_holds_under_the_lock(): void
+    {
+        $part = $this->stockedPart(10);
+        $item = $this->addPart($part, 5);
+        $stale = $item->fresh();
+
+        $this->items()->update($item->fresh(), $this->actor(), ['quantity' => '3']);
+        $this->items()->update($stale, $this->actor(), ['quantity' => '4']);
+
+        $this->assertSame('4.00', $item->fresh()->quantity);
+        $this->assertSame(6, $part->fresh()->quantity_in_stock);
+        $this->assertStockMatchesLedger();
+    }
+
+    public function test_an_edit_back_to_the_stale_value_is_still_written(): void
+    {
+        $part = $this->stockedPart(10);
+        $item = $this->addPart($part, 5);
+        $stale = $item->fresh();
+
+        $this->items()->update($item->fresh(), $this->actor(), ['quantity' => '3']);
+        $this->items()->update($stale, $this->actor(), ['quantity' => '5']);
+
+        $this->assertSame('5.00', $item->fresh()->quantity);
+        $this->assertSame(5, $part->fresh()->quantity_in_stock);
+        $this->assertStockMatchesLedger();
+    }
+
+    public function test_a_delete_from_a_stale_line_returns_what_the_row_holds(): void
+    {
+        $part = $this->stockedPart(10);
+        $item = $this->addPart($part, 5);
+        $stale = $item->fresh();
+
+        $this->items()->update($item->fresh(), $this->actor(), ['quantity' => '3']);
+        $this->items()->delete($stale, $this->actor());
+
+        $this->assertFalse(JobItem::query()->whereKey($item->getKey())->exists());
+        $this->assertSame(10, $part->fresh()->quantity_in_stock);
+        $this->assertStockMatchesLedger();
+    }
+
+    public function test_a_line_deleted_elsewhere_is_not_returned_to_stock_twice(): void
+    {
+        $part = $this->stockedPart(10);
+        $item = $this->addPart($part, 5);
+        $stale = $item->fresh();
+
+        $this->items()->delete($item->fresh(), $this->actor());
+        $movementsAfterDelete = StockMovement::query()->count();
+
+        try {
+            $this->items()->delete($stale, $this->actor());
+            $this->fail('A line that no longer exists must not be deleted again.');
+        } catch (ModelNotFoundException) {
+            // the refusal is the expected outcome
+        }
+
+        $this->assertSame(10, $part->fresh()->quantity_in_stock);
+        $this->assertSame($movementsAfterDelete, StockMovement::query()->count());
         $this->assertStockMatchesLedger();
     }
 
