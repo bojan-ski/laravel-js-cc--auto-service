@@ -62,6 +62,18 @@ class DashboardDueSoonTest extends TestCase
         return substr($html, $start, (int) strpos($html, '</section>', $start) - $start);
     }
 
+    /**
+     * Tailwind's preflight removes list markers, and Safari/VoiceOver then
+     * drops the list semantics and the item count unless the list says so
+     * (spec 36 review, a11y-static-auditor; the check-in photo lists already do).
+     */
+    public function test_the_rows_are_announced_as_a_list(): void
+    {
+        $this->vehicle(['next_service_on' => $this->inDays(5)]);
+
+        $this->assertStringContainsString('<ul role="list">', $this->panel($this->dashboard()));
+    }
+
     public function test_it_lists_every_date_on_or_before_thirty_days_out_including_overdue(): void
     {
         $long = $this->vehicle(['next_service_on' => $this->inDays(-40)]);

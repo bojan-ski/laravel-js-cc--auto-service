@@ -33,6 +33,33 @@ class CheckInPrintTest extends TestCase
         return ['mechanic' => ['mechanic'], 'receptionist' => ['receptionist'], 'admin' => ['admin']];
     }
 
+    /**
+     * Several damage photos by one uploader once shared one alt text, so a
+     * screen-reader user could not tell them apart (spec 36 review,
+     * a11y-static-auditor, WCAG 1.1.1). Each now carries its position.
+     */
+    public function test_each_printed_damage_photo_has_its_own_alt_text(): void
+    {
+        $job = Job::factory()->inProgress()->create();
+        JobCheckIn::factory()->forJob($job)->create();
+        $uploader = User::factory()->mechanic()->create();
+        JobAttachment::factory()->checkIn()->forJob($job)->uploadedBy($uploader)->count(3)->create();
+
+        $html = $this->actingAs(User::factory()->receptionist()->create())
+            ->get(route('jobs.check-in.print', $job))
+            ->assertOk()
+            ->getContent();
+
+        preg_match_all('/<img[^>]+alt="([^"]*)"/', $html, $matches);
+        $photoAlts = array_values(array_filter($matches[1], fn (string $alt): bool => str_contains($alt, $job->reference)));
+
+        $this->assertSame([
+            e(__('check_ins.photos.print_alt', ['position' => 1, 'count' => 3, 'reference' => $job->reference])),
+            e(__('check_ins.photos.print_alt', ['position' => 2, 'count' => 3, 'reference' => $job->reference])),
+            e(__('check_ins.photos.print_alt', ['position' => 3, 'count' => 3, 'reference' => $job->reference])),
+        ], $photoAlts);
+    }
+
     #[DataProvider('roles')]
     public function test_an_unsigned_sheet_prints_the_shop_vehicle_condition_and_blank_signature_lines(string $role): void
     {

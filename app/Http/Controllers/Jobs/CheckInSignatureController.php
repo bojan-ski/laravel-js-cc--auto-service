@@ -42,6 +42,10 @@ class CheckInSignatureController extends Controller
 
         abort_unless($job->checkIn?->hasDrawnSignature() ?? false, 404);
 
-        return Storage::disk(config('attachments.disk'))->response($job->checkIn->signature_path, null, ['Content-Type' => 'image/png']);
+        $disk = Storage::disk(config('attachments.disk'));
+
+        abort_unless($disk->exists($job->checkIn->signature_path), 404);
+
+        return $disk->response($job->checkIn->signature_path, null, ['Content-Type' => 'image/png']);
     }
 }

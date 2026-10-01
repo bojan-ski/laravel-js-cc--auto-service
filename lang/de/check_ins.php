@@ -44,6 +44,7 @@ return [
 
     'photos' => [
         'heading' => 'Schadensfotos',
+        'print_alt' => 'Schadensfoto :position von :count, Auftrag :reference',
         'empty' => 'Keine Schadensfotos.',
         'label' => 'Schadensfoto hinzufügen',
         'upload' => 'Foto hochladen',

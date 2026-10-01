@@ -44,6 +44,7 @@ return [
 
     'photos' => [
         'heading' => 'Fotografije oštećenja',
+        'print_alt' => 'Fotografija oštećenja :position od :count, nalog :reference',
         'empty' => 'Nema fotografija oštećenja.',
         'label' => 'Dodaj fotografiju oštećenja',
         'upload' => 'Otpremi fotografiju',

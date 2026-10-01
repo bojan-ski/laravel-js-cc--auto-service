@@ -44,6 +44,7 @@ return [
 
     'photos' => [
         'heading' => 'Damage photos',
+        'print_alt' => 'Damage photo :position of :count, job :reference',
         'empty' => 'No damage photos.',
         'label' => 'Add a damage photo',
         'upload' => 'Upload photo',
