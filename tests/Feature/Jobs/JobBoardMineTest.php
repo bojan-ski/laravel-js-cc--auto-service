@@ -4,6 +4,7 @@ namespace Tests\Feature\Jobs;
 
 use App\Enums\JobStatus;
 use App\Http\Requests\Jobs\JobIndexRequest;
+use App\Models\Customer;
 use App\Models\Job;
 use App\Models\JobItem;
 use App\Models\User;
@@ -200,6 +201,10 @@ class JobBoardMineTest extends TestCase
         $this->assertSame(1, array_sum($response->viewData('counts')));
     }
 
+    /**
+     * The completed job of "mine" is owned by a pinned name for the reason
+     * given on test_mine_and_the_search_narrow_together.
+     */
     public function test_tab_counts_under_mine_count_only_my_jobs_and_respect_the_search(): void
     {
         $user = User::factory()->mechanic()->create();
@@ -207,7 +212,7 @@ class JobBoardMineTest extends TestCase
 
         $this->laborLine(Job::factory()->received()->for($plate)->create(), $user);
         $this->laborLine(Job::factory()->inProgress()->for($plate)->create(), $user);
-        $this->laborLine(Job::factory()->completed()->create(), $user);
+        $this->laborLine(Job::factory()->completed()->for(Vehicle::factory()->for(Customer::factory()->create(['name' => 'Petar Jovanović'])))->create(), $user);
         Job::factory()->received()->for($plate)->count(2)->create();
         Job::factory()->cancelled()->create();
 
@@ -263,6 +268,12 @@ class JobBoardMineTest extends TestCase
         $this->assertSame([$mine[$status->value]], $this->pageIds($this->board($user, ['status' => $status->value])));
     }
 
+    /**
+     * The search matches the plate OR the customer's name, so the unrelated job
+     * of "mine" is owned by a pinned name: Faker's en_US first names include
+     * Carmine, Minerva, Wilhelmine and Yasmine, any of which matched "MINE"
+     * and made this test fail at random (found in spec 36's review).
+     */
     public function test_mine_and_the_search_narrow_together(): void
     {
         $user = User::factory()->mechanic()->create();
@@ -270,7 +281,7 @@ class JobBoardMineTest extends TestCase
 
         $hit = Job::factory()->for($plate)->create();
         $this->laborLine($hit, $user);
-        $this->laborLine(Job::factory()->create(), $user);
+        $this->laborLine(Job::factory()->for(Vehicle::factory()->for(Customer::factory()->create(['name' => 'Petar Jovanović'])))->create(), $user);
         Job::factory()->for($plate)->create();
 
         $this->assertSame([$hit->getKey()], $this->serviceIds($user, ['search' => 'MINE']));
