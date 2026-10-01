@@ -40,6 +40,8 @@
 
     <x-forms.field name="mileage" type="number" :label="__('vehicles.form.mileage')" :value="$vehicle?->mileage" class="tabular-nums" />
 
+    <x-vehicles.service-dates :vehicle="$vehicle" />
+
     <x-forms.textarea name="notes" :label="__('vehicles.form.notes')" :value="$vehicle?->notes" />
 
     <div class="flex flex-wrap gap-2">

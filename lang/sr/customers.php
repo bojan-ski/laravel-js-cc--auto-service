@@ -36,6 +36,9 @@ return [
         'address' => 'Adresa',
         'tax_id' => 'PIB',
         'registration_number' => 'Matični broj (MB)',
+        'receives_reminders' => 'Podsetnici za servis',
+        'reminders_on' => 'Uključeni',
+        'reminders_off' => 'Isključeni',
         'notes' => 'Napomene',
         'jobs' => 'Istorija radnih naloga',
         'jobs_empty' => 'Još nema evidentiranih radnih naloga.',
@@ -61,6 +64,7 @@ return [
         'company_hint' => 'Za pravno lice unesite i PIB i matični broj. Za fizičko lice ostavite oba polja prazna.',
         'tax_id' => 'PIB',
         'registration_number' => 'Matični broj (MB)',
+        'receives_reminders' => 'Šalji podsetnike za servis',
         'notes' => 'Napomene (opciono)',
     ],
 

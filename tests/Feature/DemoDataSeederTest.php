@@ -7,6 +7,7 @@ use App\Enums\EstimateStatus;
 use App\Enums\InvoiceStatus;
 use App\Enums\JobStatus;
 use App\Enums\PaymentMethod;
+use App\Enums\ReminderKind;
 use App\Enums\SignatureMethod;
 use App\Enums\UserRole;
 use App\Models\Appointment;
@@ -22,8 +23,11 @@ use App\Models\Part;
 use App\Models\PartNumber;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\VehicleReminder;
 use App\Services\InvoiceService;
+use App\Services\ReminderService;
 use App\Services\TaxIdChecksum;
+use Carbon\CarbonImmutable;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\Demo\DemoSeeder;
 use Database\Seeders\Demo\JobTemplateSeeder;
@@ -416,6 +420,22 @@ class DemoDataSeederTest extends TestCase
         $this->assertNotEmpty(app('mail.manager')->mailer('array')->getSymfonyTransport()->messages());
         $this->assertSame('database', config('queue.default'));
         $this->assertSame('log', config('mail.default'));
+    }
+
+    public function test_due_soon_shows_both_kinds_an_overdue_row_and_every_contact_state(): void
+    {
+        config(['queue.default' => 'database', 'mail.default' => 'log']);
+
+        $this->seed(DemoDataSeeder::class);
+
+        $rows = collect(app(ReminderService::class)->dueSoon(CarbonImmutable::today()));
+
+        $this->assertEqualsCanonicalizing(ReminderKind::cases(), $rows->pluck('kind')->unique()->values()->all());
+        $this->assertTrue($rows->contains('overdue', true));
+        $this->assertEqualsCanonicalizing(['emailed', 'pending', 'call'], $rows->pluck('contact')->unique()->values()->all());
+        $this->assertTrue(Customer::query()->where('receives_reminders', false)->exists());
+        $this->assertSame($rows->where('contact', 'emailed')->count(), VehicleReminder::query()->count());
+        $this->assertDatabaseCount('queue_jobs', 0);
     }
 
     public function test_a_second_run_changes_nothing(): void

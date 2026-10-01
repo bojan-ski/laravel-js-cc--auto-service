@@ -12,6 +12,9 @@
         $rows['registration_number'] = $customer->registration_number;
     }
 
+    $rows['receives_reminders'] = $customer->receives_reminders
+        ? __('customers.show.reminders_on')
+        : __('customers.show.reminders_off');
     $rows['notes'] = $customer->notes;
     $numeric = ['phone', 'tax_id', 'registration_number'];
 @endphp

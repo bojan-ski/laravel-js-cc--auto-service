@@ -5,7 +5,9 @@ namespace Tests\Feature\Authorization;
 use App\Models\Part;
 use App\Models\PartNumber;
 use App\Models\User;
+use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Support\AuthorizationMatrix;
 use Tests\TestCase;
 
@@ -96,6 +98,33 @@ class RoleMatrixTest extends TestCase
                 ->assertOk()
                 ->assertSee('1K0 615 301 AA')
                 ->assertSee('BP-9911');
+        }
+    }
+
+    /**
+     * Row 52: the due-soon list is a dashboard panel with no route of its own,
+     * so the capability is asserted on the dashboard. The query log carries the
+     * real boundary: a mechanic's request never reads the reminders table.
+     */
+    public function test_only_front_office_sees_the_due_soon_list(): void
+    {
+        $vehicle = Vehicle::factory()->create(['next_service_on' => now()->addDays(5)]);
+
+        foreach (['mechanic' => false, 'receptionist' => true, 'admin' => true] as $role => $sees) {
+            DB::flushQueryLog();
+            DB::enableQueryLog();
+
+            $html = $this->actingAs(User::factory()->{$role}()->create())
+                ->get(route('dashboard'))
+                ->assertOk()
+                ->getContent();
+
+            $readsReminders = collect(DB::getQueryLog())->contains(fn (array $q): bool => str_contains($q['query'], '`vehicle_reminders`'));
+            DB::disableQueryLog();
+
+            $this->assertSame($sees, $readsReminders, "{$role}: reminders query");
+            $this->assertSame($sees, str_contains($html, trans_choice('dashboard.due_soon.title', 1, ['count' => 1])), "{$role}: panel");
+            $this->assertSame($sees, str_contains($html, route('vehicles.show', $vehicle)), "{$role}: row link");
         }
     }
 

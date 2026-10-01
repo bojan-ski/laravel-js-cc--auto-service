@@ -107,6 +107,7 @@ trait WalksPages
             'jobs.show:estimate-over' => self::page('jobs.show', self::ALL_STAFF, fn (QaFixture $shop): array => [$shop->workingJob]),
             'jobs.invoice.create' => self::page('jobs.invoice.create', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->voidedJob]),
             'jobs.invoice.create:estimate-pending' => self::page('jobs.invoice.create', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->completedJob]),
+            'jobs.next-service.edit' => self::page('jobs.next-service.edit', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->completedJob], trashed: 404),
 
             'estimates.show:pending' => self::page('estimates.show', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->pendingEstimate]),
             'estimates.show:approved' => self::page('estimates.show', self::FRONT_OFFICE, fn (QaFixture $shop): array => [$shop->approvedEstimate]),

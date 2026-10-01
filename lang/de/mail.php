@@ -42,6 +42,21 @@ return [
         'line_discounted' => ':description × :quantity (:percent % Rabatt)',
     ],
 
+    'service_reminder' => [
+        'subject_service' => 'Serviceerinnerung für :plate',
+        'subject_registration' => 'Zulassungserinnerung für :plate',
+        'heading_service' => 'Serviceerinnerung',
+        'heading_registration' => 'Zulassungserinnerung',
+        'greeting' => 'Guten Tag :name,',
+        'body_service' => 'Für Ihren :make :model (:plate) ist der nächste Service am :date fällig.',
+        'body_registration' => 'Die Zulassung Ihres :make :model (:plate) läuft am :date ab.',
+        'due_on' => 'Fällig am',
+        'or_at' => 'Oder bei',
+        'expires_on' => 'Läuft ab am',
+        'book' => 'Rufen Sie uns an, um einen Termin zu vereinbaren.',
+        'opt_out' => 'Wenn Sie diese Erinnerungen nicht mehr erhalten möchten, sagen Sie uns Bescheid, und wir stellen sie ein.',
+    ],
+
     'totals' => [
         'before_discount' => 'Vor Rabatt',
         'discount' => 'Rabatt',

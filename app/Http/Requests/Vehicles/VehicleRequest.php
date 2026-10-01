@@ -36,8 +36,41 @@ abstract class VehicleRequest extends FormRequest
             'vin' => ['nullable', 'string', 'max:17', $this->uniqueAmongActive('vin')],
             'engine' => ['nullable', 'string', 'max:60'],
             'mileage' => ['nullable', 'integer', 'min:0'],
+            ...self::serviceDateRules(),
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public static function serviceDateRules(): array
+    {
+        return [
+            'next_service_on' => ['nullable', 'date_format:Y-m-d'],
+            'next_service_mileage' => ['nullable', 'integer', 'min:0', 'max:9999999'],
+            'registration_expires_on' => ['nullable', 'date_format:Y-m-d'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function serviceDateAttributes(): array
+    {
+        return [
+            'next_service_on' => __('vehicles.form.next_service_on'),
+            'next_service_mileage' => __('vehicles.form.next_service_mileage'),
+            'registration_expires_on' => __('vehicles.form.registration_expires_on'),
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return self::serviceDateAttributes();
     }
 
     /**

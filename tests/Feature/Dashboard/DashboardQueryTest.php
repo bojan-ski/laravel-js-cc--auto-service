@@ -24,11 +24,19 @@ class DashboardQueryTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
+    /**
+     * Every vehicle carries a service date and a registration date, the first
+     * one overdue, and every other customer has opted out, so the Due soon panel
+     * renders all three contact states rather than an empty list.
+     */
     private function fixture(int $each): void
     {
         for ($i = 1; $i <= $each; $i++) {
-            $customer = Customer::factory()->create();
-            $vehicle = Vehicle::factory()->for($customer)->create();
+            $customer = Customer::factory()->create(['receives_reminders' => $i % 2 === 0]);
+            $vehicle = Vehicle::factory()->for($customer)->create([
+                'next_service_on' => CarbonImmutable::today()->addDays($i === 1 ? -3 : $i % 30),
+                'registration_expires_on' => CarbonImmutable::today()->addDays(($i * 7) % 30),
+            ]);
 
             Appointment::factory()->for($customer)->for($vehicle)->create([
                 'scheduled_at' => CarbonImmutable::today()->setTime(8, 0)->addMinutes($i),
@@ -133,6 +141,7 @@ class DashboardQueryTest extends TestCase
             '`appointments`' => 'order by `scheduled_at` asc, `id` asc',
             '`jobs`' => 'order by `created_at` asc, `id` asc',
             '`parts`' => 'order by `name` asc, `id` asc',
+            '`vehicle_reminders`' => 'order by `due_on` asc, `registration_plate` asc, `kind` asc limit 15',
         ];
 
         foreach ($ordered as $table => $clause) {
@@ -167,9 +176,20 @@ class DashboardQueryTest extends TestCase
         $queries = $this->queriesFor('receptionist');
         $counts = array_values(array_filter($queries, fn (string $q): bool => str_contains($q, 'count(*)')));
 
-        $this->assertCount(2, $counts, 'Expected exactly one count query for jobs and one for parts: '.implode("\n", $queries));
+        $this->assertCount(3, $counts, 'Expected exactly one count query each for jobs, parts and due soon: '.implode("\n", $queries));
         $this->assertNotEmpty(array_filter($counts, fn (string $q): bool => str_contains($q, '`jobs`')));
         $this->assertNotEmpty(array_filter($counts, fn (string $q): bool => str_contains($q, '`parts`')));
+        $this->assertNotEmpty(array_filter($counts, fn (string $q): bool => str_contains($q, '`vehicle_reminders`')));
+    }
+
+    public function test_a_mechanic_issues_no_due_soon_count(): void
+    {
+        $this->fixture(3);
+
+        $queries = $this->queriesFor('mechanic');
+        $counts = array_values(array_filter($queries, fn (string $q): bool => str_contains($q, 'count(*)')));
+
+        $this->assertCount(2, $counts, 'Expected exactly one count query for jobs and one for parts: '.implode("\n", $queries));
     }
 
     /**

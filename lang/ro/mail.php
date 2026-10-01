@@ -42,6 +42,21 @@ return [
         'line_discounted' => ':description × :quantity (discount :percent%)',
     ],
 
+    'service_reminder' => [
+        'subject_service' => 'Memento service pentru :plate',
+        'subject_registration' => 'Memento înmatriculare pentru :plate',
+        'heading_service' => 'Memento service',
+        'heading_registration' => 'Memento înmatriculare',
+        'greeting' => 'Bună ziua, :name,',
+        'body_service' => 'Următorul service pentru :make :model (:plate) este programat pe :date.',
+        'body_registration' => 'Înmatricularea pentru :make :model (:plate) expiră pe :date.',
+        'due_on' => 'Scadent pe',
+        'or_at' => 'Sau la',
+        'expires_on' => 'Expiră pe',
+        'book' => 'Sunați-ne pentru a programa o vizită.',
+        'opt_out' => 'Dacă preferați să nu mai primiți aceste mementouri, anunțați-ne și le vom opri.',
+    ],
+
     'totals' => [
         'before_discount' => 'Înainte de discount',
         'discount' => 'Discount',

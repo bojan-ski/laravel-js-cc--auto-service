@@ -28,7 +28,7 @@ class EmptyInstallTest extends TestCase
      * @var array<string, list<string>> route => the resolved copy its empty state must show
      */
     private const EMPTY_STATES = [
-        'dashboard' => ['dashboard.today.empty', 'dashboard.active_jobs.empty', 'dashboard.low_stock.empty'],
+        'dashboard' => ['dashboard.today.empty', 'dashboard.active_jobs.empty', 'dashboard.low_stock.empty', 'dashboard.due_soon.empty'],
         'jobs.index' => ['jobs.board.empty.none.title'],
         'customers.index' => ['customers.empty.none.title'],
         'appointments.index' => ['appointments.empty.none_title'],

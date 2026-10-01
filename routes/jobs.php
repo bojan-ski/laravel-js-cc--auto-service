@@ -10,6 +10,7 @@ use App\Http\Controllers\Jobs\JobEstimateController;
 use App\Http\Controllers\Jobs\JobInvoiceController;
 use App\Http\Controllers\Jobs\JobItemController;
 use App\Http\Controllers\Jobs\JobItemDiscountController;
+use App\Http\Controllers\Jobs\JobNextServiceController;
 use App\Http\Controllers\Jobs\JobPartLineController;
 use App\Http\Controllers\Jobs\JobTemplateApplicationController;
 use App\Http\Controllers\Jobs\JobTransitionController;
@@ -31,6 +32,9 @@ Route::get('/jobs/{job}/invoice/create', [JobInvoiceController::class, 'create']
 Route::post('/jobs/{job}/invoice', [JobInvoiceController::class, 'store'])->name('jobs.invoice.store');
 
 Route::post('/jobs/{job}/estimates', [JobEstimateController::class, 'store'])->name('jobs.estimates.store');
+
+Route::get('/jobs/{job}/next-service', [JobNextServiceController::class, 'edit'])->name('jobs.next-service.edit');
+Route::put('/jobs/{job}/next-service', [JobNextServiceController::class, 'update'])->name('jobs.next-service.update');
 
 Route::post('/jobs/{job}/items', [JobItemController::class, 'store'])->name('jobs.items.store');
 Route::post('/jobs/{job}/parts', [JobPartLineController::class, 'store'])->name('jobs.parts.store');

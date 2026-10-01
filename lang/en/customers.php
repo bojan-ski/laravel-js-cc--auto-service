@@ -36,6 +36,9 @@ return [
         'address' => 'Address',
         'tax_id' => 'Tax ID (PIB)',
         'registration_number' => 'Registration no. (MB)',
+        'receives_reminders' => 'Service reminders',
+        'reminders_on' => 'On',
+        'reminders_off' => 'Off',
         'notes' => 'Notes',
         'jobs' => 'Job history',
         'jobs_empty' => 'No jobs recorded yet.',
@@ -61,6 +64,7 @@ return [
         'company_hint' => 'For a company, enter both its PIB and MB. Leave both empty for a private customer.',
         'tax_id' => 'Tax ID (PIB)',
         'registration_number' => 'Registration no. (MB)',
+        'receives_reminders' => 'Send service reminders',
         'notes' => 'Notes (optional)',
     ],
 

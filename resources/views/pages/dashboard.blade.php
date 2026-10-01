@@ -9,4 +9,10 @@
     <div class="mt-3">
         <x-dashboard.low-stock :parts="$parts" :count="$partCount" :url="$lowStockUrl" />
     </div>
+
+    @if ($dueSoon !== null)
+        <div class="mt-3">
+            <x-dashboard.due-soon :rows="$dueSoon" :count="$dueSoonCount" />
+        </div>
+    @endif
 </x-layouts.app>

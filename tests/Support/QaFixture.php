@@ -3,6 +3,7 @@
 namespace Tests\Support;
 
 use App\Enums\JobStatus;
+use App\Enums\ReminderKind;
 use App\Models\Appointment;
 use App\Models\Brand;
 use App\Models\Customer;
@@ -20,6 +21,7 @@ use App\Models\StockMovement;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\VehicleReminder;
 use App\Services\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -282,7 +284,18 @@ final class QaFixture
         }
 
         $this->vehicle = $vehicles->first();
-        $this->vehicle->forceFill(['registration_plate' => 'BG-'.self::PLATE_FRAGMENT.'-23'])->save();
+        $this->vehicle->forceFill([
+            'registration_plate' => 'BG-'.self::PLATE_FRAGMENT.'-23',
+            'next_service_on' => now()->subDays(5)->toDateString(),
+            'next_service_mileage' => 200000,
+            'registration_expires_on' => now()->addDays(10)->toDateString(),
+        ])->save();
+        VehicleReminder::factory()->forVehicle($this->vehicle, ReminderKind::Registration)->create();
+
+        $regular->get(3)->forceFill(['receives_reminders' => false])->save();
+        $vehicles->first(fn (Vehicle $vehicle): bool => $vehicle->customer_id === $regular->get(3)->getKey())
+            ->forceFill(['next_service_on' => now()->addDays(3)->toDateString()])->save();
+        $vehicles->get(1)->forceFill(['registration_expires_on' => now()->addDays(20)->toDateString()])->save();
 
         $this->reassignedVehicle = Vehicle::factory()->for($regular->get(1))->create();
         $this->trashedVehicle = Vehicle::factory()->for($this->customer)->create();

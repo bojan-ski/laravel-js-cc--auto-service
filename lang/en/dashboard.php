@@ -23,4 +23,13 @@ return [
         'view_all' => 'All parts to reorder',
         'out_of_stock' => 'out of stock',
     ],
+
+    'due_soon' => [
+        'title' => '{0} Due soon|{1} Due soon (1)|[2,*] Due soon (:count)',
+        'overdue' => 'Overdue',
+        'emailed' => 'Emailed :date',
+        'pending' => 'Email pending',
+        'more' => 'and :count more|and :count more',
+        'empty' => 'Nothing is due in the next 30 days.',
+    ],
 ];

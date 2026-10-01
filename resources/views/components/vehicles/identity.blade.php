@@ -8,8 +8,15 @@
         'mileage' => $vehicle->mileage === null
             ? null
             : __('vehicles.show.mileage_value', ['mileage' => number_format($vehicle->mileage)]),
+        'next_service_on' => $vehicle->next_service_on?->isoFormat('D MMM YYYY'),
+        'next_service_mileage' => $vehicle->next_service_mileage === null
+            ? null
+            : __('vehicles.show.mileage_value', ['mileage' => number_format($vehicle->next_service_mileage)]),
+        'registration_expires_on' => $vehicle->registration_expires_on?->isoFormat('D MMM YYYY'),
         'notes' => $vehicle->notes,
     ];
+
+    $numeric = ['year', 'vin', 'mileage', 'next_service_on', 'next_service_mileage', 'registration_expires_on'];
 @endphp
 
 <section class="mt-4 border border-border bg-surface p-4">
@@ -31,7 +38,7 @@
 
             <dd @class([
                 'whitespace-pre-line',
-                'tabular-nums' => in_array($key, ['year', 'vin', 'mileage'], true),
+                'tabular-nums' => in_array($key, $numeric, true),
                 'text-text-muted' => $value === null,
             ])><x-ui.value :value="$value" /></dd>
         @endforeach

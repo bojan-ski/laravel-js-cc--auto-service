@@ -23,4 +23,13 @@ return [
         'view_all' => 'Svi delovi za naručivanje',
         'out_of_stock' => 'nema na stanju',
     ],
+
+    'due_soon' => [
+        'title' => 'Uskoro ističe (:count)|Uskoro ističe (:count)|Uskoro ističe (:count)|{0}Uskoro ističe',
+        'overdue' => 'Prošao rok',
+        'emailed' => 'Poslat email :date',
+        'pending' => 'Email na čekanju',
+        'more' => 'i još :count|i još :count|i još :count',
+        'empty' => 'Ništa ne ističe u narednih 30 dana.',
+    ],
 ];
