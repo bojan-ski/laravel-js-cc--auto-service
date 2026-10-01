@@ -183,6 +183,7 @@ return [
             'updated' => 'Poziție actualizată.',
             'deleted' => 'Poziție ștearsă.',
             'discounted' => 'Discount salvat.',
+            'not_accepting' => 'Această lucrare nu mai acceptă modificări ale pozițiilor. Este posibil să fi fost facturată sau închisă între timp.',
             'stock_negative' => 'Stocul pentru :name este acum :balance. Stocul a devenit negativ.',
         ],
     ],

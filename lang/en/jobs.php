@@ -183,6 +183,7 @@ return [
             'updated' => 'Line item updated.',
             'deleted' => 'Line item deleted.',
             'discounted' => 'Discount saved.',
+            'not_accepting' => 'This job no longer accepts line changes. It may have been invoiced or closed in the meantime.',
             'stock_negative' => ':name is now at :balance. Stock has gone negative.',
         ],
     ],

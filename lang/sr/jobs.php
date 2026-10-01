@@ -183,6 +183,7 @@ return [
             'updated' => 'Stavka je izmenjena.',
             'deleted' => 'Stavka je obrisana.',
             'discounted' => 'Popust je sačuvan.',
+            'not_accepting' => 'Ovaj radni nalog više ne prima izmene stavki. Možda je u međuvremenu fakturisan ili zatvoren.',
             'stock_negative' => 'Stanje za :name je sada :balance. Zaliha je otišla u minus.',
         ],
     ],
