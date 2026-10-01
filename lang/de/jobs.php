@@ -183,6 +183,7 @@ return [
             'updated' => 'Position aktualisiert.',
             'deleted' => 'Position gelöscht.',
             'discounted' => 'Rabatt gespeichert.',
+            'not_accepting' => 'Dieser Auftrag nimmt keine Positionsänderungen mehr an. Möglicherweise wurde er inzwischen abgerechnet oder abgeschlossen.',
             'stock_negative' => ':name steht jetzt bei :balance. Der Bestand ist negativ.',
         ],
     ],

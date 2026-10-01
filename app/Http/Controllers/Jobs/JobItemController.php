@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Jobs;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Jobs\Concerns\FlashesStockWarning;
+use App\Http\Controllers\Jobs\Concerns\RedirectsClosedJob;
 use App\Http\Requests\Jobs\StoreJobItemRequest;
 use App\Http\Requests\Jobs\UpdateJobItemRequest;
 use App\Models\Job;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Gate;
 class JobItemController extends Controller
 {
     use FlashesStockWarning;
+    use RedirectsClosedJob;
 
     public function __construct(
         private JobItemService $items,
@@ -25,9 +27,11 @@ class JobItemController extends Controller
     {
         Gate::authorize('createItem', $job);
 
-        $this->items->addLabor($job, $request->user(), $request->validated());
+        return $this->unlessJobClosed($job->getKey(), function () use ($request, $job): RedirectResponse {
+            $this->items->addLabor($job, $request->user(), $request->validated());
 
-        return $this->redirectToJob($job->getKey(), 'added');
+            return $this->redirectToJob($job->getKey(), 'added');
+        });
     }
 
     public function update(UpdateJobItemRequest $request, int $jobItem): RedirectResponse
@@ -36,9 +40,11 @@ class JobItemController extends Controller
 
         Gate::authorize('update', $item);
 
-        $item = $this->items->update($item, $request->user(), $request->validated());
+        return $this->unlessJobClosed($item->job_id, function () use ($request, $item): RedirectResponse {
+            $item = $this->items->update($item, $request->user(), $request->validated());
 
-        return $this->redirectToJob($item->job_id, 'updated', $this->stockWarning($item));
+            return $this->redirectToJob($item->job_id, 'updated', $this->stockWarning($item));
+        });
     }
 
     public function destroy(Request $request, int $jobItem): RedirectResponse
@@ -48,9 +54,12 @@ class JobItemController extends Controller
         Gate::authorize('delete', $item);
 
         $jobId = $item->job_id;
-        $this->items->delete($item, $request->user());
 
-        return $this->redirectToJob($jobId, 'deleted');
+        return $this->unlessJobClosed($jobId, function () use ($request, $item, $jobId): RedirectResponse {
+            $this->items->delete($item, $request->user());
+
+            return $this->redirectToJob($jobId, 'deleted');
+        });
     }
 
     private function visibleItem(Request $request, int $jobItem): JobItem
