@@ -12,11 +12,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'phone', 'email', 'address', 'tax_id', 'registration_number', 'notes'])]
+#[Fillable(['name', 'phone', 'email', 'address', 'tax_id', 'registration_number', 'receives_reminders', 'notes'])]
 class Customer extends Model
 {
     /** @use HasFactory<CustomerFactory> */
     use HasFactory, SoftDeletes;
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'receives_reminders' => true,
+    ];
 
     /**
      * @return HasMany<Vehicle, $this>
@@ -53,6 +60,21 @@ class Customer extends Model
     public function isCompany(): bool
     {
         return $this->tax_id !== null;
+    }
+
+    public function canBeReminded(): bool
+    {
+        return ! $this->trashed() && ! blank($this->email) && $this->receives_reminders;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'receives_reminders' => 'boolean',
+        ];
     }
 
     #[Scope]

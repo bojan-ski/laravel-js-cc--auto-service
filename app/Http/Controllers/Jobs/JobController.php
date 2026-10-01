@@ -110,6 +110,7 @@ class JobController extends Controller
             'invoice' => $this->activeInvoiceFor($job),
             'showEstimate' => $showEstimate,
             'estimate' => $showEstimate ? $this->estimates->summaryFor($job) : null,
+            'showNextService' => Gate::allows('scheduleNextService', $job),
             'showPricing' => $showPricing,
             'subtotal' => $showPricing ? $job->subtotal() : null,
             'discountTotal' => $showPricing && $job->items->contains->hasDiscount() ? $job->discountTotal() : null,

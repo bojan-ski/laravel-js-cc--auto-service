@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\JobStatus;
 use App\Models\Job;
 use App\Models\User;
 
@@ -125,6 +126,14 @@ class JobPolicy
     public function issue(User $user, Job $job): bool
     {
         return $user->isFrontOffice() && $job->canBeInvoiced();
+    }
+
+    /**
+     * Determine whether the user can set the vehicle's next service from the job.
+     */
+    public function scheduleNextService(User $user, Job $job): bool
+    {
+        return $user->isFrontOffice() && $job->status === JobStatus::Completed;
     }
 
     /**

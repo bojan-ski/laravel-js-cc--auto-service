@@ -32,9 +32,27 @@ return [
         'mileage' => 'Kilometraj',
         'notes' => 'Observații',
         'mileage_value' => ':mileage km',
+        'next_service_on' => 'Următorul service',
+        'next_service_mileage' => 'Următorul service la',
+        'registration_expires_on' => 'Înmatricularea expiră',
         'history' => 'Istoric service',
         'history_empty' => 'Nicio lucrare înregistrată încă pentru acest vehicul.',
         'history_view_all_for' => 'Vezi toate lucrările (:count) pentru :plate',
+    ],
+
+    'reminder_kinds' => [
+        'service' => 'Service',
+        'registration' => 'Înmatriculare',
+    ],
+
+    'next_service' => [
+        'label' => 'Următorul service',
+        'set' => 'Stabilește următorul service',
+        'set_for' => 'Stabilește următorul service pentru :plate',
+        'title' => 'Următorul service — :plate',
+        'context' => 'Lucrarea :reference, finalizată :date',
+        'context_mileage' => 'Lucrarea :reference, finalizată :date la :mileage km',
+        'submit' => 'Salvează',
     ],
 
     'create' => [
@@ -62,6 +80,9 @@ return [
         'vin' => 'Serie șasiu (VIN, opțional)',
         'engine' => 'Motor (opțional)',
         'mileage' => 'Kilometraj (opțional)',
+        'next_service_on' => 'Data următorului service (opțional)',
+        'next_service_mileage' => 'Kilometrajul următorului service (opțional)',
+        'registration_expires_on' => 'Înmatricularea expiră (opțional)',
         'notes' => 'Observații (opțional)',
     ],
 
@@ -95,5 +116,6 @@ return [
         'deleted' => 'Vehiculul :plate a fost șters. Numărul de înmatriculare rămâne rezervat.',
         'restored' => 'Vehiculul :plate a fost restaurat.',
         'reassigned' => ':plate aparține acum clientului :name.',
+        'next_service_saved' => 'Următorul service pentru :plate a fost salvat.',
     ],
 ];

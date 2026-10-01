@@ -62,4 +62,12 @@ class VehiclePolicy
     {
         return $user->isAdmin();
     }
+
+    /**
+     * Determine whether the user can see the due-soon reminder list.
+     */
+    public function viewDueSoon(User $user): bool
+    {
+        return $user->isFrontOffice();
+    }
 }

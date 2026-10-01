@@ -742,6 +742,48 @@ trait AuthorizationMatrix
                 'receptionist' => self::ALLOW,
                 'admin' => self::ALLOW,
             ],
+            '51' => [
+                'capability' => "Set a vehicle's next-service and registration dates",
+                'requests' => [
+                    ['method' => 'get', 'route' => 'jobs.next-service.edit', 'params' => ['completedJob']],
+                    [
+                        'method' => 'put',
+                        'route' => 'jobs.next-service.update',
+                        'params' => ['completedJob'],
+                        'payload' => fn (): array => [
+                            'next_service_on' => now()->addMonths(6)->toDateString(),
+                            'next_service_mileage' => '200000',
+                            'registration_expires_on' => now()->addMonths(3)->toDateString(),
+                        ],
+                    ],
+                    [
+                        'method' => 'put',
+                        'route' => 'vehicles.update',
+                        'params' => ['vehicle'],
+                        'payload' => fn ($t): array => [
+                            'registration_plate' => $t->fixture('vehicle')->registration_plate,
+                            'make' => 'Opel',
+                            'model' => 'Astra H',
+                            'next_service_on' => now()->addMonths(6)->toDateString(),
+                            'next_service_mileage' => '200000',
+                            'registration_expires_on' => now()->addMonths(3)->toDateString(),
+                        ],
+                    ],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => 403,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
+            '52' => [
+                'capability' => 'See the due-soon reminder list',
+                'requests' => [],
+                'walkable' => false,
+                'guest' => self::LOGIN,
+                'mechanic' => 403,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
             '13' => [
                 'capability' => 'Delete a customer or vehicle',
                 'admin_only' => true,

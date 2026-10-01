@@ -32,9 +32,27 @@ return [
         'mileage' => 'Kilometraža',
         'notes' => 'Napomene',
         'mileage_value' => ':mileage km',
+        'next_service_on' => 'Sledeći servis',
+        'next_service_mileage' => 'Sledeći servis na',
+        'registration_expires_on' => 'Registracija ističe',
         'history' => 'Servisna istorija',
         'history_empty' => 'Još nema radnih naloga za ovo vozilo.',
         'history_view_all_for' => 'Prikaži sve radne naloge za :plate (:count)',
+    ],
+
+    'reminder_kinds' => [
+        'service' => 'Servis',
+        'registration' => 'Registracija',
+    ],
+
+    'next_service' => [
+        'label' => 'Sledeći servis',
+        'set' => 'Zakaži sledeći servis',
+        'set_for' => 'Zakaži sledeći servis za :plate',
+        'title' => 'Sledeći servis — :plate',
+        'context' => 'Radni nalog :reference, završen :date',
+        'context_mileage' => 'Radni nalog :reference, završen :date na :mileage km',
+        'submit' => 'Sačuvaj',
     ],
 
     'create' => [
@@ -62,6 +80,9 @@ return [
         'vin' => 'Broj šasije (VIN, opciono)',
         'engine' => 'Motor (opciono)',
         'mileage' => 'Kilometraža (opciono)',
+        'next_service_on' => 'Datum sledećeg servisa (opciono)',
+        'next_service_mileage' => 'Kilometraža za sledeći servis (opciono)',
+        'registration_expires_on' => 'Registracija ističe (opciono)',
         'notes' => 'Napomene (opciono)',
     ],
 
@@ -95,5 +116,6 @@ return [
         'deleted' => 'Vozilo :plate je obrisano. Njegova registarska oznaka ostaje rezervisana.',
         'restored' => 'Vozilo :plate je vraćeno.',
         'reassigned' => 'Vozilo :plate sada pripada klijentu :name.',
+        'next_service_saved' => 'Sledeći servis za :plate je sačuvan.',
     ],
 ];

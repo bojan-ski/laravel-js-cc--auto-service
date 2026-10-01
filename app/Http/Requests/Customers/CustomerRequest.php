@@ -32,6 +32,7 @@ class CustomerRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:255'],
             'tax_id' => ['nullable', 'string', 'digits:9', self::taxIdIsValid()],
             'registration_number' => ['nullable', 'string', 'digits:8', 'required_with:tax_id', 'prohibited_if:tax_id,null'],
+            'receives_reminders' => ['sometimes', 'boolean'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
     }

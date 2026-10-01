@@ -23,4 +23,13 @@ return [
         'view_all' => 'Toate piesele de comandat',
         'out_of_stock' => 'stoc epuizat',
     ],
+
+    'due_soon' => [
+        'title' => 'Scadențe apropiate (:count)|Scadențe apropiate (:count)|Scadențe apropiate (:count)|{0}Scadențe apropiate',
+        'overdue' => 'Depășit',
+        'emailed' => 'E-mail trimis :date',
+        'pending' => 'E-mail în așteptare',
+        'more' => 'și încă :count|și încă :count|și încă :count',
+        'empty' => 'Nimic scadent în următoarele 30 de zile.',
+    ],
 ];

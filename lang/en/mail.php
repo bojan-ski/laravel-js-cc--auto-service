@@ -42,6 +42,21 @@ return [
         'line_discounted' => ':description × :quantity (:percent% off)',
     ],
 
+    'service_reminder' => [
+        'subject_service' => 'Service reminder for :plate',
+        'subject_registration' => 'Registration reminder for :plate',
+        'heading_service' => 'Service reminder',
+        'heading_registration' => 'Registration reminder',
+        'greeting' => 'Dear :name,',
+        'body_service' => ':make :model (:plate) is due for its next service on :date.',
+        'body_registration' => 'The registration of :make :model (:plate) expires on :date.',
+        'due_on' => 'Due on',
+        'or_at' => 'Or at',
+        'expires_on' => 'Expires on',
+        'book' => 'Call us to book a visit.',
+        'opt_out' => 'If you would rather not receive these reminders, let us know and we will stop them.',
+    ],
+
     'totals' => [
         'before_discount' => 'Before discount',
         'discount' => 'Discount',

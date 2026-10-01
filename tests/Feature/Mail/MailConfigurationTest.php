@@ -6,12 +6,14 @@ use App\Mail\CustomerMailable;
 use App\Mail\EstimateMail;
 use App\Mail\InvoiceIssuedMail;
 use App\Mail\JobCompletedMail;
+use App\Mail\ServiceReminderMail;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Job;
 use App\Models\JobItem;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\VehicleReminder;
 use App\Services\EstimateService;
 use App\Services\InvoiceService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -37,6 +39,7 @@ class MailConfigurationTest extends TestCase
             'job completed' => [JobCompletedMail::class],
             'invoice issued' => [InvoiceIssuedMail::class],
             'estimate' => [EstimateMail::class],
+            'service reminder' => [ServiceReminderMail::class],
         ];
     }
 
@@ -49,7 +52,17 @@ class MailConfigurationTest extends TestCase
             JobCompletedMail::class => $this->jobCompletedMail(),
             InvoiceIssuedMail::class => $this->invoiceIssuedMail(),
             EstimateMail::class => $this->estimateMail(),
+            ServiceReminderMail::class => $this->serviceReminderMail(),
         };
+    }
+
+    private function serviceReminderMail(): ServiceReminderMail
+    {
+        $customer = Customer::factory()->create();
+        $vehicle = Vehicle::factory()->for($customer)->create(['next_service_on' => now()->addDays(5)]);
+        $reminder = VehicleReminder::factory()->forVehicle($vehicle)->create();
+
+        return new ServiceReminderMail($reminder, $customer, $vehicle);
     }
 
     private function estimateMail(): EstimateMail
@@ -134,6 +147,7 @@ class MailConfigurationTest extends TestCase
             JobCompletedMail::class => $instance->job->reference,
             InvoiceIssuedMail::class => $instance->invoice->number,
             EstimateMail::class => $instance->estimate->number,
+            ServiceReminderMail::class => "{$instance->vehicle->registration_plate} service {$instance->reminder->due_on->format('Y-m-d')}",
         };
 
         Log::spy();

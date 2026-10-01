@@ -48,6 +48,7 @@ class InvoiceBuyerBackfillTest extends TestCase
      */
     private function rollBackThisSpec(): void
     {
+        $this->migration('alter_customers_table_add_receives_reminders')->down();
         $this->migration('alter_invoices_table_add_discount_total')->down();
         $this->migration('alter_invoices_table_add_payment_method')->down();
         $this->migration('alter_invoices_table_add_buyer_snapshot')->down();
@@ -60,6 +61,7 @@ class InvoiceBuyerBackfillTest extends TestCase
         $this->migration('alter_invoices_table_add_buyer_snapshot')->up();
         $this->migration('alter_invoices_table_add_payment_method')->up();
         $this->migration('alter_invoices_table_add_discount_total')->up();
+        $this->migration('alter_customers_table_add_receives_reminders')->up();
     }
 
     private function insertInvoice(Job $job, string $status, User $issuer, ?User $voider = null): int
@@ -86,27 +88,36 @@ class InvoiceBuyerBackfillTest extends TestCase
         ]);
     }
 
+    /**
+     * Customers and jobs are created before the rollback, because the Customer
+     * model now defaults a column a later migration added; the rows survive the
+     * rollback's column drops. Invoices are inserted after it, in the shape the
+     * backfill was written for.
+     */
     public function test_every_existing_invoice_is_backfilled_from_its_jobs_customer(): void
     {
-        $this->rollBackThisSpec();
-
         $issuer = User::factory()->receptionist()->create();
         $admin = User::factory()->admin()->create();
-        $invoices = [];
+        $jobs = [];
 
         foreach (['unpaid', 'paid', 'void', 'trashed'] as $case) {
             $customer = Customer::factory()->create(['name' => "Customer {$case}", 'address' => "Street {$case}"]);
-            $job = Job::factory()->locked()->for($customer)->create();
-
-            $invoices[$case] = $this->insertInvoice($job, $case === 'trashed' ? 'unpaid' : $case, $issuer, $case === 'void' ? $admin : null);
-
-            if ($case === 'trashed') {
-                $customer->delete();
-            }
+            $jobs[$case] = Job::factory()->locked()->for($customer)->create();
         }
 
         $private = Customer::factory()->minimal()->create(['name' => 'No Address']);
-        $invoices['no-address'] = $this->insertInvoice(Job::factory()->locked()->for($private)->create(), 'unpaid', $issuer);
+        $jobs['no-address'] = Job::factory()->locked()->for($private)->create();
+
+        $this->rollBackThisSpec();
+
+        $invoices = [];
+
+        foreach ($jobs as $case => $job) {
+            $status = in_array($case, ['paid', 'void'], true) ? $case : 'unpaid';
+            $invoices[$case] = $this->insertInvoice($job, $status, $issuer, $case === 'void' ? $admin : null);
+        }
+
+        Customer::query()->whereKey($jobs['trashed']->customer_id)->firstOrFail()->delete();
 
         Invoice::saving(fn () => throw new RuntimeException('The backfill must not write through the model.'));
 

@@ -57,6 +57,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Service Reminders
+    |--------------------------------------------------------------------------
+    |
+    | How many days before a vehicle's next-service date or registration expiry
+    | the daily reminders:send command emails its owner.
+    |
+    */
+
+    'reminders' => [
+        'lead_days' => (int) env('SHOP_REMINDER_LEAD_DAYS', 14),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Shop Identity
     |--------------------------------------------------------------------------
     |

@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Part;
 use Database\Seeders\Demo\CatalogueSeeder;
 use Database\Seeders\Demo\CustomerSeeder;
+use Database\Seeders\Demo\ReminderSeeder;
 use Database\Seeders\Demo\StaffSeeder;
 use Database\Seeders\Demo\WorkshopSeeder;
 use Illuminate\Database\Seeder;
@@ -37,6 +38,7 @@ class DemoDataSeeder extends Seeder
                 CatalogueSeeder::class,
                 CustomerSeeder::class,
                 WorkshopSeeder::class,
+                ReminderSeeder::class,
             ]));
         } finally {
             config(['queue.default' => $queue, 'mail.default' => $mailer]);

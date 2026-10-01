@@ -52,6 +52,16 @@
         </div>
     </fieldset>
 
+    <div>
+        <input type="hidden" name="receives_reminders" value="0">
+
+        <x-forms.checkbox
+            name="receives_reminders"
+            :label="__('customers.form.receives_reminders')"
+            :checked="$customer?->receives_reminders ?? true"
+        />
+    </div>
+
     <x-forms.textarea name="notes" :label="__('customers.form.notes')" :value="$customer?->notes" />
 
     <div class="flex flex-wrap gap-2">

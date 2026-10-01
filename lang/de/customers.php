@@ -36,6 +36,9 @@ return [
         'address' => 'Adresse',
         'tax_id' => 'Steuernr. (PIB)',
         'registration_number' => 'Registernr. (MB)',
+        'receives_reminders' => 'Serviceerinnerungen',
+        'reminders_on' => 'Ein',
+        'reminders_off' => 'Aus',
         'notes' => 'Notizen',
         'jobs' => 'Auftragshistorie',
         'jobs_empty' => 'Noch keine Aufträge erfasst.',
@@ -61,6 +64,7 @@ return [
         'company_hint' => 'Bei einer Firma PIB und MB angeben. Bei einer Privatperson beide Felder leer lassen.',
         'tax_id' => 'Steuernr. (PIB)',
         'registration_number' => 'Registernr. (MB)',
+        'receives_reminders' => 'Serviceerinnerungen senden',
         'notes' => 'Notizen (optional)',
     ],
 

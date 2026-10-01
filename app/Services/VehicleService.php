@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Customer;
+use App\Models\Job;
 use App\Models\Vehicle;
 
 class VehicleService
@@ -26,6 +27,11 @@ class VehicleService
                 ]),
             ])
             ->all();
+    }
+
+    public function activeForJob(Job $job): Vehicle
+    {
+        return Vehicle::query()->findOrFail($job->vehicle_id);
     }
 
     /**

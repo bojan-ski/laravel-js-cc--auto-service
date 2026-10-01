@@ -36,6 +36,9 @@ return [
         'address' => 'Adresă',
         'tax_id' => 'Cod fiscal (PIB)',
         'registration_number' => 'Nr. de înregistrare (MB)',
+        'receives_reminders' => 'Mementouri de service',
+        'reminders_on' => 'Activate',
+        'reminders_off' => 'Dezactivate',
         'notes' => 'Observații',
         'jobs' => 'Istoric lucrări',
         'jobs_empty' => 'Nicio lucrare înregistrată încă.',
@@ -61,6 +64,7 @@ return [
         'company_hint' => 'Pentru o companie, introduceți atât PIB, cât și MB. Lăsați ambele goale pentru o persoană fizică.',
         'tax_id' => 'Cod fiscal (PIB)',
         'registration_number' => 'Nr. de înregistrare (MB)',
+        'receives_reminders' => 'Trimite mementouri de service',
         'notes' => 'Observații (opțional)',
     ],
 

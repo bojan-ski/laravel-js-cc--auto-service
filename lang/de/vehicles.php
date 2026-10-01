@@ -32,9 +32,27 @@ return [
         'mileage' => 'Kilometerstand',
         'notes' => 'Notizen',
         'mileage_value' => ':mileage km',
+        'next_service_on' => 'Nächster Service',
+        'next_service_mileage' => 'Nächster Service bei',
+        'registration_expires_on' => 'Zulassung läuft ab',
         'history' => 'Servicehistorie',
         'history_empty' => 'Für dieses Fahrzeug sind noch keine Aufträge erfasst.',
         'history_view_all_for' => 'Alle :count Aufträge für :plate anzeigen',
+    ],
+
+    'reminder_kinds' => [
+        'service' => 'Service',
+        'registration' => 'Zulassung',
+    ],
+
+    'next_service' => [
+        'label' => 'Nächster Service',
+        'set' => 'Nächsten Service festlegen',
+        'set_for' => 'Nächsten Service für :plate festlegen',
+        'title' => 'Nächster Service — :plate',
+        'context' => 'Auftrag :reference, abgeschlossen am :date',
+        'context_mileage' => 'Auftrag :reference, abgeschlossen am :date bei :mileage km',
+        'submit' => 'Speichern',
     ],
 
     'create' => [
@@ -62,6 +80,9 @@ return [
         'vin' => 'FIN (optional)',
         'engine' => 'Motor (optional)',
         'mileage' => 'Kilometerstand (optional)',
+        'next_service_on' => 'Datum des nächsten Service (optional)',
+        'next_service_mileage' => 'Kilometerstand für den nächsten Service (optional)',
+        'registration_expires_on' => 'Zulassung läuft ab (optional)',
         'notes' => 'Notizen (optional)',
     ],
 
@@ -95,5 +116,6 @@ return [
         'deleted' => ':plate wurde gelöscht. Das Kennzeichen bleibt reserviert.',
         'restored' => ':plate wurde wiederhergestellt.',
         'reassigned' => ':plate gehört jetzt :name.',
+        'next_service_saved' => 'Nächster Service für :plate gespeichert.',
     ],
 ];

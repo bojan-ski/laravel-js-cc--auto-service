@@ -55,7 +55,7 @@ class CustomerCompanyTest extends TestCase
         $listing = Schema::getColumnListing('customers');
         $address = array_search('address', $listing, true);
 
-        $this->assertSame(['tax_id', 'registration_number', 'notes'], array_slice($listing, $address + 1, 3));
+        $this->assertSame(['tax_id', 'registration_number'], array_slice($listing, $address + 1, 2));
 
         $columns = collect(Schema::getColumns('customers'))->keyBy('name');
 
@@ -315,7 +315,7 @@ class CustomerCompanyTest extends TestCase
 
         $this->assertStringNotContainsString(e(__('customers.show.tax_id')), $html);
         $this->assertStringNotContainsString(e(__('customers.show.registration_number')), $html);
-        $this->assertSame(4, substr_count($html, '<dt class="text-xs font-medium uppercase tracking-wider text-text-muted sm:pt-0.5">'));
+        $this->assertSame(5, substr_count($html, '<dt class="text-xs font-medium uppercase tracking-wider text-text-muted sm:pt-0.5">'));
     }
 
     public function test_the_company_factory_state_always_yields_a_valid_pib_and_an_eight_digit_mb(): void

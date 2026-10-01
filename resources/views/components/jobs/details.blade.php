@@ -1,9 +1,18 @@
-@props(['job', 'estimate' => null, 'showEstimate' => false])
+@props(['job', 'estimate' => null, 'showEstimate' => false, 'showNextService' => false])
 
 @php
     $mileage = $job->mileage_in === null
         ? null
         : __('jobs.show.mileage_value', ['mileage' => number_format($job->mileage_in)]);
+
+    $nextService = $showNextService
+        ? implode(' · ', array_filter([
+            $job->vehicle->next_service_on?->isoFormat('D MMM YYYY'),
+            $job->vehicle->next_service_mileage === null
+                ? null
+                : __('vehicles.show.mileage_value', ['mileage' => number_format($job->vehicle->next_service_mileage)]),
+        ]))
+        : '';
 
     $timestamps = array_filter([
         'received' => $job->created_at,
@@ -47,6 +56,25 @@
 
             <dd>
                 <x-estimates.summary :job="$job" :summary="$estimate" />
+            </dd>
+        @endif
+
+        @if ($showNextService)
+            <dt class="text-xs font-medium uppercase tracking-wider text-text-muted sm:pt-0.5">
+                {{ __('vehicles.next_service.label') }}
+            </dt>
+
+            <dd>
+                <span @class(['tabular-nums', 'text-text-muted' => $nextService === ''])><x-ui.value :value="$nextService" /></span>
+
+                @unless ($job->vehicle->trashed())
+                    <span aria-hidden="true">&middot;</span>
+                    <a
+                        href="{{ route('jobs.next-service.edit', $job) }}"
+                        aria-label="{{ __('vehicles.next_service.set_for', ['plate' => $job->vehicle->registration_plate]) }}"
+                        class="font-medium underline underline-offset-2 hover:text-brand-dark"
+                    >{{ __('vehicles.next_service.set') }}</a>
+                @endunless
             </dd>
         @endif
 

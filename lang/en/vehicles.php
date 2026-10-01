@@ -32,9 +32,27 @@ return [
         'mileage' => 'Mileage',
         'notes' => 'Notes',
         'mileage_value' => ':mileage km',
+        'next_service_on' => 'Next service',
+        'next_service_mileage' => 'Next service at',
+        'registration_expires_on' => 'Registration expires',
         'history' => 'Service history',
         'history_empty' => 'No jobs recorded for this vehicle yet.',
         'history_view_all_for' => 'View all :count jobs for :plate',
+    ],
+
+    'reminder_kinds' => [
+        'service' => 'Service',
+        'registration' => 'Registration',
+    ],
+
+    'next_service' => [
+        'label' => 'Next service',
+        'set' => 'Set next service',
+        'set_for' => 'Set next service for :plate',
+        'title' => 'Next service — :plate',
+        'context' => 'Job :reference, completed :date',
+        'context_mileage' => 'Job :reference, completed :date at :mileage km',
+        'submit' => 'Save',
     ],
 
     'create' => [
@@ -62,6 +80,9 @@ return [
         'vin' => 'VIN (optional)',
         'engine' => 'Engine (optional)',
         'mileage' => 'Mileage (optional)',
+        'next_service_on' => 'Next service date (optional)',
+        'next_service_mileage' => 'Next service mileage (optional)',
+        'registration_expires_on' => 'Registration expires (optional)',
         'notes' => 'Notes (optional)',
     ],
 
@@ -95,5 +116,6 @@ return [
         'deleted' => ':plate has been deleted. Its plate stays reserved.',
         'restored' => ':plate has been restored.',
         'reassigned' => ':plate now belongs to :name.',
+        'next_service_saved' => 'Next service for :plate saved.',
     ],
 ];

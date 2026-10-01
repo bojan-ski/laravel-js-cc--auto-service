@@ -42,6 +42,21 @@ return [
         'line_discounted' => ':description × :quantity (popust :percent%)',
     ],
 
+    'service_reminder' => [
+        'subject_service' => 'Podsetnik za servis — :plate',
+        'subject_registration' => 'Podsetnik za registraciju — :plate',
+        'heading_service' => 'Podsetnik za servis',
+        'heading_registration' => 'Podsetnik za registraciju',
+        'greeting' => 'Poštovani :name,',
+        'body_service' => 'Za vozilo :make :model (:plate) sledeći servis je zakazan za :date.',
+        'body_registration' => 'Registracija vozila :make :model (:plate) ističe :date.',
+        'due_on' => 'Rok',
+        'or_at' => 'Ili na',
+        'expires_on' => 'Ističe',
+        'book' => 'Pozovite nas da zakažete termin.',
+        'opt_out' => 'Ako ne želite da primate ove podsetnike, javite nam i prestaćemo da ih šaljemo.',
+    ],
+
     'totals' => [
         'before_discount' => 'Pre popusta',
         'discount' => 'Popust',
