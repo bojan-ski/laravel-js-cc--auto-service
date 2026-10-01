@@ -11,6 +11,7 @@ return [
         'customers' => 'Customers',
         'parts' => 'Parts',
         'invoices' => 'Invoices',
+        'reports' => 'Reports',
         'toggle' => 'Menu',
         'user_menu' => 'Account menu',
         'staff' => 'Staff',

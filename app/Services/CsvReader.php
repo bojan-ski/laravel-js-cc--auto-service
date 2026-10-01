@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Exceptions\UnreadableImport;
-use SplFileObject;
 
 class CsvReader
 {
@@ -48,11 +47,16 @@ class CsvReader
 
     public function toCsvLine(array $values, string $delimiter = ','): string
     {
-        $file = new SplFileObject('php://memory', 'r+');
-        $file->fputcsv($values, $delimiter, '"', '\\');
-        $file->rewind();
+        $handle = fopen('php://memory', 'r+');
 
-        return rtrim((string) $file->fgets(), "\r\n")."\r\n";
+        try {
+            fputcsv($handle, $values, $delimiter, '"', '\\', "\r\n");
+            rewind($handle);
+
+            return (string) stream_get_contents($handle);
+        } finally {
+            fclose($handle);
+        }
     }
 
     /**

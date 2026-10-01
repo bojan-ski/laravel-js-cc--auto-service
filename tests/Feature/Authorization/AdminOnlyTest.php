@@ -169,7 +169,7 @@ class AdminOnlyTest extends TestCase
             'row 13 vehicles' => [VehiclePolicy::class, 'delete'],
             'row 14' => [VehiclePolicy::class, 'reassign'],
             'row 20a' => [PartPolicy::class, 'delete'],
-            'row 21 / 37' => [PartPolicy::class, 'viewCostPrice'],
+            'row 21 / 37 / 54' => [PartPolicy::class, 'viewCostPrice'],
             'row 25' => [InvoicePolicy::class, 'void'],
             'row 26 viewAny' => [UserPolicy::class, 'viewAny'],
             'row 26 create' => [UserPolicy::class, 'create'],

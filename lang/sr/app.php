@@ -11,6 +11,7 @@ return [
         'customers' => 'Klijenti',
         'parts' => 'Delovi',
         'invoices' => 'Računi',
+        'reports' => 'Izveštaji',
         'toggle' => 'Meni',
         'user_menu' => 'Meni naloga',
         'staff' => 'Zaposleni',

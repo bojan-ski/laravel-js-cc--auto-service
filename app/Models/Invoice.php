@@ -6,6 +6,7 @@ use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Exceptions\InvalidInvoiceTransition;
 use App\Models\Concerns\HasStoredTotals;
+use Carbon\CarbonImmutable;
 use Database\Factories\InvoiceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -82,6 +83,19 @@ class Invoice extends Model
             $query->where('invoices.number', 'like', "%{$escaped}%")
                 ->orWhere('invoices.buyer_name', 'like', "%{$escaped}%");
         });
+    }
+
+    #[Scope]
+    protected function issuedBetween(Builder $query, CarbonImmutable $from, CarbonImmutable $to): void
+    {
+        $query->where($query->qualifyColumn('issued_at'), '>=', $from)
+            ->where($query->qualifyColumn('issued_at'), '<', $to->addDay());
+    }
+
+    #[Scope]
+    protected function notVoid(Builder $query): void
+    {
+        $query->whereNot($query->qualifyColumn('status'), InvoiceStatus::Void);
     }
 
     public function isUnpaid(): bool

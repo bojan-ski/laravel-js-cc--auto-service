@@ -111,6 +111,14 @@ class Nav extends Component
             ];
         }
 
+        if (Gate::allows('viewReports', Invoice::class)) {
+            $destinations[] = [
+                'label' => __('app.nav.reports'),
+                'route' => 'reports.index',
+                'pattern' => 'reports.*',
+            ];
+        }
+
         return array_map(fn (array $destination): array => [
             'label' => $destination['label'],
             'url' => route($destination['route']),

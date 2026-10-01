@@ -8,6 +8,7 @@ use App\Models\Job;
 use App\Models\JobItem;
 use App\Models\Part;
 use App\Models\User;
+use App\Services\InvoiceService;
 use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -424,6 +425,52 @@ class MoneyBoundaryTest extends TestCase
             $this->assertSame([], $this->queriesTouching($queries, 'estimates'), "{$method} {$url}");
             $this->assertSame([], $this->queriesTouching($queries, 'estimate_lines'), "{$method} {$url}");
         }
+    }
+
+    /**
+     * Row 54 at the query level: margin is admin-only because cost_price is,
+     * so a receptionist's report must never read the column, not merely leave
+     * it out of the table. A whole-row read of `parts` would carry the cost
+     * without naming it, which is why that shape is refused too.
+     */
+    public function test_a_receptionists_report_never_reads_a_cost_price(): void
+    {
+        $this->invoicedPartLine();
+
+        foreach ([route('reports.index'), route('reports.export')] as $url) {
+            $queries = $this->queriesFor('receptionist', $url);
+
+            $this->assertNotEmpty($queries, "{$url} recorded no queries at all, so nothing here was checked.");
+
+            foreach ($queries as $sql) {
+                $this->assertStringNotContainsString('cost_price', $sql, "{$url}: {$sql}");
+                $this->assertDoesNotMatchRegularExpression('/select \* from `parts`|`parts`\.\*/', $sql, "{$url}: {$sql}");
+            }
+        }
+
+        $this->assertNotEmpty(
+            $this->queriesTouching($this->queriesFor('receptionist', route('reports.index')), 'parts'),
+            'The report must read parts at all, or the cost check above could pass on a page that never looked.',
+        );
+    }
+
+    public function test_an_admins_report_does_read_the_cost_price_so_the_receptionist_check_can_fail(): void
+    {
+        $this->invoicedPartLine();
+
+        $named = array_filter(
+            $this->queriesFor('admin', route('reports.index')),
+            fn (string $sql): bool => str_contains($sql, '`cost_price`'),
+        );
+
+        $this->assertNotEmpty($named);
+    }
+
+    private function invoicedPartLine(): void
+    {
+        $job = Job::factory()->completed()->create();
+        JobItem::factory()->forJob($job)->forPart(Part::factory()->create(['cost_price' => '25.00']))->create(['user_id' => null, 'quantity' => 2]);
+        app(InvoiceService::class)->issue($job, User::factory()->receptionist()->create());
     }
 
     private function jobWithLine(): Job

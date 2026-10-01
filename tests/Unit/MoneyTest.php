@@ -91,6 +91,26 @@ class MoneyTest extends TestCase
         $this->assertSame($expected, Money::trimZeros($decimal));
     }
 
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public static function csvVectors(): array
+    {
+        return [
+            'a stored amount' => ['1234.50', '1234,50'],
+            'thousands are never grouped' => ['1234567.89', '1234567,89'],
+            'a rate' => ['20.00', '20,00'],
+            'zero' => ['0.00', '0,00'],
+            'no fractional part' => ['1234', '1234'],
+        ];
+    }
+
+    #[DataProvider('csvVectors')]
+    public function test_it_writes_a_stored_decimal_with_a_decimal_comma_for_the_csv(string $amount, string $expected): void
+    {
+        $this->assertSame($expected, Money::csv($amount));
+    }
+
     public function test_it_formats_exactly_the_five_amounts_of_a_totals_array(): void
     {
         $formatted = Money::formatTotals([

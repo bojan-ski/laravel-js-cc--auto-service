@@ -61,6 +61,7 @@ class InvoiceNavTest extends TestCase
             __('app.nav.customers'),
             __('app.nav.parts'),
             __('app.nav.invoices'),
+            __('app.nav.reports'),
         ], array_column((new Nav)->items, 'label'));
     }
 

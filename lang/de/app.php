@@ -11,6 +11,7 @@ return [
         'customers' => 'Kunden',
         'parts' => 'Teile',
         'invoices' => 'Rechnungen',
+        'reports' => 'Berichte',
         'toggle' => 'Menü',
         'user_menu' => 'Kontomenü',
         'staff' => 'Mitarbeiter',

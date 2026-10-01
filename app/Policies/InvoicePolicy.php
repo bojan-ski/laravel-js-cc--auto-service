@@ -32,6 +32,14 @@ class InvoicePolicy
     }
 
     /**
+     * Determine whether the user can view reports and export invoices.
+     */
+    public function viewReports(User $user): bool
+    {
+        return $user->isFrontOffice();
+    }
+
+    /**
      * Determine whether the user can void the model, unlocking its job.
      */
     public function void(User $user, Invoice $invoice): bool

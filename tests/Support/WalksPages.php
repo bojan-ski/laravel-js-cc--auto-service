@@ -126,6 +126,14 @@ trait WalksPages
             'invoices.void.create:unpaid' => self::page('invoices.void.create', self::ADMIN_ONLY, fn (QaFixture $shop): array => [$shop->unpaidInvoice]),
             'invoices.void.create:paid' => self::page('invoices.void.create', self::ADMIN_ONLY, fn (QaFixture $shop): array => [$shop->paidInvoice]),
 
+            'reports.index' => self::plain('reports.index', self::FRONT_OFFICE),
+            'reports.index:period' => self::page('reports.index', self::FRONT_OFFICE, query: fn (): array => [
+                'from' => now()->subMonth()->toDateString(),
+                'to' => now()->toDateString(),
+            ]),
+            'reports.index:empty' => self::page('reports.index', self::FRONT_OFFICE, query: fn (): array => ['from' => '2099-01-01', 'to' => '2099-01-31']),
+            'reports.export' => self::plain('reports.export', self::FRONT_OFFICE, ['html' => false]),
+
             'appointments.index' => self::plain('appointments.index', self::ALL_STAFF),
             'appointments.index:week' => self::page('appointments.index', self::ALL_STAFF, query: fn (): array => ['view' => 'week']),
             'appointments.index:busy-day' => self::page('appointments.index', self::ALL_STAFF, query: fn (QaFixture $shop): array => ['date' => $shop->busyDay->toDateString()]),
