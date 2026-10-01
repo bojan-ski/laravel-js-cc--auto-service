@@ -44,6 +44,7 @@ return [
 
     'photos' => [
         'heading' => 'Fotografii cu daune',
+        'print_alt' => 'Fotografia cu daune :position din :count, lucrarea :reference',
         'empty' => 'Nicio fotografie cu daune.',
         'label' => 'Adaugă o fotografie cu daune',
         'upload' => 'Încarcă fotografia',

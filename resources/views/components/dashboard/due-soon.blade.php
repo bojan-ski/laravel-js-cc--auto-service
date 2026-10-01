@@ -12,7 +12,7 @@
     @if ($rows === [])
         <p class="px-3 py-4 text-sm text-text-muted">{{ __('dashboard.due_soon.empty') }}</p>
     @else
-        <ul>
+        <ul role="list">
             @foreach ($rows as $row)
                 <li class="border-b border-border last:border-b-0">
                     <a

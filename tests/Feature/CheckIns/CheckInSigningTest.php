@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Services\CheckInService;
 use App\Services\InvoiceService;
 use App\Services\JobService;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
@@ -327,6 +328,33 @@ class CheckInSigningTest extends TestCase
 
         $this->assertSame([], Storage::disk(config('attachments.disk'))->allFiles());
         $this->assertNull(JobCheckIn::query()->sole()->signed_at);
+    }
+
+    /**
+     * The local disk is configured with 'throw' => false, so a refused write
+     * returns false instead of raising. Signing must stop there rather than
+     * record a signature whose image was never stored (spec 36 review,
+     * test-coverage-auditor; AttachmentFailureTest pins the upload twin).
+     */
+    public function test_a_signature_the_disk_refuses_leaves_the_sheet_unsigned(): void
+    {
+        $job = $this->openSheet();
+
+        Storage::shouldReceive('disk')->andReturn($disk = \Mockery::mock(Filesystem::class));
+        $disk->shouldReceive('put')->andReturn(false);
+        $disk->shouldReceive('delete')->andReturn(true);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Failed to store the signature');
+
+        try {
+            app(CheckInService::class)->sign($job, User::factory()->mechanic()->create(), SignatureMethod::Drawn, 'Marko', $this->signatureDataUrl());
+        } finally {
+            $sheet = JobCheckIn::query()->sole();
+            $this->assertNull($sheet->signed_at);
+            $this->assertNull($sheet->signature_path);
+            $this->assertNull($sheet->signature_method);
+        }
     }
 
     /**

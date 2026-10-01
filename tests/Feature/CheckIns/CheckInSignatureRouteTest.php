@@ -42,6 +42,21 @@ class CheckInSignatureRouteTest extends TestCase
     }
 
     /**
+     * A drawn sheet whose PNG is missing from the disk answers 404 rather than
+     * streaming nothing or failing (spec 36 review, test-coverage-auditor).
+     */
+    public function test_a_drawn_signature_whose_file_is_gone_is_not_found(): void
+    {
+        $job = Job::factory()->inProgress()->create();
+        $checkIn = JobCheckIn::factory()->forJob($job)->signedByDrawing()->create();
+        Storage::disk(config('attachments.disk'))->delete($checkIn->signature_path);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get(route('jobs.check-in.signature', $job))
+            ->assertNotFound();
+    }
+
+    /**
      * @return array<string, array{0: string}>
      */
     public static function sheetsWithoutADrawing(): array

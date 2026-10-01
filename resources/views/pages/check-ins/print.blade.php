@@ -21,7 +21,7 @@
                         <li class="print:break-inside-avoid">
                             <img
                                 src="{{ route('attachments.show', ['attachment' => $photo, 'variant' => 'thumb']) }}"
-                                alt="{{ __('jobs.attachments.photo_alt', ['reference' => $job->reference, 'name' => $photo->uploadedBy->shortName()]) }}"
+                                alt="{{ __('check_ins.photos.print_alt', ['position' => $loop->iteration, 'count' => $loop->count, 'reference' => $job->reference]) }}"
                                 class="aspect-4/3 w-full border border-border object-cover"
                             >
                         </li>
