@@ -34,6 +34,7 @@ class EmptyInstallTest extends TestCase
         'appointments.index' => ['appointments.empty.none_title'],
         'parts.index' => ['parts.empty.none.title'],
         'invoices.index' => ['invoices.empty.none.title'],
+        'reports.index' => ['reports.empty.title'],
         'admin.brands.index' => ['brands.empty.none.title'],
         'job-templates.index' => ['templates.empty.none.title'],
     ];

@@ -57,13 +57,12 @@ class TableHeaderAccessibilityTest extends TestCase
         Appointment::factory()->for($customer)->for($vehicle)->create([
             'scheduled_at' => CarbonImmutable::today()->setTime(9, 0),
         ]);
-        StockMovement::factory()
-            ->forPart(Part::factory()->inStock()->forBrand()->create())
-            ->manualAdjustment()
-            ->create();
+        $part = Part::factory()->inStock()->forBrand()->create();
+        StockMovement::factory()->forPart($part)->manualAdjustment()->create();
 
         $invoiced = Job::factory()->completed()->create();
         JobItem::factory()->forJob($invoiced)->create(['quantity' => 1, 'unit_price' => 100]);
+        JobItem::factory()->forJob($invoiced)->forPart($part)->create(['quantity' => 1, 'user_id' => null]);
         app(InvoiceService::class)->issue($invoiced, User::factory()->receptionist()->create());
 
         JobTemplateItem::factory()->forTemplate(JobTemplate::factory()->create(['description' => 'Oil and filters']))->create();
@@ -95,12 +94,15 @@ class TableHeaderAccessibilityTest extends TestCase
             'staff index' => ['admin.users.index'],
             'brands index' => ['admin.brands.index'],
             'job templates index' => ['job-templates.index'],
+            'reports' => ['reports.index'],
         ];
     }
 
     #[DataProvider('tableProvider')]
     public function test_every_table_head_is_screen_reader_visible_below_md(string $route): void
     {
+        $this->keepTheInvoiceInTheDefaultPeriod($route);
+
         $customer = $this->fixture();
 
         $url = match ($route) {
@@ -129,6 +131,8 @@ class TableHeaderAccessibilityTest extends TestCase
     #[DataProvider('tableProvider')]
     public function test_every_visible_header_matches_a_visible_cell_below_md(string $route): void
     {
+        $this->keepTheInvoiceInTheDefaultPeriod($route);
+
         $customer = $this->fixture();
 
         $url = match ($route) {
@@ -151,6 +155,19 @@ class TableHeaderAccessibilityTest extends TestCase
             $headerCounts,
             "On {$route} a header row exposes a different number of columns below md than its body row exposes cells, so ARIA maps headers to the wrong cells."
         );
+    }
+
+    /**
+     * The two assertions above pass on a page with ONE table, so without this
+     * the report's labor or parts table could fall back to its empty sentence
+     * and leave its header pairing unchecked.
+     */
+    public function test_the_fixture_renders_all_four_report_tables(): void
+    {
+        $this->keepTheInvoiceInTheDefaultPeriod('reports.index');
+        $this->fixture();
+
+        $this->assertCount(4, $this->tableHeads($this->page(route('reports.index'))));
     }
 
     /**
@@ -201,6 +218,18 @@ class TableHeaderAccessibilityTest extends TestCase
             $html,
             "On {$route} the table wrapper stays a scroll container at desktop width, so its sticky header cannot pin."
         );
+    }
+
+    /**
+     * The report's default period starts on the 1st, so on a run just after
+     * midnight on the 1st the fixture's invoice would fall outside it and the
+     * four tables would render as empty sentences instead.
+     */
+    private function keepTheInvoiceInTheDefaultPeriod(string $route): void
+    {
+        if ($route === 'reports.index') {
+            $this->travelTo(CarbonImmutable::today()->startOfMonth()->addDays(14)->setTime(12, 0));
+        }
     }
 
     /**

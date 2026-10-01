@@ -171,4 +171,21 @@ class CsvReaderTest extends TestCase
 
         $this->assertSame(['sku', 'name with, comma', 'quoted "value"'], $result['headers']);
     }
+
+    public function test_a_written_value_containing_a_line_break_survives_whole(): void
+    {
+        $line = app(CsvReader::class)->toCsvLine(['INV-1', "Main street 4\nNovi Sad", 'x'], ';');
+
+        $this->assertSame("INV-1;\"Main street 4\nNovi Sad\";x\r\n", $line);
+        $this->assertSame(1, substr_count($line, "\r\n"));
+        $this->assertStringEndsWith("x\r\n", $line);
+
+        $handle = fopen('php://memory', 'r+');
+        fwrite($handle, $line);
+        rewind($handle);
+
+        $this->assertSame(['INV-1', "Main street 4\nNovi Sad", 'x'], fgetcsv($handle, 0, ';', '"', '\\'));
+
+        fclose($handle);
+    }
 }

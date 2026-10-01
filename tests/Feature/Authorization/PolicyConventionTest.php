@@ -113,17 +113,17 @@ class PolicyConventionTest extends TestCase
      * neither this count nor the route drift guard. Nothing in the repository
      * can see the overview, so no test can close that gap.
      */
-    public function test_the_matrix_holds_every_capability_and_the_thirteen_admin_only_rows(): void
+    public function test_the_matrix_holds_every_capability_and_the_fourteen_admin_only_rows(): void
     {
         // One row per Authorization Summary capability, plus lettered rows
         // (4a, 4b, 10a, 10b, 16a, 20a) where a capability spans separate
         // routes carrying different verdicts.
-        $this->assertCount(58, self::matrix());
+        $this->assertCount(60, self::matrix());
 
         // Cast: PHP stores a numeric row key as an integer, so '13' comes back
         // as 13 while the lettered keys stay strings.
         $this->assertSame(
-            ['13', '14', '27', '20a', '21', '28', '29', '37', '47', '25', '26', '33', '39'],
+            ['13', '14', '27', '20a', '21', '28', '29', '37', '47', '25', '54', '26', '33', '39'],
             array_map(strval(...), array_keys(self::adminOnlyMatrix())),
         );
     }

@@ -20,6 +20,11 @@ final class Money
         return number_format((float) $amount, 2);
     }
 
+    public static function csv(string $amount): string
+    {
+        return str_replace('.', ',', $amount);
+    }
+
     public static function trimZeros(string $decimal): string
     {
         if (! str_contains($decimal, '.')) {

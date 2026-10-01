@@ -1199,7 +1199,8 @@ trait AuthorizationMatrix
     }
 
     /**
-     * Rows 22–25: the invoice area, which a mechanic cannot reach at all.
+     * Rows 22–25, 53 and 54: the invoice area and the reports built on it,
+     * which a mechanic cannot reach at all.
      *
      * @return array<string, array<string, mixed>>
      */
@@ -1255,6 +1256,27 @@ trait AuthorizationMatrix
                     ['method' => 'get', 'route' => 'invoices.void.create', 'params' => ['unpaidInvoice']],
                     ['method' => 'patch', 'route' => 'invoices.void', 'params' => ['unpaidInvoice']],
                 ],
+                'guest' => self::LOGIN,
+                'mechanic' => 403,
+                'receptionist' => 403,
+                'admin' => self::ALLOW,
+            ],
+            '53' => [
+                'capability' => 'View reports and export invoices as CSV',
+                'requests' => [
+                    ['method' => 'get', 'route' => 'reports.index'],
+                    ['method' => 'get', 'route' => 'reports.export'],
+                ],
+                'guest' => self::LOGIN,
+                'mechanic' => 403,
+                'receptionist' => self::ALLOW,
+                'admin' => self::ALLOW,
+            ],
+            '54' => [
+                'capability' => 'See parts margin in reports',
+                'admin_only' => true,
+                'requests' => [],
+                'walkable' => false,
                 'guest' => self::LOGIN,
                 'mechanic' => 403,
                 'receptionist' => 403,

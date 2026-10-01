@@ -77,6 +77,41 @@ class PartImportRouteTest extends TestCase
     }
 
     /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function templateBytesProvider(): array
+    {
+        return [
+            'receptionist' => [
+                'receptionist',
+                "sku,quantity,name,unit_price,brand,category,location,reorder_level,supplier,oe_numbers\r\n"
+                ."BP-1042,8,\"Brake pads front\",4200.00,Bosch,Braking,A3,4,\"Febi Bilstein\",1K0615301AA|8K0698451D\r\n",
+            ],
+            'admin' => [
+                'admin',
+                "sku,quantity,name,unit_price,cost_price,brand,category,location,reorder_level,supplier,oe_numbers\r\n"
+                ."BP-1042,8,\"Brake pads front\",4200.00,2600.00,Bosch,Braking,A3,4,\"Febi Bilstein\",1K0615301AA|8K0698451D\r\n",
+            ],
+        ];
+    }
+
+    /**
+     * Pinned byte for byte before spec 35 changed how CsvReader::toCsvLine()
+     * reads back what fputcsv wrote, so that change cannot alter the file a
+     * shop already downloads.
+     */
+    #[DataProvider('templateBytesProvider')]
+    public function test_the_template_bytes_are_exactly_pinned(string $role, string $expected): void
+    {
+        $body = $this->actingAs(User::factory()->{$role}()->create())
+            ->get(route('parts.import.template'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame($expected, $body);
+    }
+
+    /**
      * The template is generated from the same enum the parser reads, so a
      * column added to one must appear in the other. Compared against the enum
      * rather than a literal list, which would just restate the fixture.

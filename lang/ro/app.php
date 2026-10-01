@@ -11,6 +11,7 @@ return [
         'customers' => 'Clienți',
         'parts' => 'Piese',
         'invoices' => 'Facturi',
+        'reports' => 'Rapoarte',
         'toggle' => 'Meniu',
         'user_menu' => 'Meniu cont',
         'staff' => 'Personal',
