@@ -13,11 +13,12 @@ Every user is a staff member. Accounts are created by an admin, and there is no 
 - 🔐 Authentication: Sign in, Forgot/Reset password
 - 🌍 Use the app in **English, Serbian (Latin), Romanian, or German**. The choice is saved on your account, and the sign-in page has its own language switcher
 - 🌗 **Light, dark, or system** theme, saved on your account. Printing is always light
+- 📝 **Check-in sheet** for each car on arrival: fuel level, damage notes, valuables and damage photos, signed by the customer by drawing on a tablet or on the printed sheet. Once signed it is read-only
 
 ### 🔩 Mechanic
-- 📋 Jobs board with status tabs, search by plate or customer, sorting, and pagination
+- 📋 Jobs board with status tabs, search by plate or customer, sorting, and pagination, plus a **Mine** filter for the jobs you have worked on
 - 🔄 Start work, pause for parts, resume, and complete jobs (Received → In progress ⇄ Awaiting parts → Completed)
-- 🛠️ Record their own labor lines and the parts they take off the shelf (stock falls immediately)
+- 🛠️ Record their own labor lines and the parts they take off the shelf (stock falls immediately), or apply a **job template** ("small service") in one step
 - 📸 Upload job photos (optimized into two WebP sizes with **Intervention Image**) and PDF documents
 - 🚗 View customers, vehicles, and full vehicle service history (read-only)
 - 🗓️ View appointments (read-only)
@@ -27,21 +28,27 @@ Every user is a staff member. Accounts are created by an admin, and there is no 
 ### 🧾 Receptionist
 - ✅ Sees everything a mechanic sees, with prices visible. Starting and resuming work is left to the mechanics; receptionists pause, complete, reopen, and cancel jobs
 - 👥 Create and edit customers and vehicles, with plate and VIN uniqueness. Search customers by name, phone, plate (dashes and spaces ignored), make and model, or VIN
+- 🏢 **Company customers**: a PIB (checksum-validated) and MB. The invoice keeps the buyer's details as they were at issue
 - 🗓️ Book appointments from tomorrow onward, within the shop's appointment hours (with a non-blocking overlap warning), and mark cars as arrived or no-show
 - 🚘 Book or walk in a **new customer and vehicle from one form**: find an existing customer by name, phone, or plate, or enter new ones on the spot
 - 🧰 Open jobs from an arrival or as a walk-in, and manage every job line regardless of who recorded it
 - 📦 Create and edit parts, record OE, catalogue, barcode, and supplier numbers, restock, and adjust stock. Every change is written to an audit trail
 - 📥 Import parts from a CSV file (all-or-nothing) using a generated template
-- 💶 Issue invoices from completed jobs (VAT stamped at issue time), mark them paid, and print them
+- 🧩 Create and edit **job templates**, and choose the mechanic when applying one
+- 📑 **Estimates**: a numbered, frozen quote of a job's lines, emailed to the customer on request, with the customer's approval or decline recorded by staff. The job and invoice pages warn when the work goes over the approved total, but never block
+- 🏷️ **Line discounts** as a percentage, set at the counter before invoicing. All money is rounded half-up
+- 💶 Issue invoices from completed jobs (VAT stamped at issue time), mark them paid with a **payment method** (cash, card, bank transfer), and print them
+- 🔔 **Service and registration reminders**: set a vehicle's next-service and registration dates, also from a completed job. Customers are emailed 14 days ahead, and those without email appear on the dashboard's **Due soon** call list
+- 📊 **Reports** for a date range (revenue, VAT, payments, labor per mechanic, parts sold), with a CSV export written for European Excel
 - 📧 Customers are emailed automatically when their car is ready and when an invoice is issued, always in the shop's language. The screen confirms the address being emailed, or that none is on file
 
 ### 🛡️ Admin
-- ✅ Everything a receptionist can do, plus starting and resuming work and seeing part cost prices
+- ✅ Everything a receptionist can do, plus starting and resuming work, seeing part cost prices, and the parts margin in reports
 - 👤 Manage staff accounts (create, edit, offboard), with safeguards so the last admin cannot be removed
 - ❌ Void invoices. This is the only way to unlock an invoiced job
 - ⏰ Set the shop's appointment hours
 - 🏷️ Manage part brands and their quality tiers
-- 🗑️ Delete and restore customers, vehicles, and parts. Nothing is ever purged, so every past job keeps its history
+- 🗑️ Delete and restore customers, vehicles, parts, and job templates. Nothing is ever purged, so every past job keeps its history
 
 ---
 
@@ -121,6 +128,7 @@ ADMIN_PASSWORD=
 # Shop settings (VAT is stamped onto each invoice at issue time)
 SHOP_LABOR_RATE=3000
 SHOP_VAT_RATE=20
+SHOP_REMINDER_LEAD_DAYS=14
 SHOP_IDENTITY_NAME=
 SHOP_IDENTITY_ADDRESS=
 SHOP_IDENTITY_PHONE=
@@ -145,7 +153,7 @@ php artisan serve
 npm run dev
 php artisan queue:work
 ```
-Without the queue worker, customer emails wait unsent in the `queue_jobs` table.
+Without the queue worker, customer emails wait unsent in the `queue_jobs` table. Service reminders are sent by a daily scheduled command (`reminders:send`, 07:00). Run `php artisan schedule:work` locally, or `php artisan reminders:send` once by hand.
 
 ### 8. Run the Tests
 ```bash
@@ -162,6 +170,7 @@ The full suite runs in parallel. Each process uses its own `auto_service_testing
 - Set `APP_ENV=production`, which also keeps the demo data out
 - Build the frontend with `npm run build`, run `php artisan migrate --force`, then `php artisan view:cache`. Rebuilding the compiled views matters: views compiled by an older release can point at components that have since changed
 - Keep a queue worker running. On shared hosting without Supervisor, run a cron job every minute: `php artisan queue:work --stop-when-empty --max-time=50`
+- Run Laravel's scheduler from one cron entry every minute: `php artisan schedule:run`. It sends the daily service and registration reminders, and a re-run or a missed day never sends a reminder twice
 - Raise PHP's `upload_max_filesize` to at least 24M and `post_max_size` to at least 32M. With lower limits a large photo or PDF upload fails as a "419 page expired" error
 - The application is deliberately kept out of search engines on every host: `robots.txt` disallows everything, and every response carries `X-Robots-Tag: noindex`
 
