@@ -4,5 +4,7 @@
     "to": "do",
     "of": "od",
     "results": "rezultata",
-    "Go to page :page": "Idi na stranu :page"
+    "Go to page :page": "Idi na stranu :page",
+    "Previous page": "Prethodna strana",
+    "Next page": "Sledeća strana"
 }

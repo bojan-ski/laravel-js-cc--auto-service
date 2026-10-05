@@ -30,9 +30,9 @@ class LocaleParityTest extends TestCase
     private const PLURAL_SAMPLES = [0, 1, 2, 3, 5, 11, 12, 20, 21, 22, 25, 101, 111];
 
     /**
-     * The five bare strings the published paginator passes to __().
+     * The bare strings the published paginator passes to __().
      */
-    private const PAGINATOR_JSON_KEYS = ['Pagination Navigation', 'Showing', 'to', 'of', 'results', 'Go to page :page'];
+    private const PAGINATOR_JSON_KEYS = ['Pagination Navigation', 'Showing', 'to', 'of', 'results', 'Go to page :page', 'Previous page', 'Next page'];
 
     /**
      * @return array<string, array{0: Locale}>

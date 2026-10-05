@@ -4,5 +4,7 @@
     "to": "bis",
     "of": "von",
     "results": "Ergebnissen",
-    "Go to page :page": "Gehe zu Seite :page"
+    "Go to page :page": "Gehe zu Seite :page",
+    "Previous page": "Vorherige Seite",
+    "Next page": "Nächste Seite"
 }

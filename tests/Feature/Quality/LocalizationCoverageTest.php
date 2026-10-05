@@ -102,6 +102,8 @@ class LocalizationCoverageTest extends TestCase
         'of',
         'results',
         'Go to page :page',
+        'Previous page',
+        'Next page',
     ];
 
     public function test_every_literal_key_in_source_resolves(): void
