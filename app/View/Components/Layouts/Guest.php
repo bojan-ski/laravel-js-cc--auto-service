@@ -13,6 +13,8 @@ class Guest extends Component
 
     public string $htmlLang;
 
+    public int $year;
+
     /**
      * @var array<int, array{value: string, label: string, current: bool, lang: string}>
      */
@@ -25,6 +27,7 @@ class Guest extends Component
         $this->theme = Theme::forUser($user);
         $this->htmlLang = Locale::current()->htmlLang();
         $this->localeOptions = $user === null ? Locale::options() : [];
+        $this->year = now()->year;
     }
 
     public function render(): View

@@ -4,6 +4,10 @@ return [
     'name' => 'Auto Service',
     'document_title' => ':page — :app',
 
+    'footer' => [
+        'copyright' => '© :year :app | Toate drepturile rezervate | code BPdevelopment',
+    ],
+
     'nav' => [
         'primary' => 'Navigare principală',
         'jobs' => 'Lucrări',
