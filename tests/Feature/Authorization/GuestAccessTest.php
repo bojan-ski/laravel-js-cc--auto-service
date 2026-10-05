@@ -61,8 +61,10 @@ class GuestAccessTest extends TestCase
 
     /**
      * The partition proof: every route the application registers is either
-     * behind `auth`, behind `guest`, or the health check. Nothing sits outside
-     * all three, so the sweep above cannot miss a route by failing to match it.
+     * behind `auth`, behind `guest`, the health check, or the fallback that
+     * renders an unmatched URL's 404 through the web group (UAT F-6-08). Nothing
+     * sits outside them, so the sweep above cannot miss a route by failing to
+     * match it.
      *
      * This is why the sweep needs no hardcoded count — a new route joins one of
      * the three bands or fails here.
@@ -76,7 +78,8 @@ class GuestAccessTest extends TestCase
 
             $banded = in_array('auth', $middleware, true)
                 || in_array('guest', $middleware, true)
-                || $route->uri() === self::HEALTH_URI;
+                || $route->uri() === self::HEALTH_URI
+                || $route->isFallback;
 
             if (! $banded) {
                 $unbanded[] = $route->uri().' ('.($route->getName() ?? 'unnamed').')';

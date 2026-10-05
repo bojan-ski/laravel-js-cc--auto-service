@@ -42,7 +42,9 @@ class LogoutTest extends TestCase
     {
         $this->actingAs(User::factory()->create())
             ->get('/logout')
-            ->assertMethodNotAllowed();
+            ->assertNotFound();
+
+        $this->assertAuthenticated();
     }
 
     public function test_a_guest_cannot_reach_the_logout_route(): void
