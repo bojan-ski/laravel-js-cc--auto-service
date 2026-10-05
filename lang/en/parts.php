@@ -236,6 +236,7 @@ return [
 
     'validation' => [
         'sku_deleted' => 'That SKU belongs to a deleted part, :name. An administrator can restore it from the catalogue.',
+        'adjustment_note_required' => 'A manual adjustment needs a note saying why.',
     ],
 
     'flash' => [

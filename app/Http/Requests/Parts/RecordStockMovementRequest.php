@@ -63,6 +63,16 @@ class RecordStockMovementRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'note.required_if' => __('parts.validation.adjustment_note_required'),
+        ];
+    }
+
     private function reasonAcceptsSupplier(): bool
     {
         $reason = StockMovementReason::tryFrom((string) $this->input('reason'));

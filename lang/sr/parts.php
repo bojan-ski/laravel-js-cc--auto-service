@@ -236,6 +236,7 @@ return [
 
     'validation' => [
         'sku_deleted' => 'Ta šifra pripada obrisanom delu, :name. Administrator ga može vratiti iz kataloga.',
+        'adjustment_note_required' => 'Ručna korekcija mora imati napomenu sa razlogom.',
     ],
 
     'flash' => [
