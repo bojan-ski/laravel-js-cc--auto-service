@@ -19,12 +19,12 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        App::setLocale($this->resolve($request)->value);
+        App::setLocale(self::resolve($request)->value);
 
         return $next($request);
     }
 
-    private function resolve(Request $request): Locale
+    public static function resolve(Request $request): Locale
     {
         return $request->user()?->locale
             ?? Locale::tryFrom((string) $request->session()->get(self::SESSION_KEY))
