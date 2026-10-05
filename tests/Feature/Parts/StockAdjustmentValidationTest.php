@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Parts;
 
+use App\Enums\Locale;
 use App\Enums\StockMovementReason;
 use App\Models\Part;
 use App\Models\User;
@@ -190,6 +191,42 @@ class StockAdjustmentValidationTest extends TestCase
         ])->assertSessionHasNoErrors();
 
         $this->assertDatabaseCount('stock_movements', 1);
+    }
+
+    /**
+     * @return array<string, array{Locale}>
+     */
+    public static function locales(): array
+    {
+        $locales = [];
+
+        foreach (Locale::cases() as $locale) {
+            $locales[$locale->value] = [$locale];
+        }
+
+        return $locales;
+    }
+
+    #[DataProvider('locales')]
+    public function test_a_missing_adjustment_note_is_reported_in_words_not_by_the_reason_value(Locale $locale): void
+    {
+        $part = Part::factory()->create();
+        $expected = trans('parts.validation.adjustment_note_required', [], $locale->value);
+
+        $this->actingAs(User::factory()->receptionist()->create(['locale' => $locale]))
+            ->from(route('parts.adjust.create', $part))
+            ->post(route('parts.adjust.store', $part), [
+                'reason' => StockMovementReason::ManualAdjustment->value,
+                'quantity_change' => -3,
+            ])
+            ->assertRedirect(route('parts.adjust.create', $part));
+
+        $this->assertSame([$expected], app('session.store')->get('errors')['default']['messages']['note'] ?? []);
+        $this->assertStringNotContainsString(StockMovementReason::ManualAdjustment->value, $expected);
+
+        $this->get(route('parts.adjust.create', $part))
+            ->assertOk()
+            ->assertSee($expected);
     }
 
     public function test_a_rejected_submission_returns_to_the_form_with_its_input(): void

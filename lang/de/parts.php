@@ -236,6 +236,7 @@ return [
 
     'validation' => [
         'sku_deleted' => 'Diese Artikelnummer gehört zu einem gelöschten Teil, :name. Ein Administrator kann es im Katalog wiederherstellen.',
+        'adjustment_note_required' => 'Eine manuelle Korrektur braucht eine Notiz mit dem Grund.',
     ],
 
     'flash' => [

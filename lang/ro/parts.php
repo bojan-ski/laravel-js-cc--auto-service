@@ -236,6 +236,7 @@ return [
 
     'validation' => [
         'sku_deleted' => 'Acest cod intern aparține unei piese șterse, :name. Un administrator o poate restaura din catalog.',
+        'adjustment_note_required' => 'O ajustare manuală are nevoie de o notă care să explice motivul.',
     ],
 
     'flash' => [
