@@ -145,7 +145,7 @@ class InvoiceVoidRouteTest extends TestCase
 
         $this->actingAs(User::factory()->admin()->create())
             ->post(route('invoices.void', $invoice))
-            ->assertMethodNotAllowed();
+            ->assertNotFound();
 
         $this->assertSame(InvoiceStatus::Unpaid, $invoice->fresh()->status);
     }

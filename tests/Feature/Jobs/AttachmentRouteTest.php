@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Support\CreatesRealUploads;
 use Tests\TestCase;
 
@@ -136,13 +135,13 @@ class AttachmentRouteTest extends TestCase
      * The status alone cannot tell the two 404s apart: without the whereIn
      * constraint the request still 404s, just from the controller's null
      * pathFor() check instead. Matching at the router proves it never gets
-     * that far.
+     * that far: only the 404 fallback route matches the URL.
      */
     public function test_an_unrecognised_variant_is_refused_by_the_route_itself(): void
     {
-        $this->expectException(NotFoundHttpException::class);
+        $matched = Route::getRoutes()->match(Request::create('/attachments/1/nonsense', 'GET'));
 
-        Route::getRoutes()->match(Request::create('/attachments/1/nonsense', 'GET'));
+        $this->assertTrue($matched->isFallback, 'The URL matched '.$matched->getName().' instead of the 404 fallback.');
     }
 
     public function test_each_accepted_variant_does_match_the_route(): void
