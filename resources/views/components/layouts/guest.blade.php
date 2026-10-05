@@ -36,5 +36,9 @@
             />
         @endif
     </main>
+
+    <footer class="px-3 pb-4 text-center text-xs text-text-soft">
+        {{ __('app.footer.copyright', ['year' => $year, 'app' => __('app.name')]) }}
+    </footer>
 </body>
 </html>

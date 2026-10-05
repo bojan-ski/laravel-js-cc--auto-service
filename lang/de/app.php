@@ -4,6 +4,10 @@ return [
     'name' => 'Auto Service',
     'document_title' => ':page — :app',
 
+    'footer' => [
+        'copyright' => '© :year :app | Alle Rechte vorbehalten | code BPdevelopment',
+    ],
+
     'nav' => [
         'primary' => 'Hauptnavigation',
         'jobs' => 'Aufträge',

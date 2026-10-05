@@ -4,6 +4,10 @@ return [
     'name' => 'Auto Servis',
     'document_title' => ':page — :app',
 
+    'footer' => [
+        'copyright' => '© :year :app | Sva prava zadržana | code BPdevelopment',
+    ],
+
     'nav' => [
         'primary' => 'Glavna navigacija',
         'jobs' => 'Radni nalozi',
