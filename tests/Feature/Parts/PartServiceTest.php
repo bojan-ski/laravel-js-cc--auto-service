@@ -5,6 +5,7 @@ namespace Tests\Feature\Parts;
 use App\Models\Part;
 use App\Models\User;
 use App\Services\PartService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
 
@@ -124,6 +125,38 @@ class PartServiceTest extends TestCase
 
         $this->assertArrayNotHasKey('unit_price', $part->getAttributes());
         $this->assertArrayNotHasKey('cost_price', $part->getAttributes());
+    }
+
+    public function test_find_visible_applies_the_visibility_scope(): void
+    {
+        $part = Part::factory()->create();
+
+        $forMechanic = $this->service()->findVisible($part->id, User::factory()->mechanic()->create());
+        $forReceptionist = $this->service()->findVisible($part->id, User::factory()->receptionist()->create());
+
+        $this->assertArrayNotHasKey('unit_price', $forMechanic->getAttributes());
+        $this->assertArrayNotHasKey('cost_price', $forMechanic->getAttributes());
+        $this->assertArrayHasKey('unit_price', $forReceptionist->getAttributes());
+        $this->assertArrayNotHasKey('cost_price', $forReceptionist->getAttributes());
+    }
+
+    public function test_find_visible_refuses_a_trashed_part_by_default(): void
+    {
+        $part = Part::factory()->deleted()->create();
+
+        $this->expectException(ModelNotFoundException::class);
+
+        $this->service()->findVisible($part->id, User::factory()->admin()->create());
+    }
+
+    public function test_find_visible_returns_a_trashed_part_when_asked(): void
+    {
+        $part = Part::factory()->deleted()->create();
+
+        $found = $this->service()->findVisible($part->id, User::factory()->admin()->create(), withTrashed: true);
+
+        $this->assertTrue($found->is($part));
+        $this->assertTrue($found->trashed());
     }
 
     public function test_each_write_lands_on_a_page_that_renders_its_own_flash(): void

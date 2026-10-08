@@ -83,9 +83,6 @@ class CsvReader
     }
 
     /**
-     * Pads a short row and drops a long one's surplus, so a ragged file is a
-     * per-field validation problem rather than a fatal parse error.
-     *
      * @param  list<string>  $headers
      * @param  list<string|null>  $values
      * @return array<string, string>

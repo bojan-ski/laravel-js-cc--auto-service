@@ -7,11 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Parts\PartIndexRequest;
 use App\Http\Requests\Parts\PartRequest;
 use App\Models\Part;
-use App\Models\User;
 use App\Services\BrandService;
 use App\Services\PartService;
 use App\Services\StockService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -60,7 +58,11 @@ class PartController extends Controller
 
     public function show(Request $request, int $part): View
     {
-        $visible = $this->visible($part, $request->user(), allowTrashed: true);
+        $visible = $this->parts->findVisible(
+            $part,
+            $request->user(),
+            withTrashed: Gate::allows('viewDeleted', Part::class),
+        );
 
         Gate::authorize('view', $visible);
 
@@ -77,7 +79,7 @@ class PartController extends Controller
 
     public function edit(Request $request, int $part): View
     {
-        $visible = $this->visible($part, $request->user());
+        $visible = $this->parts->findVisible($part, $request->user());
 
         Gate::authorize('update', $visible);
 
@@ -97,7 +99,7 @@ class PartController extends Controller
 
     public function update(PartRequest $request, int $part): RedirectResponse
     {
-        $visible = $this->visible($part, $request->user());
+        $visible = $this->parts->findVisible($part, $request->user());
 
         Gate::authorize('update', $visible);
 
@@ -109,7 +111,7 @@ class PartController extends Controller
 
     public function destroy(Request $request, int $part): RedirectResponse
     {
-        $visible = $this->visible($part, $request->user());
+        $visible = $this->parts->findVisible($part, $request->user());
 
         Gate::authorize('delete', $visible);
 
@@ -121,7 +123,11 @@ class PartController extends Controller
 
     public function restore(Request $request, int $part): RedirectResponse
     {
-        $visible = $this->visible($part, $request->user(), allowTrashed: true);
+        $visible = $this->parts->findVisible(
+            $part,
+            $request->user(),
+            withTrashed: Gate::allows('viewDeleted', Part::class),
+        );
 
         Gate::authorize('restore', $visible);
 
@@ -129,24 +135,5 @@ class PartController extends Controller
 
         return redirect()->route('parts.show', $visible)
             ->with('success', __('parts.flash.restored', ['sku' => $visible->sku]));
-    }
-
-    /**
-     * Resolves the part through the role's column scope rather than letting route
-     * binding hydrate every column. Trashed parts are reachable only where the
-     * action needs them — show and restore — and then only for an admin, so a
-     * non-admin's request for a deleted part is a natural 404 rather than a 403.
-     * Editing, updating and deleting never see a trashed part at all: it must be
-     * restored first.
-     */
-    private function visible(int $part, User $user, bool $allowTrashed = false): Part
-    {
-        return Part::query()
-            ->visibleTo($user)
-            ->when(
-                $allowTrashed && Gate::allows('viewDeleted', Part::class),
-                fn (Builder $query) => $query->withTrashed(),
-            )
-            ->findOrFail($part);
     }
 }

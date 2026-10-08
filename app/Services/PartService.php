@@ -34,6 +34,14 @@ class PartService
             ->withQueryString();
     }
 
+    public function findVisible(int $part, User $user, bool $withTrashed = false): Part
+    {
+        return Part::query()
+            ->visibleTo($user)
+            ->when($withTrashed, fn (Builder $query) => $query->withTrashed())
+            ->findOrFail($part);
+    }
+
     /**
      * @param  array{search: string, filter: string, trashed: string}  $filters
      * @return array{all: int, low_stock: int}

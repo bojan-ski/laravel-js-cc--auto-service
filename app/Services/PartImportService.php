@@ -111,9 +111,6 @@ class PartImportService
     }
 
     /**
-     * Validates every row before a single write happens, so a rejected file
-     * never acquires a row lock. Brands are resolved once and reused.
-     *
      * @param  list<array{line: int, values: array<string, string>}>  $rows
      * @param  array<string, Part>  $existing
      * @return list<array{line: int, sku: string, quantity: int, values: array<string, string>, brand: ?Brand}>
