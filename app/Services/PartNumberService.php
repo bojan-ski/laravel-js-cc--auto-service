@@ -25,10 +25,6 @@ class PartNumberService
         $number->delete();
     }
 
-    /**
-     * The other part carrying this catalogue number under the same brand, if
-     * there is one. Drives the non-blocking warning; never refuses a write.
-     */
     public function catalogueConflict(Part $part, string $value): ?Part
     {
         if ($part->brand_id === null) {

@@ -4,21 +4,23 @@ namespace App\Http\Controllers\Parts;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Parts\PartNumberRequest;
-use App\Models\Part;
 use App\Models\PartNumber;
-use App\Models\User;
 use App\Services\PartNumberService;
+use App\Services\PartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class PartNumberController extends Controller
 {
-    public function __construct(private PartNumberService $numbers) {}
+    public function __construct(
+        private PartService $parts,
+        private PartNumberService $numbers,
+    ) {}
 
     public function store(PartNumberRequest $request, int $part): RedirectResponse
     {
-        $visible = $this->visible($part, $request->user());
+        $visible = $this->parts->findVisible($part, $request->user());
 
         Gate::authorize('update', $visible);
 
@@ -44,7 +46,7 @@ class PartNumberController extends Controller
 
     public function destroy(Request $request, int $part, int $number): RedirectResponse
     {
-        $visible = $this->visible($part, $request->user());
+        $visible = $this->parts->findVisible($part, $request->user());
 
         Gate::authorize('update', $visible);
 
@@ -56,14 +58,5 @@ class PartNumberController extends Controller
 
         return redirect()->route('parts.show', $visible)
             ->with('success', __('parts.numbers.flash.removed', ['number' => $target->number]));
-    }
-
-    /**
-     * Identifiers belong to a part that is being edited, so a trashed part is
-     * out of reach here exactly as it is for parts.edit.
-     */
-    private function visible(int $part, User $user): Part
-    {
-        return Part::query()->visibleTo($user)->findOrFail($part);
     }
 }

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Parts\RecordStockMovementRequest;
 use App\Models\Part;
 use App\Models\StockMovement;
-use App\Models\User;
+use App\Services\PartService;
 use App\Services\StockService;
 use App\Services\SupplierService;
 use Illuminate\Http\RedirectResponse;
@@ -17,13 +17,14 @@ use Illuminate\View\View;
 class StockAdjustmentController extends Controller
 {
     public function __construct(
+        private PartService $parts,
         private StockService $stock,
         private SupplierService $suppliers,
     ) {}
 
     public function create(Request $request, int $part): View
     {
-        $visible = $this->visible($part, $request->user());
+        $visible = $this->parts->findVisible($part, $request->user());
 
         Gate::authorize('adjustStock', Part::class);
 
@@ -35,7 +36,7 @@ class StockAdjustmentController extends Controller
 
     public function store(RecordStockMovementRequest $request, int $part): RedirectResponse
     {
-        $visible = $this->visible($part, $request->user());
+        $visible = $this->parts->findVisible($part, $request->user());
 
         Gate::authorize('adjustStock', Part::class);
 
@@ -49,15 +50,6 @@ class StockAdjustmentController extends Controller
         );
 
         return $this->redirectAfter($visible, $movement);
-    }
-
-    /**
-     * A soft-deleted part is not adjustable, so this deliberately omits
-     * withTrashed() and 404s — the behaviour spec 15 settled.
-     */
-    private function visible(int $part, User $user): Part
-    {
-        return Part::query()->visibleTo($user)->findOrFail($part);
     }
 
     private function redirectAfter(Part $part, StockMovement $movement): RedirectResponse
