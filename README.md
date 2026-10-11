@@ -7,6 +7,20 @@ Every user is a staff member. Accounts are created by an admin, and there is no 
 
 ---
 
+## 🌐 Live Demo
+
+**[dimgrey-echidna-866037.hostingersite.com](https://dimgrey-echidna-866037.hostingersite.com/)**
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | `milica@auto-service.test` | `password` |
+| Receptionist | `jelena@auto-service.test` | `password` |
+| Mechanic | `dragan@auto-service.test` | `password` |
+
+Sign in as each role to see how access changes. A mechanic, for example, never sees a price. This is a shared public demo with about 60 days of made-up shop history. It may be reset at any time, and it sends no real email.
+
+---
+
 ## ✨ Features
 
 ### 👥 Every Staff Member
@@ -143,7 +157,7 @@ The seeder creates the first admin account from `ADMIN_EMAIL` and `ADMIN_PASSWOR
 
 **Demo data.** Outside production, the seeder also loads about 60 days of shop history: staff, a parts catalogue, customers and vehicles, and jobs, appointments, and invoices in every state. Demo staff sign in with the password `password`, for example `milica@auto-service.test` (admin), `jelena@auto-service.test` (receptionist), and `dragan@auto-service.test` (mechanic). The demo seeder skips a database that already holds customers or parts, and it never runs when `APP_ENV=production`.
 
-> A staging site reachable from the internet should not keep the demo accounts: anyone who reads this README knows their password.
+> The [live demo](#-live-demo) keeps these accounts on purpose. Any other install reachable from the internet should delete them or change their passwords: anyone who reads this README knows them.
 
 > Do **not** run `php artisan storage:link`. Job photos and documents are staff-only files. They live on the private disk and are served only through an authorized route.
 
